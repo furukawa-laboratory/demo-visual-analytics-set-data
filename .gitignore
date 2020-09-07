@@ -1,3 +1,4 @@
 .idea/
 .python-version
-datasets/nba/.ipynb-checkpoints/*
+datasets/nba/.ipynb_checkpoints/*
+datasets/nba/__pycache__/*
