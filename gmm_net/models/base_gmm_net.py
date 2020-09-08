@@ -522,7 +522,6 @@ class BaseGMMNetworkOwnOppPerformance():
                 # conditional component plane
                 index = self.__calc_nearest_candidate(self.opp_ukr_kde.click_coordinates_latent_space,
                                                       self.opp_ukr_kde.grid_points_latent_space)
-                print('in opp grid coordinate={}'.format(self.opp_ukr_kde.grid_points_latent_space[index]))
                 grid_values = self.mesh_grid_mapping[:, index, self.selected_performance][:, None]
                 grid_precision = self.mesh_grid_precision[:, index][:, None]
                 if self.opp_ukr_kde.is_select_latent_variable:
