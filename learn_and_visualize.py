@@ -67,7 +67,7 @@ def _main():
     lose_team_club_label_train = dict_nba[target_seasons]["about_game"]["label"]["team"]["train"]["lose"].copy()
     wl_team_club_label_train = np.concatenate([win_team_club_label_train, lose_team_club_label_train])
     import pandas as pd
-    df_ranking = pd.read_csv('./ranking.csv')
+    df_ranking = pd.read_csv('./datasets/nba/ranking.csv')
     df_team_train = pd.DataFrame(data=wl_team_club_label_train, columns=['Short name'])
     label_club_train_encoded = pd.merge(df_team_train,
                                         df_ranking,
