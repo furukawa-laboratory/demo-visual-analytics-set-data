@@ -14,15 +14,13 @@ class BaseGMMNetworkOwnOppPerformance():
         if win_team_bag_of_members.shape != lose_team_bag_of_members.shape:
             raise ValueError('own_bag_of_members and opp_bga_of_members must be same size')
         self.n_games = win_team_bag_of_members.shape[0]
-        # if is_own_win.ndim!=1 or is_own_win.shape[0]!=self.n_games:
-        #     raise ValueError('is_own_win must be same length own_bag_of_members.shape[0]')
 
-        # UKRに渡すパラメータをセットしてUKRのインスタンスを作成する
+        # Set parameters in UKR and create instance
         self.params_lower_ukr = params_lower_ukr.copy()
         self.params_lower_ukr['X'] = member_features.copy()
         self.lower_ukr = UKR(**self.params_lower_ukr)
 
-        # UKR for KDEに渡すgroup_featureを作りその他パラメータと共に辞書に渡す
+        # Create group_feature given for ukr for kde and Set parameters
         self.params_upper_ukr_kde = params_upper_ukr_kde.copy()
         team_features = np.concatenate([win_team_bag_of_members, lose_team_bag_of_members], axis=0)
         if 'weight_of_group' in params_upper_ukr_kde:
@@ -52,7 +50,7 @@ class BaseGMMNetworkOwnOppPerformance():
             raise ValueError('invalid init_upper_ukr = {}'.format(init_upper_ukr_kde))
         self.num_groups = team_features.shape[0]
 
-        # Regressorに渡すパラメータをセット
+        # Set parameters in GaussianProcessRegressor
         self.win_team_performance = win_team_performance.copy()
         self.lose_team_performance = lose_team_performance.copy()
         self.training_performance = np.concatenate([self.win_team_performance,
@@ -68,7 +66,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                 eta_lower_ukr=eta_lower_ukr)
             self.is_given_lower_ukr_fit = False
         elif isinstance(lower_ukr_fit, UKR):
-            # 与えられたUKRが適切か簡易チェック
+            # Check if UKR is consistent
             if not np.all(lower_ukr_fit.X == self.lower_ukr.X):
                 raise ValueError("Not expected lower_ukr_fit's X")
             elif lower_ukr_fit.bandwidth_gaussian_kernel != self.lower_ukr.bandwidth_gaussian_kernel:
@@ -86,7 +84,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                     eta_ukr_kde=eta_upper_ukr_kde)
             self.is_give_upper_ukr_kde_fit = False
         elif isinstance(upper_ukr_kde_fit, UKRKDE):
-            # 簡易チェック
+            # Check if UKRKDE is consinstent
             if not np.all(upper_ukr_kde_fit.member_features == self.lower_ukr.Z):
                 raise ValueError('upper_ukr_kde_fit.member_features is not matched laten variables of lower ukr')
             else:
@@ -100,33 +98,29 @@ class BaseGMMNetworkOwnOppPerformance():
         self._fit_gpr()
 
     def _fit_lower_ukr(self, nb_epoch_lower_ukr, eta_lower_ukr):
-        # ukrのfit
+        # fit ukr
         self.lower_ukr.fit(nb_epoch=nb_epoch_lower_ukr, eta=eta_lower_ukr)
 
     def _fit_upper_ukr_kde(self, nb_epoch_ukr_kde, eta_ukr_kde):
-        # ukr for kdeのfit
+        # fit ukr for kde
         self.params_upper_ukr_kde['member_features'] = self.lower_ukr.Z
         self.upper_ukr_kde = UKRKDE(**self.params_upper_ukr_kde)
         self.upper_ukr_kde.fit(n_epoch=nb_epoch_ukr_kde,
                                learning_rate=eta_ukr_kde)
 
     def _fit_gpr(self):
-        # GPRegressionのfit
-        ## GPRのfitの入力Xを作る
-        ## 元々上位のUKRには自チームと相手チームのbag of membersを縦方向にconcatenateして入力しているため
-        ## 半分の位置で二つに分ける
-        own_latent_variables = self.upper_ukr_kde.Z[:self.n_games, :].copy()  # 自チームの潜在変数
-        opp_latent_variables = self.upper_ukr_kde.Z[self.n_games:, :].copy()  # 相手チームの潜在変数
-        # 回帰のTrainingに用いる自チームに相当する入力（潜在変数）と相手チームのそれを作成
+        # fit GP Regression
+        ## Create X in gpr.fit
+        own_latent_variables = self.upper_ukr_kde.Z[:self.n_games, :].copy()  # Latent variable of own team
+        opp_latent_variables = self.upper_ukr_kde.Z[self.n_games:, :].copy()  # Latent variable of opposing team
+        # Concatenate two arrays of latent variables
         training_own_latent_variables = np.concatenate([own_latent_variables,
                                                         opp_latent_variables], axis=0)
         training_opp_latent_variables = np.concatenate([opp_latent_variables,
                                                         own_latent_variables], axis=0)
-        # 最終的に回帰に渡すトレーニングセットの入力は自チームと相手チームのペア
-        # 自チームに相当するownと相手チームに相当するoppの潜在変数を列方向にconcatenateする
         gpr_training_X = np.concatenate([training_own_latent_variables,
                                          training_opp_latent_variables], axis=1)
-        ## fitしちゃう
+        ## fit gpr
         self.gpr.fit(X=gpr_training_X,
                      y=self.training_performance)
 
@@ -164,8 +158,8 @@ class BaseGMMNetworkOwnOppPerformance():
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
-        # 相手チームのマップに関する変数や描画メソッドをまとめておく新しいukr for kdeインスタンスを作る
-        self.own_ukr_kde = self.upper_ukr_kde  # こっちは参照渡し
+        # Create instance of ukr for kde to put together variables and methods
+        self.own_ukr_kde = self.upper_ukr_kde
         self.opp_ukr_kde = UKRKDE(**self.params_upper_ukr_kde)
         self.opp_ukr_kde.Z = self.upper_ukr_kde.Z.copy()
 
@@ -173,21 +167,21 @@ class BaseGMMNetworkOwnOppPerformance():
         import copy
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
 
-        # 色付けに関わる変数の用意
+        # Prepare variables to color
         self.cmap_density = cmap_density
         self.cmap_feature = cmap_feature
         self.cmap_ccp = cmap_ccp
         self.is_ccp_middle_color_zero = is_ccp_middle_color_zero
         self.is_member_cp_middle_color_zero = is_member_cp_middle_color_zero
 
-        # メンバー交代simulationのための変数の用意
+        # Variables to simulate new member
         self.n_epoch_to_change_member =n_epoch_to_change_member
         self.learning_rate_to_change_member = learning_rate_to_change_member
         self.is_simulate_changing_member = False
         self.deleted_member_coordinates = None
         self.grid_simulated_latent_variables = None
 
-        # figureやaxesの用意
+        # Figure and axes
         if fig_size is None:
             self.fig = plt.figure(figsize=(14, 10))
         else:
@@ -200,7 +194,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.ax_performance_bars = self.fig.add_subplot(2, 3, 5)
         self.fig.subplots_adjust(left=0.075, bottom=0.1, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
 
-        # 各インスタンスに描画に関わる変数をセットする
+        # Set parameters
         if 'params_scatter' in params_init_lower_ukr.keys():
             pass
         else:
@@ -235,7 +229,6 @@ class BaseGMMNetworkOwnOppPerformance():
                                                 ax_latent_space=ax_opp_member_latent_space,
                                                 ax_feature_bars=None,
                                                 **params_init_lower_ukr)
-        # 下位のUKRの潜在空間を上位のUKRの観測空間
         params_init_upper_ukr['params_scatter_data_space'] = None
         self.own_ukr_kde._initialize_to_visualize(n_grid_points,
                                                   params_imshow_latent_space={'cmap': self.cmap_ccp,
@@ -268,11 +261,11 @@ class BaseGMMNetworkOwnOppPerformance():
                                                   is_show_all_label_groups=False,
                                                   is_show_ticks=False,
                                                   **params_init_upper_ukr)
-        # 下位のUKRの潜在空間上の代表点を上位のUKRの観測空間上の代表点と合わせる
+        # Match grid points in latent space of lower ukr and one in data space of upper ukr for kde
         self.lower_ukr._set_grid(grid_points=self.own_ukr_kde.grid_points_data_space,
                                  n_grid_points=self.own_ukr_kde.n_grid_points_data_space)
 
-        # CCPに必要な変数を揃える
+        # Create tensor to draw ccp
         if 'mesh_grid_mapping' in vars(self) and 'mesh_grid_precision':
             if self.mesh_grid_mapping.shape[0] == self.upper_ukr_kde.n_grid_points_latent_space.prod():
                 pass
@@ -287,11 +280,11 @@ class BaseGMMNetworkOwnOppPerformance():
             self.label_performance = np.arange(self.training_performance.shape[1])
         else:
             self.label_performance = label_performance
-        # CCPで不確定性を表示する際の輝度の幅を指定, 0.0は真っ黒になって判別できないため0.3未満は利用しない
+        # Specific range of brightness
         self.own_ukr_kde.set_used_bright_range([0.5, 1.0])
         self.opp_ukr_kde.set_used_bright_range([0.5, 1.0])
 
-        # まず一度一通り描画しておく
+        # Draw initial view
         self.lower_ukr.set_comment_in_latent_space('Click in map')
         self.own_ukr_kde.set_comment_in_latent_space('Click in map')
         self.opp_ukr_kde.set_comment_in_latent_space('Click in map')
@@ -313,7 +306,6 @@ class BaseGMMNetworkOwnOppPerformance():
         if event.xdata is not None:
             click_coordinates = np.array([event.xdata, event.ydata])
             if event.inaxes == self.lower_ukr.ax_latent_space.axes:
-                # 下位のUKRの潜在空間をクリックした時の挙動
                 # If specific latent variable is selected in team map
                 if self.own_ukr_kde.is_select_latent_variable:
                     self._set_to_simulate_changing_member(click_coordinates)
@@ -334,7 +326,6 @@ class BaseGMMNetworkOwnOppPerformance():
 
 
             elif event.inaxes == self.lower_ukr.ax_feature_bars.axes:
-                # 下位のUKRの特徴量barがクリックされた時
                 self.lower_ukr._set_latent_space_from_feature_bar(click_coordinates)
                 self.lower_ukr.set_params_imshow({'cmap': self.cmap_feature})
                 self.lower_ukr.is_middle_color_zero = self.is_member_cp_middle_color_zero
@@ -346,12 +337,12 @@ class BaseGMMNetworkOwnOppPerformance():
             elif event.inaxes == self.own_ukr_kde.ax_latent_space.axes:
                 if self.is_simulate_changing_member:
                     self._reset_simulation()
-                # 下位の潜在空間に表示する値を計算
+                # calculate value to draw in data space in upper ukr
                 self.own_ukr_kde._set_data_space_from_latent_space(click_coordinates)
-                # その値を取得
+                # get values
                 grid_values = self.own_ukr_kde.get_grid_values_to_draw_data_space()
                 mask_shown_member = self.own_ukr_kde.mask_shown_member
-                # 下位のUKRにセット
+                # set lower ukr
                 self.lower_ukr._set_grid_values_to_draw(grid_values)
                 self.lower_ukr.set_params_imshow({'cmap': self.cmap_density})
                 self.lower_ukr.is_middle_color_zero = False
@@ -375,7 +366,7 @@ class BaseGMMNetworkOwnOppPerformance():
                     annotation_text = 'Density of clicked own team'
                 self.lower_ukr.set_comment_in_latent_space(annotation_text)
 
-                # 描画
+                # draw
                 self.lower_ukr._draw_latent_space()
                 self.lower_ukr._draw_feature_bars()
                 self.own_ukr_kde._draw_latent_space()
@@ -412,7 +403,7 @@ class BaseGMMNetworkOwnOppPerformance():
                     annotation_text = 'Density of clicked opp team'
                 self.opp_lower_ukr.set_comment_in_latent_space(annotation_text)
 
-                # 描画
+                # draw
                 self.lower_ukr._draw_latent_space()
                 self.lower_ukr._draw_feature_bars()
                 self.own_ukr_kde._draw_latent_space()
@@ -420,7 +411,7 @@ class BaseGMMNetworkOwnOppPerformance():
                 self.opp_lower_ukr._draw_latent_space()
                 self._draw_target_bars()
             elif event.inaxes == self.opp_lower_ukr.ax_latent_space.axes:
-                # 下位のUKRの潜在空間をクリックした時の挙動
+                # If opp member map is clicked
                 self.opp_lower_ukr._set_feature_bar_from_latent_space(click_coordinates)
 
                 # set the value to draw in own team map
@@ -444,52 +435,12 @@ class BaseGMMNetworkOwnOppPerformance():
                 self._draw_target_bars()
                 self.lower_ukr._draw_latent_space()
 
-                # # The annotation in own team map
-                # if self.selected_performance is not None:
-                #     if self.own_ukr_kde.click_coordinates_latent_space is not None:
-                #         if self.opp_ukr_kde.is_select_latent_variable:
-                #             annotation_text = 'Heat map of {} (vs {})'.format(self.label_performance[self.selected_performance],
-                #                                                               self.opp_ukr_kde.label_groups[self.opp_ukr_kde.index_team_selected]
-                #                                                               )
-                #         else:
-                #             annotation_text = 'Heat map of {} (vs clicked team)'.format(self.label_performance[self.selected_performance])
-                #     else:
-                #         annotation_text = 'Heat map of {} (marginal)'.format(
-                #             self.label_performance[self.selected_performance]
-                #         )
-                #     self.own_ukr_kde.ax_latent_space.text(1.0, 0.0,
-                #                                           annotation_text,
-                #                                           horizontalalignment='right',
-                #                                           verticalalignment='top',
-                #                                           transform=self.own_ukr_kde.ax_latent_space.transAxes
-                #                                           )
-                # # The annotation in opp team map
-                # if self.selected_performance is not None:
-                #     if self.own_ukr_kde.click_coordinates_latent_space is not None:
-                #         # conditional
-                #         if self.own_ukr_kde.is_select_latent_variable:
-                #             annotation_text = 'Heat map of {} (vs {})'.format(self.label_performance[self.selected_performance],
-                #                                                               self.own_ukr_kde.label_groups[self.own_ukr_kde.index_team_selected]
-                #                                                               )
-                #         else:
-                #             annotation_text = 'Heat map of {} (vs clicked own team)'.format(self.label_performance[self.selected_performance])
-                #     else:
-                #         # marginal
-                #         annotation_text = 'Heat map of {} (marginal)'.format(
-                #             self.label_performance[self.selected_performance]
-                #         )
-                #     self.opp_ukr_kde.ax_latent_space.text(1.0, 0.0,
-                #                                           annotation_text,
-                #                                           horizontalalignment='right',
-                #                                           verticalalignment='top',
-                #                                           transform=self.opp_ukr_kde.ax_latent_space.transAxes
-                #                                           )
 
 
 
     def __mouse_over_fig(self, event):
         if event.xdata is not None:
-            # オーバーされた座標の取得
+            # Get the coordinates of mouse over
             over_coordinates = np.array([event.xdata, event.ydata])
             if event.inaxes == self.lower_ukr.ax_latent_space.axes:
                 self.lower_ukr._set_shown_label_in_latent_space(over_coordinates)
@@ -566,8 +517,6 @@ class BaseGMMNetworkOwnOppPerformance():
             return mesh_grid_mapping
 
     def _set_own_team_latent_space_from_opp_team_latent_space(self):
-        # クリックされた座標の情報はself.opp_ukr_kde._set_data_space_from_latent_spaceで
-        # 既にself.opp_ukr_kdeに与えてあるのでここで代入する必要はない
         if self.selected_performance is not None:
             if self.opp_ukr_kde.click_coordinates_latent_space is not None:
                 # conditional component plane
@@ -600,8 +549,6 @@ class BaseGMMNetworkOwnOppPerformance():
             pass
 
     def _set_opp_team_latent_space_from_own_team_latent_space(self):
-        # クリックされた座標の情報はself.own_ukr_kde._set_data_space_from_latent_spaceで
-        # 既にself.own_ukr_kdeに与えてあるのでここで代入する必要はない
         if self.selected_performance is not None:
             if self.own_ukr_kde.click_coordinates_latent_space is not None:
                 # conditional
@@ -715,7 +662,7 @@ class BaseGMMNetworkOwnOppPerformance():
             if self.grid_simulated_latent_variables is None:
                 if not np.isclose(self.own_ukr_kde.bag_of_shown_member.sum(), 1.0):
                     raise ValueError('sum of weights is not one: {}'.format(self.own_ukr_kde.bag_of_shown_member))
-                # 残っているメンバーの重みを取得
+                # Get weights of playing members
                 weights_minus_one = np.delete(self.own_ukr_kde.bag_of_shown_member, index_nearest)
                 if weights_minus_one.sum() >= 1.0 or np.any(weights_minus_one < 0.0):
                     raise ValueError('invalid weights of shown member={}'.format(self.own_ukr_kde.bag_of_shown_member))

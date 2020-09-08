@@ -40,7 +40,7 @@ class UnsupervisedKernelRegression(object):
 
         self._done_fit = False
 
-    def fit(self, nb_epoch=100, verbose=True, eta=0.5, expand_epoch=None):
+    def fit(self, nb_epoch=100, verbose=True, eta=0.5):
 
         self.nb_epoch = nb_epoch
 
@@ -276,26 +276,25 @@ class UnsupervisedKernelRegression(object):
         # connect figure and method defining action when mouse over
         if self.label_data is not None and self.is_show_all_label_data is False:
             self.fig.canvas.mpl_connect('motion_notify_event', self.__mouse_over_fig)
-            # self.fig.canvas.mpl_connect('axes_leave_event', self.__mouse_leave_fig)
         plt.show()
 
     def __onclick_fig(self, event):
         self.is_initial_view = False
         if event.xdata is not None:
-            # クリックされた座標の取得
+            # Get clicked coordinates
             click_coordinates = np.array([event.xdata, event.ydata])
-            if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
+            if event.inaxes == self.ax_latent_space.axes:  # If the latent space is clicked
                 self._set_feature_bar_from_latent_space(click_coordinates)
                 self._draw_latent_space()
                 self._draw_feature_bars()
-            elif event.inaxes == self.ax_feature_bars.axes:  # 特徴量のバーがクリックされたかどうか
+            elif event.inaxes == self.ax_feature_bars.axes:  # If the feature bar is clicked
                 self._set_latent_space_from_feature_bar(click_coordinates)
                 self._draw_latent_space()
                 self._draw_feature_bars()
 
     def __mouse_over_fig(self, event):
         if event.xdata is not None:
-            # クリックされた座標の取得
+            # Get clicked coordinates
             over_coordinates = np.array([event.xdata, event.ydata])
             if event.inaxes == self.ax_latent_space.axes:
                 self._set_shown_label_in_latent_space(over_coordinates)
@@ -317,12 +316,12 @@ class UnsupervisedKernelRegression(object):
             raise ValueError('Now support only n_components = 2')
 
         if isinstance(n_grid_points, int):
-            # 代表点の数を潜在空間の次元ごとに格納
+            # Store number of grid points for each dimension
             self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
             if self.is_compact:
                 self._set_grid(create_zeta(-1.0, 1.0, self.n_components, n_grid_points), self.n_grid_points)
             else:
-                raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
+                raise ValueError('Not support is_compact=False')
         else:
             raise ValueError('Only support n_grid_points is int')
 
@@ -442,10 +441,10 @@ class UnsupervisedKernelRegression(object):
             self.click_point_latent_space = None
             self.clicked_mapping = self.X.mean(axis=0)
         else:
-            # クリックしたところといちばん近い代表点がどこかを計算
+            # Calculate nearest grid point for clicked point
             self.click_point_latent_space = self.__calc_nearest_grid_point(click_coordinates)
 
-            # その代表点の写像先の特徴量を計算
+            # Pick up the mapping
             self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
 
     def _set_latent_space_from_feature_bar(self, click_coordinates):
