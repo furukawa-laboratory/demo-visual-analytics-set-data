@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 from gmm_net.models.kde import KDE
-from somf.libs.tools.create_zeta import create_zeta
+from gmm_net.tools.create_zeta import create_zeta
 
 
 class UKRForWeightedKDE():
