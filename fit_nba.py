@@ -213,8 +213,8 @@ def _main():
         os.mkdir(path_joblib)
     path_whole_model_joblib = (
             path_joblib
-            + "fit_team_team_performance_mm_seed{}_epoch{}.cmp".format(seed,
-                                                                       nb_epoch_multiview)
+            + "fit_gmm_net_seed{}_epoch{}.cmp".format(seed,
+                                                      nb_epoch_multiview)
     )
     # 学習済みのモデルがpklとして保存されている場合はそれを用いる
     if os.path.exists(path_whole_model_joblib):
@@ -250,7 +250,7 @@ def _main():
         # save whole model
         print("whole model has been saved as pickle")
         f = open(path_whole_model_joblib, "wb")
-        joblib.dump(gmm_net, f)
+        joblib.dump(gmm_net, f, compress=True)
         f.close()
 
     # f = open(path_whole_model_joblib, "rb")
