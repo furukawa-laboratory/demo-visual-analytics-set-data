@@ -1,5 +1,5 @@
 import numpy as np
-from gmm_net.models.base_gmm_net import OwnTeamOppTeamRegressor
+from gmm_net.models.base_gmm_net import BaseGMMNetworkOwnOppPerformance
 from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
 from gmm_net.models.gplvm import GPLVM
@@ -9,7 +9,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 import warnings
 
 
-class GMMNetworkForOwnTeamOppTeamPerformance(OwnTeamOppTeamRegressor):
+class GMMNetworkForOwnTeamOppTeamPerformance(BaseGMMNetworkOwnOppPerformance):
     def __init__(self,
                  win_team_bag_of_members: np.ndarray,
                  lose_team_bag_of_members: np.ndarray,
