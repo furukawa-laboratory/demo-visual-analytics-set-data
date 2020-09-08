@@ -9,7 +9,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 import warnings
 
 
-class OwnTeamOppTeamPerformanceMultiLevelViewMM(OwnTeamOppTeamRegressor):
+class GMMNetworkForOwnTeamOppTeamPerformance(OwnTeamOppTeamRegressor):
     def __init__(self,
                  win_team_bag_of_members: np.ndarray,
                  lose_team_bag_of_members: np.ndarray,

@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from gmm_net.tools.normalize_like_map import normalize_like_map
 from gmm_net.models.gmm_net_for_own_opp_team_performance import \
-    OwnTeamOppTeamPerformanceMultiLevelViewMM as TTPMVMM
+    GMMNetworkForOwnTeamOppTeamPerformance as TTPMVMM
 from datasets.nba.nba import load_data
 from sklearn.decomposition import PCA
 import math
