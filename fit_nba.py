@@ -8,7 +8,6 @@ from gmm_net.models.own_opp_team_performance_multilevel_view_mm import \
 from datasets.nba.nba import load_data
 from sklearn.decomposition import PCA
 import math
-from sklearn.preprocessing import LabelEncoder
 
 
 def calculate_bandwidth(
