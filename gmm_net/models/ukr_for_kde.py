@@ -88,7 +88,6 @@ class UKRForWeightedKDE():
             init_value = init_value / np.std(init_value[:, 0])
             self.Z = init_value * self.bandwidth_nw * 0.1
         elif isinstance(init, np.ndarray) and init.shape == (self.n_groups, self.n_embedding):
-            # 外部から形が合っている配列が渡された場合
             self.Z = init.copy()
         else:
             raise ValueError("invalid init: {}".format(init))
@@ -158,7 +157,7 @@ class UKRForWeightedKDE():
                                                                          axis=0)
                     self.history['obj_func'][last_n_epoch + epoch] = obj_func
         elif self.metric == 'l2':
-            from somf.libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as RUKR
+            from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as RUKR
             regular_ukr = RUKR(X=self.data_densities, n_components=self.n_embedding,
                                bandwidth_gaussian_kernel=self.bandwidth_nw, is_compact=self.is_compact,
                                lambda_=self.lambda_, init=self.Z.copy(), is_loocv=False,
@@ -300,11 +299,6 @@ class UKRForWeightedKDE():
             dCEdZnew = np.einsum('kt,ktl->kl',
                                  smoothed_product,
                                  Deltabar[:, None, :] - Delta)
-            # dCEdZnew = np.einsum("kt,kd,td,ktl->kl",
-            #                      R,
-            #                      ratios_density,
-            #                      self.data_densities,
-            #                      Deltabar[:, None, :] - Delta)
             dCEdZnew *= -self.precision_nadaraya * (self.step ** self.n_embedding)
 
             Znew -= learning_rate * dCEdZnew
@@ -321,7 +315,8 @@ class UKRForWeightedKDE():
 
     def inverse_transform(self, latent_variables):
         raise ValueError(
-            'One latent variable is mapped to one density function which is infinte dimension. Use inverse_transformed_pdf with any point x in space of random variable')
+            'One latent variable is mapped to one density function which is infinte dimension. Use inverse_transformed_pdf with any point x in space of random variable'
+        )
 
     def inverse_transformed_pdf(self, x, latent_variables):
 
@@ -418,7 +413,7 @@ class UKRForWeightedKDE():
 
     def __mouse_over_fig(self, event):
         if event.xdata is not None:
-            # クリックされた座標の取得
+            # Get clicked coordinates
             over_coordinates = np.array([event.xdata, event.ydata])
             if event.inaxes == self.ax_latent_space.axes:
                 self._set_shown_label_in_latent_space(over_coordinates)
@@ -438,7 +433,7 @@ class UKRForWeightedKDE():
             raise ValueError('Now support only n_embedding = 2 and n_features = 2')
 
         if isinstance(n_grid_points, int):
-            # 代表点の数を潜在空間の次元ごとに格納
+            # Keep resolution per one dimension
             self.n_grid_points_latent_space = np.ones(self.n_embedding, dtype='int8') * n_grid_points
             self.n_grid_points_data_space = np.ones(self.n_features, dtype='int8') * n_grid_points
         else:
@@ -535,7 +530,7 @@ class UKRForWeightedKDE():
         self.comment_latent_space = None
 
         # shape=(grid_points**self.n_embedding, self.resolution_quadrature**self.n_feature)
-        # 要するに潜在空間の離散化数xデータの空間の離散化数
+        # In short, number of discretizing latent space x number of discretizing data space
         self.grid_mapping = self.inverse_transformed_pdf(x=self.grid_points_data_space,
                                                          latent_variables=self.grid_points_latent_space)
 
@@ -544,7 +539,7 @@ class UKRForWeightedKDE():
 
     def _set_data_space_from_latent_space(self, click_coordinates):
         if self.click_coordinates_latent_space is not None:
-            # If a coodinates are clicked previously
+            # If a coordinates are clicked previously
             _, dist_previous_click_coordinates = self.__calc_nearest_candidate(click_coordinates,
                                                                                self.click_coordinates_latent_space.reshape(1, -1),
                                                                                retdist=True)
