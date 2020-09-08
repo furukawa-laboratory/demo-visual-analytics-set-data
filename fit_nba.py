@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from gmm_net.tools.normalize_like_map import normalize_like_map
 from gmm_net.models.gmm_net_for_own_opp_team_performance import \
-    GMMNetworkForOwnTeamOppTeamPerformance as TTPMVMM
+    GMMNetworkForOwnTeamOppTeamPerformance as GMMNet
 from datasets.nba.nba import load_data
 from sklearn.decomposition import PCA
 import math
@@ -220,13 +220,13 @@ def _main():
     if os.path.exists(path_whole_model_joblib):
         print("whole pickle exists")
         f = open(path_whole_model_joblib, "rb")
-        team_team_performance_mm = joblib.load(f)
+        gmm_net = joblib.load(f)
         f.close()
     # 保存されていない場合は新たにインスタンスを作成し学習する
     else:
         print("whole pickle does not exist")
         # fit whole model
-        team_team_performance_mm = TTPMVMM(
+        gmm_net = GMMNet(
             win_team_bag_of_members=win_team_bag_of_members_train,
             lose_team_bag_of_members=lose_team_bag_of_members_train,
             win_team_performance=win_team_performance_train,
@@ -239,7 +239,7 @@ def _main():
             is_save_history=is_save_history,
             is_compact=is_compact
         )
-        team_team_performance_mm.fit(
+        gmm_net.fit(
             nb_epoch_lower_ukr=nb_epoch_ukr,
             eta_lower_ukr=eta_ukr,
             nb_epoch_multiview_mm=nb_epoch_multiview,
@@ -250,7 +250,7 @@ def _main():
         # save whole model
         print("whole model has been saved as pickle")
         f = open(path_whole_model_joblib, "wb")
-        joblib.dump(team_team_performance_mm, f)
+        joblib.dump(gmm_net, f)
         f.close()
 
     # f = open(path_whole_model_joblib, "rb")
@@ -318,10 +318,10 @@ def _main():
     path_meshed = path_joblib + 'meshes_to_ccp_resolution{}.npz'.format(n_grid_points)
     if os.path.exists(path_meshed):
         npz_meshes = np.load(path_meshed)
-        team_team_performance_mm.mesh_grid_mapping = npz_meshes['mapping']
-        team_team_performance_mm.mesh_grid_precision = npz_meshes['precision']
+        gmm_net.mesh_grid_mapping = npz_meshes['mapping']
+        gmm_net.mesh_grid_precision = npz_meshes['precision']
 
-    team_team_performance_mm.visualize(
+    gmm_net.visualize(
         n_grid_points=n_grid_points,
         cmap_density=cmap_density,
         cmap_feature=cmap_feature,
@@ -338,8 +338,8 @@ def _main():
         learning_rate_to_change_member=learning_rate_to_change_member
     )
     np.savez_compressed(path_meshed,
-                        mapping=team_team_performance_mm.mesh_grid_mapping,
-                        precision=team_team_performance_mm.mesh_grid_precision)
+                        mapping=gmm_net.mesh_grid_mapping,
+                        precision=gmm_net.mesh_grid_precision)
 
 
     print("finish!")
