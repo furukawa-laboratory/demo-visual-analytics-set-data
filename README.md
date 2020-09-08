@@ -1,2 +1,2 @@
-# GenerativeManifoldModelingNetwork
+# GenerativeManifoldModelNetwork
 Interactive visualization demo
