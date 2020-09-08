@@ -95,7 +95,6 @@ class UnsupervisedKernelRegression(object):
                 self.history['obj_func'][epoch] = obj_func
 
         self._done_fit = True
-        return self.history
 
     def calculate_history_of_mapping(self, resolution, size='auto'):
         """

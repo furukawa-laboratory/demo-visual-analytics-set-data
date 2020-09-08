@@ -1,5 +1,5 @@
 import numpy as np
-from gmm_net.models.own_opp_team_regressor import OwnTeamOppTeamRegressor
+from gmm_net.models.base_gmm_net import BaseGMMNetworkOwnOppPerformance
 from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
 from gmm_net.models.gplvm import GPLVM
@@ -9,7 +9,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 import warnings
 
 
-class OwnTeamOppTeamPerformanceMultiLevelViewMM(OwnTeamOppTeamRegressor):
+class GMMNetworkForOwnTeamOppTeamPerformance(BaseGMMNetworkOwnOppPerformance):
     def __init__(self,
                  win_team_bag_of_members: np.ndarray,
                  lose_team_bag_of_members: np.ndarray,
@@ -118,7 +118,7 @@ class OwnTeamOppTeamPerformanceMultiLevelViewMM(OwnTeamOppTeamRegressor):
                                 eta_lower_ukr=eta_lower_ukr)
             self.is_given_lower_ukr_fit = False
         elif isinstance(lower_ukr_fit, UKR):
-            # 与えられたUKRが適切か簡易チェック
+            # Check if given UKR is consistent
             if not np.all(lower_ukr_fit.X == self.lower_ukr.X):
                 raise ValueError("Not expected lower_ukr_fit's X")
             elif lower_ukr_fit.bandwidth_gaussian_kernel != self.lower_ukr.bandwidth_gaussian_kernel:

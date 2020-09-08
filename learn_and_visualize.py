@@ -3,8 +3,8 @@ import joblib
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from gmm_net.tools.normalize_like_map import normalize_like_map
-from gmm_net.models.own_opp_team_performance_multilevel_view_mm import \
-    OwnTeamOppTeamPerformanceMultiLevelViewMM as TTPMVMM
+from gmm_net.models.gmm_net_for_own_opp_team_performance import \
+    GMMNetworkForOwnTeamOppTeamPerformance as GMMNet
 from datasets.nba.nba import load_data
 from sklearn.decomposition import PCA
 import math
@@ -28,11 +28,11 @@ def calculate_bandwidth(
 
 
 def _main():
-    # load dataset
+    # Load dataset
     version = '2'
     dict_nba = load_data(version=version)
-    target_seasons = "2019"  # 現状は2018-2019だけにフォーカス
-    ## 各メンバーについてのデータを引き出す
+    target_seasons = "2019"  # Focus seasong 2018-19
+    ## Load dataset about members
     member_features_original = dict_nba[target_seasons]["about_member"][
         "feature"
     ].copy()
@@ -40,7 +40,7 @@ def _main():
     label_feature = dict_nba[target_seasons]["about_member"]["label"]["feature"]
     df_member_info = dict_nba[target_seasons]["about_member"]["info"]
     label_position = df_member_info['Pos'].values
-    ## 次にチーム関連のデータ
+    ## Load dataset about teams
     ### training data
     win_team_bag_of_members_train = dict_nba[target_seasons]["about_game"]["feature"][
         "train"
@@ -57,7 +57,7 @@ def _main():
     n_team_train = (
             win_team_bag_of_members_train.shape[0] + lose_team_bag_of_members_train.shape[0]
     )
-    # training dataにおける各メンバーの総出場時間を計算しておく
+    # Calculate total playing time corresponds each member
     all_bag_of_members_train = np.concatenate(
         [win_team_bag_of_members_train, lose_team_bag_of_members_train], axis=0
     )
@@ -67,36 +67,15 @@ def _main():
     lose_team_club_label_train = dict_nba[target_seasons]["about_game"]["label"]["team"]["train"]["lose"].copy()
     wl_team_club_label_train = np.concatenate([win_team_club_label_train, lose_team_club_label_train])
     import pandas as pd
-    df_ranking = pd.read_csv('./ranking.csv')
+    df_ranking = pd.read_csv('./datasets/nba/ranking.csv')
     df_team_train = pd.DataFrame(data=wl_team_club_label_train, columns=['Short name'])
     label_club_train_encoded = pd.merge(df_team_train,
                                         df_ranking,
                                         on='Short name',
                                         how='left')['W/L%'].values
-    # le = LabelEncoder()
-    # label_club_train_encoded = le.fit_transform(wl_team_club_label_train)
 
-    win_team_club_label_test = dict_nba[target_seasons]["about_game"]["label"]["team"]["test"]["win"].copy()
-    lose_team_club_label_test = dict_nba[target_seasons]["about_game"]["label"]["team"]["test"]["lose"].copy()
-    wl_team_club_label_test = np.concatenate([win_team_club_label_test, lose_team_club_label_test])
-    df_team_test = pd.DataFrame(data=wl_team_club_label_test, columns=['Short name'])
-    label_club_test_encoded = pd.merge(df_team_test,
-                                       df_ranking,
-                                       on='Short name',
-                                       how='left')['W/L%'].values
 
-    ## 次にtest data
-    win_team_bag_of_members_test = dict_nba[target_seasons]["about_game"]["feature"]["test"]["win"].copy()
-    lose_team_bag_of_members_test = dict_nba[target_seasons]["about_game"]["feature"]["test"]["lose"].copy()
-    win_team_performance_test = dict_nba[target_seasons]["about_game"]["target"]["test"]["win"].copy()
-    lose_team_performance_test = dict_nba[target_seasons]["about_game"]["target"]["test"]["lose"].copy()
-    n_game_test = win_team_bag_of_members_test.shape[0]
-    ### テストで与えるために整形する
-    own_bag_of_members_test = np.concatenate([win_team_bag_of_members_test,
-                                              lose_team_bag_of_members_test], axis=0)
-    team_performance_test = np.concatenate([win_team_performance_test,
-                                            lose_team_performance_test], axis=0)
-    # 前処理
+    # Preprocess
     ## for member features
     prior_mean = 0.0
     prior_precision = 100
@@ -108,7 +87,7 @@ def _main():
         prior_precision=prior_precision,
         after_standardization=after_standardization,
     )
-    ### ネガティブなスタッツの符号を変換
+    ### Negate negative stats
     member_features_map[:, label_feature == "TOVPM"] *= -1
     member_features_map[:, label_feature == "PFPM"] *= -1
     label_feature[label_feature == "TOVPM"] = "NTOVPM"
@@ -127,13 +106,11 @@ def _main():
     lose_team_performance_train = standardizer_to_performance.transform(
         lose_team_performance_train
     )
-    team_performance_test = standardizer_to_performance.transform(team_performance_test)
 
     # set common parameter
     seed = 13
     is_save_history = False
-    is_save_whole_pkl = True
-    width_latent_space = 2.0  # こういう仕様に下位のUKRも上位のUKRもなっているのでここで決めとく
+    width_latent_space = 2.0
     path_joblib = "./dumped/"
 
     ## about lower ukr
@@ -155,14 +132,13 @@ def _main():
 
     params_lower_ukr["is_loocv"] = False
     params_lower_ukr["is_save_history"] = is_save_history
-    params_lower_ukr["weights"] = member_total_play_time  # UKRの重みを選手の総出場時間に
+    params_lower_ukr["weights"] = member_total_play_time
     nb_epoch_ukr = 30000
     eta_ukr = 0.03
 
     ## about ukr_for_kde
     params_upper_ukr_kde = {}
     params_upper_ukr_kde["n_embedding"] = 2
-    # list_bandwidth_kde = [0.2]
     params_upper_ukr_kde["bandwidth_kde"] = 0.2
     n_data_in_one_sigma_ukr_kde = 4
     params_upper_ukr_kde["bandwidth_nadaraya"] = calculate_bandwidth(
@@ -171,15 +147,12 @@ def _main():
         n_components=params_upper_ukr_kde["n_embedding"],
         width_latent_space=width_latent_space,
     )
-    # params_upper_ukr_kde["is_compact"] = True
     params_upper_ukr_kde["lambda_"] = 0.0
     params_upper_ukr_kde["metric_evaluation_method"] = "quadrature_by_parts"
     params_upper_ukr_kde["metric"] = 'kl'
     params_upper_ukr_kde["resolution_quadrature"] = 30
     params_upper_ukr_kde["init"] = "pca_densities"
-    # params_upper_ukr_kde["is_save_history"] = is_save_history
     params_upper_ukr_kde["random_state"] = seed
-    # init_upper_ukr_kde = None
 
     ## about gplvm
     params_gplvm = {}
@@ -188,11 +161,10 @@ def _main():
                                  n_components=params_upper_ukr_kde["n_embedding"]*2,
                                  width_latent_space=width_latent_space)
     params_gplvm["sqlength"] = length ** 2.0
-    params_gplvm["beta_inv"] = 0.72 # この辺のハイパーパラメータは何がいいのか良くわからんのでとりあえずこれで
+    params_gplvm["beta_inv"] = 0.72
     params_gplvm["is_optimize_sqlength"] = False
     params_gplvm["is_optimize_beta_inv"] = False
     params_gplvm["how_calculate_inv"] = 'cholesky'
-    # params_gplvm["is_compact"] = True
 
     ## about multiview
     nb_epoch_multiview = 8000
@@ -208,25 +180,22 @@ def _main():
     params_gpr["optimizer"] = None  # Not optimize
 
 
-    # create instance and fit
     if not os.path.exists(path_joblib):
         os.mkdir(path_joblib)
     path_whole_model_joblib = (
             path_joblib
-            + "fit_team_team_performance_mm_seed{}_epoch{}.cmp".format(seed,
-                                                                       nb_epoch_multiview)
+            + "fit_gmm_net_seed{}_epoch{}.cmp".format(seed,
+                                                      nb_epoch_multiview)
     )
-    # 学習済みのモデルがpklとして保存されている場合はそれを用いる
     if os.path.exists(path_whole_model_joblib):
-        print("whole pickle exists")
+        print("saved model exists")
         f = open(path_whole_model_joblib, "rb")
-        team_team_performance_mm = joblib.load(f)
+        gmm_net = joblib.load(f)
         f.close()
-    # 保存されていない場合は新たにインスタンスを作成し学習する
     else:
-        print("whole pickle does not exist")
-        # fit whole model
-        team_team_performance_mm = TTPMVMM(
+        print("saved model does not exist")
+        # create instance and fit
+        gmm_net = GMMNet(
             win_team_bag_of_members=win_team_bag_of_members_train,
             lose_team_bag_of_members=lose_team_bag_of_members_train,
             win_team_performance=win_team_performance_train,
@@ -239,7 +208,7 @@ def _main():
             is_save_history=is_save_history,
             is_compact=is_compact
         )
-        team_team_performance_mm.fit(
+        gmm_net.fit(
             nb_epoch_lower_ukr=nb_epoch_ukr,
             eta_lower_ukr=eta_ukr,
             nb_epoch_multiview_mm=nb_epoch_multiview,
@@ -250,43 +219,12 @@ def _main():
         # save whole model
         print("whole model has been saved as pickle")
         f = open(path_whole_model_joblib, "wb")
-        joblib.dump(team_team_performance_mm, f)
+        joblib.dump(gmm_net, f, compress=True)
         f.close()
 
-    # f = open(path_whole_model_joblib, "rb")
-    # team_team_performance_mm = pickle.load(f)
-    # f.close()
-    #
-    # del team_team_performance_mm.history
-    # del team_team_performance_mm.lower_ukr.history
-    # del team_team_performance_mm.upper_ukr_kde.history
-    # path_whole_model_pkl = (
-    #         path_pkl
-    #         + "fit_team_team_performance_mm_seed{}_ratio_ukr{}_epoch{}_nohistory.pkl".format(seed,
-    #                                                                                          text_ratio,
-    #                                                                                          nb_epoch_multiview)
-    # )
-    # f = open(path_whole_model_pkl, "wb")
-    # pickle.dump(team_team_performance_mm, f)
-    # f.close()
-    # save delete history
-    # path_whole_model_joblib = (
-    #         path_joblib
-    #         + "fit_team_team_performance_mm_seed{}_ratio_ukr{}_epoch{}_nohistory.comp".format(seed,
-    #                                                                                          text_ratio,
-    #                                                                                          nb_epoch_multiview)
-    # )
-    # import joblib
-    # f = open(path_whole_model_joblib, "wb")
-    # joblib.dump(team_team_performance_mm, f, compress=True)
-    # f.close()
-    #
-    # f = open(path_whole_model_joblib, "rb")
-    # team_team_performance_mm = joblib.load(f)
-    # f.close()
 
     # visualize interactively
-    n_grid_points = 15
+    resolution = 15
     cmap_density = "binary"
     cmap_feature = "bwr"
     cmap_ccp = "bwr"
@@ -309,20 +247,20 @@ def _main():
     }
     params_init_upper_ukr = {
         'params_scatter_latent_space': {'c': label_club_train_encoded,
-                                        'cmap': 'jet',
+                                        'cmap': 'rainbow_r',
                                         's': 5,
                                         'alpha': 0.5}
     }
     n_epoch_to_change_member = 700
     learning_rate_to_change_member = 0.002
-    path_meshed = path_joblib + 'meshes_to_ccp_resolution{}.npz'.format(n_grid_points)
+    path_meshed = path_joblib + 'meshes_to_ccp_resolution{}.npz'.format(resolution)
     if os.path.exists(path_meshed):
         npz_meshes = np.load(path_meshed)
-        team_team_performance_mm.mesh_grid_mapping = npz_meshes['mapping']
-        team_team_performance_mm.mesh_grid_precision = npz_meshes['precision']
+        gmm_net.mesh_grid_mapping = npz_meshes['mapping']
+        gmm_net.mesh_grid_precision = npz_meshes['precision']
 
-    team_team_performance_mm.visualize(
-        n_grid_points=n_grid_points,
+    gmm_net.visualize(
+        n_grid_points=resolution,
         cmap_density=cmap_density,
         cmap_feature=cmap_feature,
         cmap_ccp=cmap_ccp,
@@ -338,8 +276,8 @@ def _main():
         learning_rate_to_change_member=learning_rate_to_change_member
     )
     np.savez_compressed(path_meshed,
-                        mapping=team_team_performance_mm.mesh_grid_mapping,
-                        precision=team_team_performance_mm.mesh_grid_precision)
+                        mapping=gmm_net.mesh_grid_mapping,
+                        precision=gmm_net.mesh_grid_precision)
 
 
     print("finish!")

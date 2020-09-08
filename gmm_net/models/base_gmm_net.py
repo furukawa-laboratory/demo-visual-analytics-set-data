@@ -6,7 +6,7 @@ from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
 
-class OwnTeamOppTeamRegressor():
+class BaseGMMNetworkOwnOppPerformance():
     def __init__(self, win_team_bag_of_members, lose_team_bag_of_members,
                  win_team_performance, lose_team_performance, member_features,
                  params_lower_ukr, params_upper_ukr_kde, params_gpr,

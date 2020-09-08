@@ -4,3 +4,4 @@ datasets/nba/.ipynb_checkpoints/*
 datasets/nba/__pycache__/*
 *.pyc
 .venv/
+*.egg-info
