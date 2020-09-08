@@ -1,8 +1,8 @@
 import numpy as np
-from libs_tpm.models.own_opp_team_regressor import OwnTeamOppTeamRegressor
+from gmm_net.models.own_opp_team_regressor import OwnTeamOppTeamRegressor
 from somf.libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
-from libs_tpm.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
-from libs_tpm.models.gplvm import GPLVM
+from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
+from gmm_net.models.gplvm import GPLVM
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 from tqdm import tqdm
 from sklearn.gaussian_process import GaussianProcessRegressor

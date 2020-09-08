@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
-from libs_tpm.models.kde import KDE
+from gmm_net.models.kde import KDE
 from somf.libs.tools.create_zeta import create_zeta
 
 
@@ -228,7 +228,7 @@ class UKRForWeightedKDE():
                                              weights_of_group.shape[0],
                                              self.n_embedding))
             self.history['obj_func_znew'] = np.zeros(n_epoch)
-        from libs_tpm.models.kde import KDE
+        from gmm_net.models.kde import KDE
         kde = KDE()
         kde.fit(dataset=self.member_features,
                 bandwidth=self.bandwidth_kde,
@@ -667,7 +667,7 @@ class UKRForWeightedKDE():
         if self.grid_values_to_draw_latent_space is not None:
             if self.grid_values_to_draw_latent_space.ndim == 2:
                 if self.grid_values_to_draw_latent_space.shape[1] == 2:
-                    from libs_tpm.tools.cmap2d_value_and_brightness import cmap2d_base_and_brightness
+                    from gmm_net.tools.cmap2d_value_and_brightness import cmap2d_base_and_brightness
                     if self.is_latent_space_middle_color_zero:
                         max_grid_value = self.grid_values_to_draw_latent_space[0].max()
                         min_grid_value = self.grid_values_to_draw_latent_space[0].min()
@@ -817,7 +817,7 @@ class UKRForWeightedKDE():
         if self.grid_values_to_draw_data_space is not None:
             if self.grid_values_to_draw_data_space.ndim == 2:
                 if self.grid_values_to_draw_data_space.shape[1] == 2:
-                    from libs_tpm.tools.cmap2d_value_and_brightness import cmap2d_base_and_brightness
+                    from gmm_net.tools.cmap2d_value_and_brightness import cmap2d_base_and_brightness
                     if self.is_latent_space_middle_color_zero:
                         max_grid_value = self.grid_values_to_draw_data_space[0].max()
                         min_grid_value = self.grid_values_to_draw_data_space[0].min()

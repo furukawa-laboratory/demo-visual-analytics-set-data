@@ -1,5 +1,5 @@
 from somf.libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
-from libs_tpm.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
+from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from scipy.spatial.distance import cdist

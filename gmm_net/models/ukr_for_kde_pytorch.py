@@ -81,7 +81,7 @@ class UKRForWeightedKDEPyTorch():
                                                           self.normalized_weight_of_group,
                                                           cross_entropy_gaussians)
         elif self.evaluation_kldiv_method == 'quadrature_by_parts':
-            from libs_tpm.models.kde import KDE
+            from gmm_net.models.kde import KDE
             from somf.libs.tools.create_zeta import create_zeta
             grid_points, self.step = create_zeta(zeta_min=self.member_features.min() - 2.0 * self.bandwidth_kde,
                                                       zeta_max=self.member_features.max() + 2.0 * self.bandwidth_kde,
