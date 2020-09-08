@@ -1,4 +1,4 @@
-from somf.libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
+from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor

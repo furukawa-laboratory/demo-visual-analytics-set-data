@@ -1,6 +1,6 @@
 import numpy as np
 from gmm_net.models.own_opp_team_regressor import OwnTeamOppTeamRegressor
-from somf.libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
+from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
 from gmm_net.models.gplvm import GPLVM
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
