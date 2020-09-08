@@ -118,7 +118,7 @@ class GMMNetworkForOwnTeamOppTeamPerformance(BaseGMMNetworkOwnOppPerformance):
                                 eta_lower_ukr=eta_lower_ukr)
             self.is_given_lower_ukr_fit = False
         elif isinstance(lower_ukr_fit, UKR):
-            # 与えられたUKRが適切か簡易チェック
+            # Check if given UKR is consistent
             if not np.all(lower_ukr_fit.X == self.lower_ukr.X):
                 raise ValueError("Not expected lower_ukr_fit's X")
             elif lower_ukr_fit.bandwidth_gaussian_kernel != self.lower_ukr.bandwidth_gaussian_kernel:
