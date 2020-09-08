@@ -2,8 +2,8 @@ import os
 import joblib
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from libs_tpm.tools.normalize_like_map import normalize_like_map
-from libs_tpm.models.own_opp_team_performance_multilevel_view_mm import \
+from gmm_net.tools.normalize_like_map import normalize_like_map
+from gmm_net.models.own_opp_team_performance_multilevel_view_mm import \
     OwnTeamOppTeamPerformanceMultiLevelViewMM as TTPMVMM
 from datasets.nba.nba import load_data
 from sklearn.decomposition import PCA
