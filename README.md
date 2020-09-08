@@ -1,5 +1,4 @@
 # GenerativeManifoldModelNetwork
-Interactive visualization demo
 In the paper, we introduce the visualization method to support forming the team.
 It's the network consisting of *generative manifold modelings*.
 Proposed method can visualize the relationship among own team composition, opposing one, own team's performance.
