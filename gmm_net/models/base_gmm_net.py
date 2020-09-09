@@ -147,7 +147,7 @@ class BaseGMMNetworkOwnOppPerformance():
     def visualize(self, n_grid_points=30, cmap_feature=None, cmap_density=None, cmap_ccp=None,
                   label_member=None, label_feature=None, label_team=None, label_performance=None,
                   fig_size=None, is_member_cp_middle_color_zero=False, is_ccp_middle_color_zero=False,
-                  params_init_lower_ukr=None, params_init_upper_ukr=None,
+                  params_init_lower_ukr=None, params_init_upper_ukr=None, is_available_simulation_mode=False,
                   n_epoch_to_change_member=1500, learning_rate_to_change_member=0.001):
         # invalid check
         if self.lower_ukr.n_components != 2 or self.upper_ukr_kde.n_embedding != 2:
@@ -178,6 +178,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.n_epoch_to_change_member =n_epoch_to_change_member
         self.learning_rate_to_change_member = learning_rate_to_change_member
         self.is_simulate_changing_member = False
+        self.is_available_simulation_mode = is_available_simulation_mode
         self.deleted_member_coordinates = None
         self.grid_simulated_latent_variables = None
 
@@ -307,7 +308,7 @@ class BaseGMMNetworkOwnOppPerformance():
             click_coordinates = np.array([event.xdata, event.ydata])
             if event.inaxes == self.lower_ukr.ax_latent_space.axes:
                 # If specific latent variable is selected in team map
-                if self.own_ukr_kde.is_select_latent_variable:
+                if self.own_ukr_kde.is_select_latent_variable and self.is_available_simulation_mode:
                     self._set_to_simulate_changing_member(click_coordinates)
                 else:
                     self.is_simulate_changing_member = False
