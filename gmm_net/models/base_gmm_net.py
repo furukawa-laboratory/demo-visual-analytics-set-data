@@ -360,9 +360,14 @@ class BaseGMMNetworkOwnOppPerformance():
 
                 # set comment
                 if self.own_ukr_kde.is_select_latent_variable:
-                    annotation_text = 'Density of {}\nIf member is clicked, new team mode starts.'.format(
-                        self.own_ukr_kde.label_groups[self.own_ukr_kde.index_team_selected]
-                    )
+                    if self.is_available_simulation_mode:
+                        annotation_text = 'Density of {}\nIf member is clicked, new team mode starts.'.format(
+                            self.own_ukr_kde.label_groups[self.own_ukr_kde.index_team_selected]
+                        )
+                    else:
+                        annotation_text = 'Density of {}\nIf member is clicked, new team mode starts.'.format(
+                            self.own_ukr_kde.label_groups[self.own_ukr_kde.index_team_selected]
+                        )
                 else:
                     annotation_text = 'Density of clicked own team'
                 self.lower_ukr.set_comment_in_latent_space(annotation_text)
