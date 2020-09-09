@@ -574,7 +574,6 @@ class UKRForWeightedKDE():
                 self.click_coordinates_latent_space = self.Z[index_nearest_latent_variable]
                 self.is_select_latent_variable = True
                 self.index_team_selected = index_nearest_latent_variable
-                print('clicked team is {}'.format(self.index_team_selected))
             else:
                 self.mask_shown_member = np.full(self.n_members, True, bool)
                 self.bag_of_shown_member = None

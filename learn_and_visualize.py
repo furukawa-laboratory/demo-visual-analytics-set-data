@@ -224,7 +224,7 @@ def _main():
 
 
     # visualize interactively
-    resolution = 15
+    resolution = 30
     cmap_density = "binary"
     cmap_feature = "bwr"
     cmap_ccp = "bwr"
