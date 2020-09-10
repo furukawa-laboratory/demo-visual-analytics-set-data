@@ -218,7 +218,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr._initialize_to_visualize(n_grid_points,
                                                 label_data=label_member,
                                                 label_feature=label_feature,
-                                                title_latent_space='Opp member map',
+                                                title_latent_space='Opposing member map',
                                                 title_feature_bars='Member feature',
                                                 is_show_all_label_data=False,
                                                 is_show_ticks_latent_space=False,
