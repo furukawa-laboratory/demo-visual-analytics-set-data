@@ -10,6 +10,8 @@ If you use poetry, run `poetry install`.
 In addition, please make `tkinter` available in the Python environment because the visualization implemented by matplotlib works only when backend is set to `TkAgg`.
 
 ## Demonstration of interactive visualization
+<img width="1438" alt="Viewer" src="https://user-images.githubusercontent.com/19607449/92686237-38a03200-f374-11ea-8d6c-1dd67ed7ff28.png">
+
 This demonstration provides a GUI Interface that facilitates knowledge discovery by clicking topological maps.
 We use the data of 1228 games held in 2018–2019, obtained from [Basketball Reference website](https://www.basketball-reference.com/).
 
