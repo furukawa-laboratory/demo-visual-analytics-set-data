@@ -1,5 +1,5 @@
 # GenerativeManifoldModelNetwork
-In the paper, *Multi-Aspect Visualization for Team Formation SupportBased on Generative Manifold Modeling Network*, we introduce the visualization method to support forming the team.
+In the paper, *Multi-Aspect Visualization for Team Formation Support Based on Generative Manifold Modeling Network*, we introduce the visualization method to support forming the team.
 It's the network consisting of *generative manifold modelings*.
 Proposed method can visualize the relationship among own team's composition, opposing team's one and own team's performance.
 The purpose of this repository is sharing our implementation of proposed method and providing the demonstration of interactive visualization.
