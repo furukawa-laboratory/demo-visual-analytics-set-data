@@ -1,4 +1,4 @@
-# GenerativeManifoldModelNetwork
+# GenerativeManifoldModelingNetwork
 <img width="1438" alt="Viewer" src="https://user-images.githubusercontent.com/19607449/92686237-38a03200-f374-11ea-8d6c-1dd67ed7ff28.png">
 In the paper, *Multi-Aspect Visualization for Team Formation Support Based on Generative Manifold Modeling Network*, we introduce the visualization method to support forming the team.
 It's the network consisting of *generative manifold modelings*.
