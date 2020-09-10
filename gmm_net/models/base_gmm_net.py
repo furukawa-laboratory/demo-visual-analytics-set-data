@@ -365,7 +365,7 @@ class BaseGMMNetworkOwnOppPerformance():
                             self.own_ukr_kde.label_groups[self.own_ukr_kde.index_team_selected]
                         )
                     else:
-                        annotation_text = 'Density of {}\nIf member is clicked, new team mode starts.'.format(
+                        annotation_text = 'Density of {}'.format(
                             self.own_ukr_kde.label_groups[self.own_ukr_kde.index_team_selected]
                         )
                 else:
