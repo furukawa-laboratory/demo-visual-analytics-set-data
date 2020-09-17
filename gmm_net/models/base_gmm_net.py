@@ -193,7 +193,7 @@ class BaseGMMNetworkOwnOppPerformance():
         ax_own_team_latent_space = self.fig.add_subplot(2, 3, 2, aspect='equal')
         ax_opp_team_latent_space = self.fig.add_subplot(2, 3, 3, aspect='equal')
         self.ax_performance_bars = self.fig.add_subplot(2, 3, 5)
-        self.fig.subplots_adjust(left=0.075, bottom=0.1, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
+        self.fig.subplots_adjust(left=0.085, bottom=0.1, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
 
         # Set parameters
         if 'params_scatter' in params_init_lower_ukr.keys():
@@ -215,6 +215,8 @@ class BaseGMMNetworkOwnOppPerformance():
                                                 ax_latent_space=ax_lower_ukr_latent_space,
                                                 ax_feature_bars=ax_lower_ukr_feature_bars,
                                                 **params_init_lower_ukr)
+        temp_dict = params_init_lower_ukr.copy()
+        temp_dict.update({'dict_marker_label': None})
         self.opp_lower_ukr._initialize_to_visualize(n_grid_points,
                                                 label_data=label_member,
                                                 label_feature=label_feature,
@@ -229,7 +231,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                                 fig_size=None,
                                                 ax_latent_space=ax_opp_member_latent_space,
                                                 ax_feature_bars=None,
-                                                **params_init_lower_ukr)
+                                                **temp_dict)
         params_init_upper_ukr['params_scatter_data_space'] = None
         self.own_ukr_kde._initialize_to_visualize(n_grid_points,
                                                   params_imshow_latent_space={'cmap': self.cmap_ccp,

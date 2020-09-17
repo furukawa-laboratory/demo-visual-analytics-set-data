@@ -190,7 +190,8 @@ class UnsupervisedKernelRegression(object):
         return F
 
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
-                  marker='.', is_show_all_label_data=False, is_middle_color_zero=False,
+                  marker='.', dict_marker_label=None,
+                  is_show_all_label_data=False, is_middle_color_zero=False,
                   is_show_ticks_latent_space=False,
                   params_imshow=None, params_scatter=None,
                   title_latent_space=None, title_feature_bars=None,
@@ -213,6 +214,8 @@ class UnsupervisedKernelRegression(object):
             The labels corresponds columns of the dataset X.
         marker: MarkerStyle or its sequence, optional, default = None
             The marker of scatter. It allows multiple markers.
+        dict_marker_label: dict, optional, default = None
+            The dictionary of label corresponding marker
         is_show_all_label_data: bool, optional, default = False
             When True the labels of the data is always shown.
             When False the label is only shown when the cursor overlaps the corresponding latent variable.
@@ -266,7 +269,8 @@ class UnsupervisedKernelRegression(object):
                                       fig_size=fig_size,
                                       ax_latent_space=ax_latent_space,
                                       ax_feature_bars=ax_feature_bars,
-                                      marker=marker)
+                                      marker=marker,
+                                      dict_marker_label=dict_marker_label)
 
         self._draw_latent_space()
         self._draw_feature_bars()
@@ -305,11 +309,12 @@ class UnsupervisedKernelRegression(object):
                 pass
 
     def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
-                                 marker, is_show_all_label_data, is_middle_color_zero,
+                                 is_show_all_label_data, is_middle_color_zero,
                                  is_show_ticks_latent_space,
                                  params_imshow, params_scatter,
                                  title_latent_space, title_feature_bars,
-                                 fig, fig_size, ax_latent_space, ax_feature_bars):
+                                 fig, fig_size, ax_latent_space, ax_feature_bars,
+                                 marker=None, dict_marker_label=None):
 
         # invalid check
         if self.n_components != 2:
@@ -413,6 +418,15 @@ class UnsupervisedKernelRegression(object):
         self.mask_latent_variables = np.full(self.n_samples, True, bool)
         self.cross_points = None
         self.comment_latent_space = None
+        if isinstance(dict_marker_label, dict):
+            if set(dict_marker_label.keys()) == set(np.unique(self.multiple_marker)):
+                self.dict_marker_label = dict_marker_label
+            else:
+                raise ValueError('invalid dict_marker_label={}'.format(dict_marker_label))
+        elif dict_marker_label is None:
+            self.dict_marker_label = dict_marker_label
+        else:
+            raise ValueError('invalid dict_marker_label={}'.format(dict_marker_label))
 
     def _set_grid(self, grid_points, n_grid_points):
         self.grid_points = grid_points
@@ -559,14 +573,21 @@ class UnsupervisedKernelRegression(object):
         else:
             unique_markers = np.unique(self.multiple_marker)
             for marker in unique_markers:
+                if isinstance(self.dict_marker_label, dict):
+                    label = self.dict_marker_label[marker]
+                else:
+                    label = None
                 mask = (self.multiple_marker == marker)
                 mask = self.mask_latent_variables & mask
                 self.ax_latent_space.scatter(
                     self.Z[mask, 0],
                     self.Z[mask, 1],
                     marker=marker,
+                    label=label,
                     **self.params_scatter
                 )
+        if self.dict_marker_label is not None:
+            self.ax_latent_space.legend(loc='lower right', bbox_to_anchor=(0.0, 0.0), fontsize=8)
         # Write label
         if self.label_data is None:
             pass
