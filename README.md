@@ -20,3 +20,6 @@ If you want to apply the model to the desired other dataset, code a script to le
 
 ## How to use?
 In preparation...
+
+## Contact us
+If you have any questions or requests, please give us an Issue!
