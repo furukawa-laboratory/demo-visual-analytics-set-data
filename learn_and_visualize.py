@@ -237,11 +237,19 @@ def _main():
         'PG': '^',
         'SF': '*'
     }
+    dict_marker_label = {
+        'o': 'Center',
+        ',': 'Power forward',
+        'p': 'Shooting guard',
+        '^': 'Power guard',
+        '*': 'Small forward'
+    }
     marker_position = []
     for lp in label_position:
         marker_position.append(dict_position_marker[lp])
     params_init_lower_ukr = {
         'marker': marker_position,
+        'dict_marker_label': dict_marker_label,
         'params_scatter': {'alpha': 0.7,
                            's': 17}
     }
