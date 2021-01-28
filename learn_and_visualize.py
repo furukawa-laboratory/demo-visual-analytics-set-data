@@ -41,18 +41,10 @@ df_member_info = dict_nba[target_seasons]["about_member"]["info"]
 label_position = df_member_info['Pos'].values
 ## Load dataset about teams
 ### training data
-win_team_bag_of_members_train = dict_nba[target_seasons]["about_game"]["feature"][
-    "train"
-]["win"].copy()
-lose_team_bag_of_members_train = dict_nba[target_seasons]["about_game"]["feature"][
-    "train"
-]["lose"].copy()
-win_team_performance_train = dict_nba[target_seasons]["about_game"]["target"][
-    "train"
-]["win"].copy()
-lose_team_performance_train = dict_nba[target_seasons]["about_game"]["target"][
-    "train"
-]["lose"].copy()
+win_team_bag_of_members_train = dict_nba[target_seasons]["about_game"]["feature"]["train"]["win"].copy()
+lose_team_bag_of_members_train = dict_nba[target_seasons]["about_game"]["feature"]["train"]["lose"].copy()
+win_team_performance_train = dict_nba[target_seasons]["about_game"]["target"]["train"]["win"].copy()
+lose_team_performance_train = dict_nba[target_seasons]["about_game"]["target"]["train"]["lose"].copy()
 n_team_train = (
         win_team_bag_of_members_train.shape[0] + lose_team_bag_of_members_train.shape[0]
 )
@@ -66,13 +58,13 @@ win_team_club_label_train = dict_nba[target_seasons]["about_game"]["label"]["tea
 lose_team_club_label_train = dict_nba[target_seasons]["about_game"]["label"]["team"]["train"]["lose"].copy()
 wl_team_club_label_train = np.concatenate([win_team_club_label_train, lose_team_club_label_train])
 import pandas as pd
+
 df_ranking = pd.read_csv('./datasets/nba/ranking.csv')
 df_team_train = pd.DataFrame(data=wl_team_club_label_train, columns=['Short name'])
 label_club_train_encoded = pd.merge(df_team_train,
                                     df_ranking,
                                     on='Short name',
                                     how='left')['W/L%'].values
-
 
 # Preprocess
 ## for member features
@@ -157,7 +149,7 @@ params_upper_ukr_kde["random_state"] = seed
 params_gplvm = {}
 length = calculate_bandwidth(n_data_in_one_sigma=3,
                              n_samples=n_team_train,
-                             n_components=params_upper_ukr_kde["n_embedding"]*2,
+                             n_components=params_upper_ukr_kde["n_embedding"] * 2,
                              width_latent_space=width_latent_space)
 params_gplvm["sqlength"] = length ** 2.0
 params_gplvm["beta_inv"] = 0.72
@@ -177,7 +169,6 @@ params_gpr["alpha"] = 0.0
 params_gpr["random_state"] = seed
 params_gpr["normalize_y"] = False
 params_gpr["optimizer"] = None  # Not optimize
-
 
 if not os.path.exists(path_joblib):
     os.mkdir(path_joblib)
@@ -220,7 +211,6 @@ else:
     f = open(path_whole_model_joblib, "wb")
     joblib.dump(gmm_net, f, compress=True)
     f.close()
-
 
 # visualize interactively
 resolution = 30
@@ -266,10 +256,7 @@ if os.path.exists(path_meshed):
     gmm_net.mesh_grid_mapping = npz_meshes['mapping']
     gmm_net.mesh_grid_precision = npz_meshes['precision']
 
-
-
 print("finish!")
-
 
 if __name__ == "__main__":
     gmm_net.visualize(
