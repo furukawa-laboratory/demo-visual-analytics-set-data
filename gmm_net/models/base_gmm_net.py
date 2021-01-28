@@ -144,6 +144,152 @@ class BaseGMMNetworkOwnOppPerformance():
                                                   opp_Zeta.reshape(-1, n_dim_latent_space)], axis=1),
                                 return_std=return_std, return_cov=return_cov)
 
+    def define_dash_app(self, n_grid_points=30, cmap_feature=None, cmap_density=None, cmap_ccp=None,
+                  label_member=None, label_feature=None, label_team=None, label_performance=None,
+                  fig_size=None, is_member_cp_middle_color_zero=False, is_ccp_middle_color_zero=False,
+                  params_init_lower_ukr=None, params_init_upper_ukr=None, is_available_simulation_mode=False,
+                  n_epoch_to_change_member=1500, learning_rate_to_change_member=0.001):
+
+        import dash
+        import dash_core_components as dcc
+        import dash_html_components as html
+        from dash.dependencies import Input, Output
+        # invalid check
+        if self.lower_ukr.n_components != 2 or self.upper_ukr_kde.n_embedding != 2:
+            raise ValueError('Now support only n_components = 2')
+
+        external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+        app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+        config = {'displayModeBar': False}
+        # Prepare variables to color
+        self.cmap_density = cmap_density
+        self.cmap_feature = cmap_feature
+        self.cmap_ccp = cmap_ccp
+        self.is_ccp_middle_color_zero = is_ccp_middle_color_zero
+        self.is_member_cp_middle_color_zero = is_member_cp_middle_color_zero
+
+        # Variables to simulate new member
+        self.n_epoch_to_change_member =n_epoch_to_change_member
+        self.learning_rate_to_change_member = learning_rate_to_change_member
+        self.is_simulate_changing_member = False
+        self.is_available_simulation_mode = is_available_simulation_mode
+        self.deleted_member_coordinates = None
+        self.grid_simulated_latent_variables = None
+
+        # Create instance of ukr for kde to put together variables and methods
+        self.own_ukr_kde = self.upper_ukr_kde
+        self.opp_ukr_kde = UKRKDE(**self.params_upper_ukr_kde)
+        self.opp_ukr_kde.Z = self.upper_ukr_kde.Z.copy()
+
+        # Create instance to draw opp member map
+        import copy
+        self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
+        self.own_lower_ukr = self.lower_ukr
+
+        self.own_lower_ukr.define_figs():
+
+
+        # 全体のレイアウト
+        app.layout = html.Div(children=[
+            # `dash_html_components`が提供するクラスは`childlen`属性を有している。
+            # `childlen`属性を慣例的に最初の属性にしている。
+            html.H1(children='Visualization iris dataset by UKR'),
+            # html.Div(children='by component plance of SOM.'),
+            # `dash_core_components`が`plotly`に従う機能を提供する。
+            # HTMLではSVG要素として表現される。
+            html.Div(
+                [
+                    dcc.Graph(
+                        id='left-graph',
+                        figure=self.own_lower_ukr.fig_ls,
+                        config=config
+                    ),
+                    html.P('Feature as contour'),
+                    dcc.Dropdown(
+                        id='feature_dropdown',
+                        options=[{"value": i, "label": x}
+                                 for i, x in enumerate(label_feature)],
+                        value=0
+                    )
+                ],
+                style={'display': 'inline-block', 'width': '49%'}
+            ),
+            html.Div(
+                [dcc.Graph(
+                    id='right-graph',
+                    figure=self.own_lower_ukr.fig_fb,
+                    config=config
+                )],
+                style={'display': 'inline-block', 'width': '49%'}
+            )
+        ])
+
+        # Define callback function when data is clicked
+        @app.callback(
+            Output(component_id='right-graph', component_property='figure'),
+            Input(component_id='left-graph', component_property='clickData')
+        )
+        def update_bar(clickData):
+            # print(clickData)
+            return self.own_lower_ukr.update_fb_from_ls(clickData)
+
+        # 後でどっかしらには追加するけどとりあえずコメントアウト
+        # @app.callback(
+        #     Output(component_id='left-graph', component_property='figure'),
+        #     [Input(component_id='feature_dropdown', component_property='value'),
+        #      Input(component_id='left-graph', component_property='clickData')]
+        # )
+        # def update_ls(index_selected_feature, clickData):
+        #     # print(clickData)
+        #     print(index_selected_feature, clickData)
+        #     ctx = dash.callback_context
+        #     if not ctx.triggered or ctx.triggered[0]['value'] is None:
+        #         return dash.no_update
+        #     else:
+        #         clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+        #         # print(clicked_id_text)
+        #         if clicked_id_text == 'feature_dropdown':
+        #             # print(index_selected_feature)
+        #             fig_ls.update_traces(z=som.Y[:, index_selected_feature],
+        #                                  selector=dict(type='contour', name='cp'))
+        #             return fig_ls
+        #         elif clicked_id_text == 'left-graph':
+        #             if clickData['points'][0]['curveNumber'] == index_grids:
+        #                 # if contour is clicked
+        #                 # print('clicked map')
+        #                 fig_ls.update_traces(
+        #                     x=np.array(clickData['points'][0]['x']),
+        #                     y=np.array(clickData['points'][0]['y']),
+        #                     visible=True,
+        #                     marker=dict(
+        #                         symbol='x'
+        #                     ),
+        #                     selector=dict(name='clicked_point', type='scatter')
+        #                 )
+        #             elif clickData['points'][0]['curveNumber'] == index_z:
+        #                 # print('clicked latent variable')
+        #                 fig_ls.update_traces(
+        #                     x=np.array(clickData['points'][0]['x']),
+        #                     y=np.array(clickData['points'][0]['y']),
+        #                     visible=True,
+        #                     marker=dict(
+        #                         symbol='circle'
+        #                     ),
+        #                     selector=dict(name='clicked_point', type='scatter')
+        #                 )
+        #                 # if latent variable is clicked
+        #                 # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
+        #
+        #             fig_ls.update_traces(z=som.Y[:, index_selected_feature],
+        #                                  selector=dict(type='contour', name='cp'))
+        #             return fig_ls
+        #         else:
+        #             return dash.no_update
+
+        return app
+
     def visualize(self, n_grid_points=30, cmap_feature=None, cmap_density=None, cmap_ccp=None,
                   label_member=None, label_feature=None, label_team=None, label_performance=None,
                   fig_size=None, is_member_cp_middle_color_zero=False, is_ccp_middle_color_zero=False,

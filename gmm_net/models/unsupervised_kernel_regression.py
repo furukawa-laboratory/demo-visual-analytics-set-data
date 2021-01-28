@@ -189,6 +189,118 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
+    def define_flags(self, n_grid_points, label_data, label_feature,
+                     is_show_all_label_data, is_middle_color_zero,
+                     is_show_ticks_latent_space,
+                     params_imshow, params_scatter,
+                     title_latent_space, title_feature_bars,
+                     fig, fig_size, ax_latent_space, ax_feature_bars,
+                     marker=None, dict_marker_label=None):
+        import plotly.graph_objects as go
+        self._initialize_to_visualize(n_grid_points=n_grid_points,
+                                      label_data=label_data,
+                                      label_feature=label_feature,
+                                      is_show_all_label_data=is_show_all_label_data,
+                                      is_middle_color_zero=is_middle_color_zero,
+                                      is_show_ticks_latent_space=is_show_ticks_latent_space,
+                                      params_imshow=params_imshow,
+                                      params_scatter=params_scatter,
+                                      title_latent_space=title_latent_space,
+                                      title_feature_bars=title_feature_bars,
+                                      fig=fig,
+                                      fig_size=fig_size,
+                                      ax_latent_space=ax_latent_space,
+                                      ax_feature_bars=ax_feature_bars,
+                                      marker=marker,
+                                      dict_marker_label=dict_marker_label
+                                      )
+        self.fig_ls = go.Figure(
+            layout=go.Layout(
+                title=go.layout.Title(text='Latent space'),
+                xaxis={'range': [self.Z[:, 0].min() - 0.05, self.Z[:, 0].max() + 0.05]
+                       },
+                yaxis={
+                    'range': [self.Z[:, 1].min() - 0.05, self.Z[:, 1].max() + 0.05],
+                    'scaleanchor': 'x',
+                    'scaleratio': 1.0
+                },
+                # width=width_fig,
+                # height=width_fig,
+                showlegend=False
+            )
+        )
+        # draw contour of mapping
+        self.fig_ls.add_trace(
+            go.Contour(x=self.grid_points[:, 0], y=self.grid_points[:, 1],
+                       z=self.grid_mapping[:, 0], colorscale='GnBu_r',
+                       line_smoothing=0.85,
+                       contours_coloring='heatmap', name='cp'
+                       )
+        )
+        # draw invisible grids to click
+        self.fig_ls.add_trace(
+            go.Scatter(x=self.grid_points[:, 0], y=self.grid_points[:, 1], mode='markers',
+                       visible=True,
+                       marker=dict(symbol='square', size=10, opacity=0.0, color='black'),
+                       name='latent space')
+        )
+        self.index_grids = 1
+
+        # draw latent variables
+        self.fig_ls.add_trace(
+            go.Scatter(
+                x=self.Z[:, 0], y=self.Z[:, 1],
+                mode='markers', name='latent variable',
+                text=label_data
+                marker=dict(
+                    size=10,
+                    # color=color_sequence[iris.target],
+                    line=dict(
+                        width=2,
+                        color="dimgrey"
+                    )
+                )
+            )
+        )
+
+
+        self.fig_fb = go.Figure(
+            layout=go.Layout(
+                title=go.layout.Title(text='Feature bars'),
+                yaxis={'range': [self.X.min(), self.X.max()]},
+                # width=width_fig,
+                # height=width_fig,
+                showlegend=False
+            )
+        )
+
+        self.fig_fb.add_trace(
+            go.Bar(x=label_feature, y=np.zeros(self.X.shape[1]))
+            # go.Bar(x=label_feature, y=np.zeros(self.X.shape[1]),
+            #        marker=dict(color=color_sequence[len(np.unique(iris.target))])
+            #        )
+        )
+
+    def update_fb_from_ls(self, clickData):
+        import dash
+        if clickData is not None:
+            index = clickData['points'][0]['pointIndex']
+            # print('index={}'.format(index))
+            if clickData['points'][0]['curveNumber'] == self.index_z:
+                # print('clicked latent variable')
+                # if latent variable is clicked
+                self.fig_fb.update_traces(y=self.X[index])
+                #fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
+            elif clickData['points'][0]['curveNumber'] == self.index_grids:
+                # print('clicked map')
+                # if contour is clicked
+                self.fig_fb.update_traces(y=self.grid_mapping[index])
+            # elif clickData['points'][0]['curveNumber'] == 0:
+            #     print('clicked heatmap')
+            return self.fig_fb
+        else:
+            return dash.no_update
+
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
                   marker='.', dict_marker_label=None,
                   is_show_all_label_data=False, is_middle_color_zero=False,
