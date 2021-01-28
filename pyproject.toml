@@ -14,6 +14,7 @@ joblib = "^0.16.0"
 scipy = "^1.5.2"
 pandas = "^1.1.2"
 dash = "^1.19.0"
+gunicorn = "^20.0.4"
 
 [tool.poetry.dev-dependencies]
 
