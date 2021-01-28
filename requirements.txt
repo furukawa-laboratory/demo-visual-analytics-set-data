@@ -1,6 +1,5 @@
 certifi==2020.6.20
 cycler==0.10.0
--e git+git@github.com:furukawa-laboratory/GenerativeManifoldModelingNetwork.git@18abb72d6d726b8e501a7b026e7196d4370b4fb1#egg=gmm_net
 joblib==0.16.0
 kiwisolver==1.2.0
 matplotlib==3.3.1
