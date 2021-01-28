@@ -212,7 +212,7 @@ else:
     joblib.dump(gmm_net, f, compress=True)
     f.close()
 
-# visualize interactively
+# set parameters to visualize
 resolution = 30
 cmap_density = "binary"
 cmap_feature = "bwr"
@@ -257,6 +257,24 @@ if os.path.exists(path_meshed):
     gmm_net.mesh_grid_precision = npz_meshes['precision']
 
 print("finish!")
+
+app = gmm_net.define_dash_app(
+    n_grid_points=resolution,
+    cmap_density=cmap_density,
+    cmap_feature=cmap_feature,
+    cmap_ccp=cmap_ccp,
+    label_member=label_member,
+    label_feature=label_feature,
+    label_team=wl_team_club_label_train,
+    label_performance=dict_nba[target_seasons]["about_game"]["label"]["target"],
+    is_member_cp_middle_color_zero=is_member_cp_middle_color_zero,
+    is_ccp_middle_color_zero=is_ccp_middle_color_zero,
+    params_init_lower_ukr=params_init_lower_ukr,
+    params_init_upper_ukr=params_init_upper_ukr,
+    n_epoch_to_change_member=n_epoch_to_change_member,
+    learning_rate_to_change_member=learning_rate_to_change_member
+)
+server = app.server
 
 if __name__ == "__main__":
     gmm_net.visualize(
