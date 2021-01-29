@@ -230,11 +230,16 @@ class UnsupervisedKernelRegression(object):
             )
         )
         # draw contour of mapping
+        if self.is_middle_color_zero:
+            zmid = 0.0
+        else:
+            zmid = None
         self.fig_ls.add_trace(
             go.Contour(x=self.grid_points[:, 0], y=self.grid_points[:, 1],
                        z=self.grid_mapping[:, 0], colorscale='GnBu_r',
                        line_smoothing=0.85,
-                       contours_coloring='heatmap', name='cp'
+                       contours_coloring='heatmap', name='cp',
+                       zmid=zmid
                        )
         )
         # draw invisible grids to click
@@ -331,6 +336,15 @@ class UnsupervisedKernelRegression(object):
             # print(clicked_id_text)
             if clicked_id_text == 'feature_dropdown':
                 # print(index_selected_feature)
+                if self.is_middle_color_zero:
+                    # max_grid_value = self.grid_mapping[:, index_selected_feature].max()
+                    # min_grid_value = self.grid_mapping[:, index_selected_feature].min()
+                    # min_grid_value = self.grid_values_to_draw.min()
+                    # vmin = -max(abs(max_grid_value), abs(min_grid_value))
+                    # vmax = max(abs(max_grid_value), abs(min_grid_value))
+                    zmid = 0.0
+                else:
+                    zmid = None
                 self.fig_ls.update_traces(z=self.grid_mapping[:, index_selected_feature],
                                           selector=dict(type='contour', name='cp'))
                 return self.fig_ls
