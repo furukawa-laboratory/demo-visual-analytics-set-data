@@ -213,7 +213,7 @@ class BaseGMMNetworkOwnOppPerformance():
             html.Div(
                 [
                     dcc.Graph(
-                        id='left-graph',
+                        id='member-map',
                         figure=self.own_lower_ukr.fig_ls,
                         config=config
                     ),
@@ -223,24 +223,25 @@ class BaseGMMNetworkOwnOppPerformance():
                         options=[{"value": i, "label": x}
                                  for i, x in enumerate(label_feature)],
                         value=0
+                    ),
+                    dcc.Graph(
+                        id='feature_bars',
+                        figure=self.own_lower_ukr.fig_fb,
+                        config=config
                     )
                 ],
                 style={'display': 'inline-block', 'width': '49%'}
             ),
             html.Div(
-                [dcc.Graph(
-                    id='right-graph',
-                    figure=self.own_lower_ukr.fig_fb,
-                    config=config
-                )],
+                [],
                 style={'display': 'inline-block', 'width': '49%'}
             )
         ])
 
         # Define callback function when data is clicked
         @app.callback(
-            Output(component_id='right-graph', component_property='figure'),
-            Input(component_id='left-graph', component_property='clickData')
+            Output(component_id='feature_bars', component_property='figure'),
+            Input(component_id='member-map', component_property='clickData')
         )
         def update_bar(clickData):
             # print(clickData)
@@ -248,9 +249,9 @@ class BaseGMMNetworkOwnOppPerformance():
 
         # 後でどっかしらには追加するけどとりあえずコメントアウト
         @app.callback(
-            Output(component_id='left-graph', component_property='figure'),
+            Output(component_id='member-map', component_property='figure'),
             [Input(component_id='feature_dropdown', component_property='value'),
-             Input(component_id='left-graph', component_property='clickData')]
+             Input(component_id='member-map', component_property='clickData')]
         )
         def update_ls(index_selected_feature, clickData):
             return self.own_lower_ukr.update_ls(index_selected_feature=index_selected_feature,
@@ -268,7 +269,7 @@ class BaseGMMNetworkOwnOppPerformance():
         #             fig_ls.update_traces(z=som.Y[:, index_selected_feature],
         #                                  selector=dict(type='contour', name='cp'))
         #             return fig_ls
-        #         elif clicked_id_text == 'left-graph':
+        #         elif clicked_id_text == 'member-map':
         #             if clickData['points'][0]['curveNumber'] == index_grids:
         #                 # if contour is clicked
         #                 # print('clicked map')
