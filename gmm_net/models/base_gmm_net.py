@@ -209,7 +209,7 @@ class BaseGMMNetworkOwnOppPerformance():
         app.layout = html.Div(children=[
             # `dash_html_components`が提供するクラスは`childlen`属性を有している。
             # `childlen`属性を慣例的に最初の属性にしている。
-            html.H1(children='Visualization iris dataset by UKR'),
+            html.H1(children='Visual Analyticis of NBA dataset'),
             # html.Div(children='by component plance of SOM.'),
             # `dash_core_components`が`plotly`に従う機能を提供する。
             # HTMLではSVG要素として表現される。
@@ -250,12 +250,14 @@ class BaseGMMNetworkOwnOppPerformance():
             return self.own_lower_ukr.update_fb_from_ls(clickData)
 
         # 後でどっかしらには追加するけどとりあえずコメントアウト
-        # @app.callback(
-        #     Output(component_id='left-graph', component_property='figure'),
-        #     [Input(component_id='feature_dropdown', component_property='value'),
-        #      Input(component_id='left-graph', component_property='clickData')]
-        # )
-        # def update_ls(index_selected_feature, clickData):
+        @app.callback(
+            Output(component_id='left-graph', component_property='figure'),
+            [Input(component_id='feature_dropdown', component_property='value'),
+             Input(component_id='left-graph', component_property='clickData')]
+        )
+        def update_ls(index_selected_feature, clickData):
+            return self.own_lower_ukr.update_ls(index_selected_feature=index_selected_feature,
+                                                clickData=clickData)
         #     # print(clickData)
         #     print(index_selected_feature, clickData)
         #     ctx = dash.callback_context
