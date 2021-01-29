@@ -189,7 +189,7 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def define_flags(self, n_grid_points, label_data, label_feature,
+    def define_figs(self, n_grid_points, label_data, label_feature,
                      is_show_all_label_data, is_middle_color_zero,
                      is_show_ticks_latent_space,
                      params_imshow, params_scatter,
@@ -251,7 +251,7 @@ class UnsupervisedKernelRegression(object):
             go.Scatter(
                 x=self.Z[:, 0], y=self.Z[:, 1],
                 mode='markers', name='latent variable',
-                text=label_data
+                text=label_data,
                 marker=dict(
                     size=10,
                     # color=color_sequence[iris.target],
@@ -262,6 +262,7 @@ class UnsupervisedKernelRegression(object):
                 )
             )
         )
+        self.index_z = 2
 
 
         self.fig_fb = go.Figure(

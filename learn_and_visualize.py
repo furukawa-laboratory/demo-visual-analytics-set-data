@@ -256,7 +256,6 @@ if os.path.exists(path_meshed):
     gmm_net.mesh_grid_mapping = npz_meshes['mapping']
     gmm_net.mesh_grid_precision = npz_meshes['precision']
 
-print("finish!")
 
 app = gmm_net.define_dash_app(
     n_grid_points=resolution,

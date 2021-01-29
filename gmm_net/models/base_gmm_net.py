@@ -188,7 +188,21 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
         self.own_lower_ukr = self.lower_ukr
 
-        self.own_lower_ukr.define_figs():
+        self.own_lower_ukr.define_figs(n_grid_points=n_grid_points,
+                                       label_data = label_member,
+                                       label_feature = label_feature,
+                                       title_latent_space = 'Own member map',
+                                       title_feature_bars = 'Member feature',
+                                       is_show_all_label_data = False,
+                                       params_imshow = {'cmap': cmap_feature,
+                                                        'interpolation': 'spline16'},
+                                       is_middle_color_zero = is_member_cp_middle_color_zero,
+                                       is_show_ticks_latent_space = False,
+                                       fig = None,
+                                       fig_size = None,
+                                       ax_latent_space = None,
+                                       ax_feature_bars = None,
+                                       **params_init_lower_ukr)
 
 
         # 全体のレイアウト
