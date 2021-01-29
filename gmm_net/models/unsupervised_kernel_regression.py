@@ -190,30 +190,20 @@ class UnsupervisedKernelRegression(object):
         return F
 
     def define_figs(self, n_grid_points, label_data, label_feature,
-                     is_show_all_label_data, is_middle_color_zero,
-                     is_show_ticks_latent_space,
-                     params_imshow, params_scatter,
-                     title_latent_space, title_feature_bars,
-                     fig, fig_size, ax_latent_space, ax_feature_bars,
-                     marker=None, dict_marker_label=None):
+                    is_show_all_label_data, is_middle_color_zero,
+                    is_show_ticks_latent_space,
+                    params_contour, params_scat_z,params_fig_ls):
         import plotly.graph_objects as go
-        self._initialize_to_visualize(n_grid_points=n_grid_points,
+        self._initialize_to_vis_least(n_grid_points=n_grid_points,
                                       label_data=label_data,
                                       label_feature=label_feature,
                                       is_show_all_label_data=is_show_all_label_data,
                                       is_middle_color_zero=is_middle_color_zero,
-                                      is_show_ticks_latent_space=is_show_ticks_latent_space,
-                                      params_imshow=params_imshow,
-                                      params_scatter=params_scatter,
-                                      title_latent_space=title_latent_space,
-                                      title_feature_bars=title_feature_bars,
-                                      fig=fig,
-                                      fig_size=fig_size,
-                                      ax_latent_space=ax_latent_space,
-                                      ax_feature_bars=ax_feature_bars,
-                                      marker=marker,
-                                      dict_marker_label=dict_marker_label
-                                      )
+                                      is_show_ticks_latent_space=is_show_ticks_latent_space)
+        self._initialize_to_vis_dash(params_contour=params_contour,
+                                     params_scat_z=params_scat_z,
+                                     params_fig_ls=params_fig_ls
+                                     )
         self.fig_ls = go.Figure(
             layout=go.Layout(
                 title=go.layout.Title(text='Latent space'),
@@ -235,11 +225,12 @@ class UnsupervisedKernelRegression(object):
         else:
             zmid = None
         self.fig_ls.add_trace(
-            go.Contour(x=self.grid_points[:, 0], y=self.grid_points[:, 1],
-                       z=self.grid_mapping[:, 0], colorscale='GnBu_r',
-                       line_smoothing=0.85,
-                       contours_coloring='heatmap', name='cp',
-                       zmid=zmid
+            go.Contour(x=self.grid_points[:, 0],
+                       y=self.grid_points[:, 1],
+                       z=self.grid_mapping[:, 0],
+                       name='cp',
+                       zmid=zmid,
+                       **params_contour
                        )
         )
         # draw invisible grids to click
@@ -255,16 +246,9 @@ class UnsupervisedKernelRegression(object):
         self.fig_ls.add_trace(
             go.Scatter(
                 x=self.Z[:, 0], y=self.Z[:, 1],
-                mode='markers', name='latent variable',
+                mode='markers',
                 text=label_data,
-                marker=dict(
-                    size=10,
-                    # color=color_sequence[iris.target],
-                    line=dict(
-                        width=2,
-                        color="dimgrey"
-                    )
-                )
+                **params_scat_z
             )
         )
         self.index_z = 2
@@ -381,6 +365,80 @@ class UnsupervisedKernelRegression(object):
             else:
                 return dash.no_update
 
+    def _initialize_to_vis_least(self, n_grid_points, label_data, label_feature,
+                                 is_show_all_label_data, is_middle_color_zero,
+                                 is_show_ticks_latent_space):
+
+        # invalid check
+        if self.n_components != 2:
+            raise ValueError('Now support only n_components = 2')
+
+        if isinstance(n_grid_points, int):
+            # Store number of grid points for each dimension
+            self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
+            if self.is_compact:
+                self._set_grid(create_zeta(-1.0, 1.0, self.n_components, n_grid_points), self.n_grid_points)
+            else:
+                raise ValueError('Not support is_compact=False')
+        else:
+            raise ValueError('Only support n_grid_points is int')
+
+        if label_data is None:
+            self.label_data = label_data
+        elif isinstance(label_data, list):
+            self.label_data = label_data
+        elif isinstance(label_data, np.ndarray):
+            if np.squeeze(label_data).ndim == 1:
+                self.label_data = np.squeeze(label_data)
+            else:
+                raise ValueError('label_data must be 1d array')
+        else:
+            raise ValueError('label_data must be 1d array or list')
+
+        if label_feature is None:
+            self.label_feature = np.arange(self.n_dimensions)
+        elif isinstance(label_feature, list):
+            self.label_feature = label_feature
+        elif isinstance(label_feature, np.ndarray):
+            if np.squeeze(label_feature).ndim == 1:
+                self.label_feature = np.squeeze(label_feature)
+            else:
+                raise ValueError('label_feature must be 1d array')
+        else:
+            raise ValueError('label_feature must be 1d array or list')
+
+        self.is_middle_color_zero = is_middle_color_zero
+        self.is_show_ticks_latent_space = is_show_ticks_latent_space
+        self.is_show_all_label_data = is_show_all_label_data
+
+    def _initialize_to_vis_dash(self,
+                                params_contour: dict,
+                                params_scat_z: dict,
+                                params_fig_ls: dict
+                                ):
+
+        if params_contour is None:
+            self.params_contour = {}
+        elif isinstance(params_contour, dict):
+            self.params_contour = params_contour
+        else:
+            raise ValueError('invalid params_contour={}'.format(params_contour))
+
+        if params_scat_z is None:
+            self.params_scat_z = {}
+        elif isinstance(params_scat_z, dict):
+            self.params_scat_z = params_scat_z
+        else:
+            raise ValueError('invalid params_scat_z={}'.format(params_scat_z))
+
+        if params_fig_ls is None:
+            self.params_fig_ls = {}
+        elif isinstance(params_fig_ls, dict):
+            self.params_fig_ls = params_fig_ls
+        else:
+            raise ValueError('invalid params_fig_ls={}'.format(params_fig_ls))
+
+
 
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
                   marker='.', dict_marker_label=None,
@@ -448,22 +506,22 @@ class UnsupervisedKernelRegression(object):
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
-        self._initialize_to_visualize(n_grid_points=n_grid_points,
-                                      params_imshow=params_imshow,
-                                      params_scatter=params_scatter,
-                                      label_data=label_data,
-                                      label_feature=label_feature,
-                                      title_latent_space=title_latent_space,
-                                      title_feature_bars=title_feature_bars,
-                                      is_show_all_label_data=is_show_all_label_data,
-                                      is_middle_color_zero=is_middle_color_zero,
-                                      is_show_ticks_latent_space=is_show_ticks_latent_space,
-                                      fig=fig,
-                                      fig_size=fig_size,
-                                      ax_latent_space=ax_latent_space,
-                                      ax_feature_bars=ax_feature_bars,
-                                      marker=marker,
-                                      dict_marker_label=dict_marker_label)
+        self._initialize_to_vis_mpl(n_grid_points=n_grid_points,
+                                    params_imshow=params_imshow,
+                                    params_scatter=params_scatter,
+                                    label_data=label_data,
+                                    label_feature=label_feature,
+                                    title_latent_space=title_latent_space,
+                                    title_feature_bars=title_feature_bars,
+                                    is_show_all_label_data=is_show_all_label_data,
+                                    is_middle_color_zero=is_middle_color_zero,
+                                    is_show_ticks_latent_space=is_show_ticks_latent_space,
+                                    fig=fig,
+                                    fig_size=fig_size,
+                                    ax_latent_space=ax_latent_space,
+                                    ax_feature_bars=ax_feature_bars,
+                                    marker=marker,
+                                    dict_marker_label=dict_marker_label)
 
         self._draw_latent_space()
         self._draw_feature_bars()
@@ -501,52 +559,21 @@ class UnsupervisedKernelRegression(object):
             elif event.inaxes == self.ax_feature_bars:
                 pass
 
-    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
-                                 is_show_all_label_data, is_middle_color_zero,
-                                 is_show_ticks_latent_space,
-                                 params_imshow, params_scatter,
-                                 title_latent_space, title_feature_bars,
-                                 fig, fig_size, ax_latent_space, ax_feature_bars,
-                                 marker=None, dict_marker_label=None):
 
-        # invalid check
-        if self.n_components != 2:
-            raise ValueError('Now support only n_components = 2')
+    def _initialize_to_vis_mpl(self, n_grid_points, label_data, label_feature,
+                               is_show_all_label_data, is_middle_color_zero,
+                               is_show_ticks_latent_space,
+                               params_imshow, params_scatter,
+                               title_latent_space, title_feature_bars,
+                               fig, fig_size, ax_latent_space, ax_feature_bars,
+                               marker=None, dict_marker_label=None):
 
-        if isinstance(n_grid_points, int):
-            # Store number of grid points for each dimension
-            self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
-            if self.is_compact:
-                self._set_grid(create_zeta(-1.0, 1.0, self.n_components, n_grid_points), self.n_grid_points)
-            else:
-                raise ValueError('Not support is_compact=False')
-        else:
-            raise ValueError('Only support n_grid_points is int')
-
-        if label_data is None:
-            self.label_data = label_data
-        elif isinstance(label_data, list):
-            self.label_data = label_data
-        elif isinstance(label_data, np.ndarray):
-            if np.squeeze(label_data).ndim == 1:
-                self.label_data = np.squeeze(label_data)
-            else:
-                raise ValueError('label_data must be 1d array')
-        else:
-            raise ValueError('label_data must be 1d array or list')
-
-        if label_feature is None:
-            self.label_feature = np.arange(self.n_dimensions)
-        elif isinstance(label_feature, list):
-            self.label_feature = label_feature
-        elif isinstance(label_feature, np.ndarray):
-            if np.squeeze(label_feature).ndim == 1:
-                self.label_feature = np.squeeze(label_feature)
-            else:
-                raise ValueError('label_feature must be 1d array')
-        else:
-            raise ValueError('label_feature must be 1d array or list')
-
+        self._initialize_to_vis_least(n_grid_points=n_grid_points,
+                                      label_data=label_data,
+                                      label_feature=label_feature,
+                                      is_show_all_label_data=is_show_all_label_data,
+                                      is_middle_color_zero=is_middle_color_zero,
+                                      is_show_ticks_latent_space=is_show_ticks_latent_space)
 
         if params_imshow is None:
             self.params_imshow = {}
@@ -581,7 +608,6 @@ class UnsupervisedKernelRegression(object):
         else:
             self.title_feature_bars = title_feature_bars
 
-        self.is_show_all_label_data = is_show_all_label_data
 
         # set variables
         if fig is None:
@@ -600,8 +626,6 @@ class UnsupervisedKernelRegression(object):
             self.ax_latent_space = ax_latent_space
             self.ax_feature_bars = ax_feature_bars
 
-        self.is_middle_color_zero = is_middle_color_zero
-        self.is_show_ticks_latent_space = is_show_ticks_latent_space
         self.click_point_latent_space = None  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True

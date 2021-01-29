@@ -215,36 +215,68 @@ else:
 # set parameters to visualize
 resolution = 30
 cmap_density = "binary"
-cmap_feature = "bwr"
+cmap_feature = "RdBu_r"
 cmap_ccp = "bwr"
 is_member_cp_middle_color_zero = True
 is_ccp_middle_color_zero = True
 dict_position_marker = {
-    'C': 'o',
-    'PF': ',',
-    'SG': 'p',
-    'PG': '^',
-    'SF': '*'
+    'C': 'circle',
+    'PF': 'square',
+    'SG': 'pentagon',
+    'PG': 'triangle-up',
+    'SF': 'star'
 }
-dict_marker_label = {
-    'o': 'Center',
-    ',': 'Power forward',
-    'p': 'Shooting guard',
-    '^': 'Power guard',
-    '*': 'Small forward'
+import matplotlib.pyplot as plt
+import matplotlib
+cmap_member_scat = plt.get_cmap('tab10')
+dict_position_color = {
+    'C': cmap_member_scat(0),
+    'PF': cmap_member_scat(4),
+    'SG': cmap_member_scat(3),
+    'PG': cmap_member_scat(2),
+    'SF': cmap_member_scat(1)
 }
-marker_position = []
+for key in dict_position_color.keys():
+    dict_position_color[key] = matplotlib.colors.to_hex(dict_position_color[key])
+
+dict_position_correct_name = {
+    'C': 'Center',
+    'PF': 'Power forward',
+    'SG': 'Shooting guard',
+    'PG': 'Point guard',
+    'SF': 'Small forward'
+}
+position_symbol = []
+position_color = []
 for lp in label_position:
-    marker_position.append(dict_position_marker[lp])
-params_init_lower_ukr = {
-    'marker': marker_position,
-    'dict_marker_label': dict_marker_label,
-    'params_scatter': {'alpha': 0.7,
-                       's': 17}
-}
+    position_symbol.append(dict_position_marker[lp])
+    position_color.append(dict_position_color[lp])
+
+# position_symbol = np.array(position_symbol)
+# position_color = np.array(position_color)
+# params_init_lower_ukr = {
+#     'marker': marker_position,
+#     'dict_marker_label': dict_marker_label,
+#     'params_scatter': {'alpha': 0.7,
+#                        's': 17}
+# }
+params_init_lower_ukr=dict(
+    params_scat_z=dict(
+        name='member',
+        marker=dict(
+            size=8,
+            color=position_color,
+            line=dict(
+                width=1,
+                color="white"
+            ),
+            symbol=position_symbol
+        )
+    )
+)
 params_init_upper_ukr = {
-    'params_scatter_latent_space': {'c': label_club_train_encoded,
-                                    'cmap': 'rainbow_r',
+'params_scatter_latent_space': {'c': label_club_train_encoded,
+                                'cmap': 'rainbow_r',
                                     's': 5,
                                     'alpha': 0.5}
 }
@@ -276,22 +308,23 @@ app = gmm_net.define_dash_app(
 server = app.server
 
 if __name__ == "__main__":
-    gmm_net.visualize(
-        n_grid_points=resolution,
-        cmap_density=cmap_density,
-        cmap_feature=cmap_feature,
-        cmap_ccp=cmap_ccp,
-        label_member=label_member,
-        label_feature=label_feature,
-        label_team=wl_team_club_label_train,
-        label_performance=dict_nba[target_seasons]["about_game"]["label"]["target"],
-        is_member_cp_middle_color_zero=is_member_cp_middle_color_zero,
-        is_ccp_middle_color_zero=is_ccp_middle_color_zero,
-        params_init_lower_ukr=params_init_lower_ukr,
-        params_init_upper_ukr=params_init_upper_ukr,
-        n_epoch_to_change_member=n_epoch_to_change_member,
-        learning_rate_to_change_member=learning_rate_to_change_member
-    )
+    app.run_server()
+    # gmm_net.visualize(
+    #     n_grid_points=resolution,
+    #     cmap_density=cmap_density,
+    #     cmap_feature=cmap_feature,
+    #     cmap_ccp=cmap_ccp,
+    #     label_member=label_member,
+    #     label_feature=label_feature,
+    #     label_team=wl_team_club_label_train,
+    #     label_performance=dict_nba[target_seasons]["about_game"]["label"]["target"],
+    #     is_member_cp_middle_color_zero=is_member_cp_middle_color_zero,
+    #     is_ccp_middle_color_zero=is_ccp_middle_color_zero,
+    #     params_init_lower_ukr=params_init_lower_ukr,
+    #     params_init_upper_ukr=params_init_upper_ukr,
+    #     n_epoch_to_change_member=n_epoch_to_change_member,
+    #     learning_rate_to_change_member=learning_rate_to_change_member
+    # )
 
     if not os.path.exists(path_meshed):
         np.savez_compressed(path_meshed,

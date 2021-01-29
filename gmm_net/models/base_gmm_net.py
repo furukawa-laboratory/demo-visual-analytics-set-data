@@ -191,18 +191,15 @@ class BaseGMMNetworkOwnOppPerformance():
         self.own_lower_ukr.define_figs(n_grid_points=n_grid_points,
                                        label_data = label_member,
                                        label_feature = label_feature,
-                                       title_latent_space = 'Own member map',
-                                       title_feature_bars = 'Member feature',
                                        is_show_all_label_data = False,
-                                       params_imshow = {'cmap': cmap_feature,
-                                                        'interpolation': 'spline16'},
-                                       is_middle_color_zero = is_member_cp_middle_color_zero,
-                                       is_show_ticks_latent_space = False,
-                                       fig = None,
-                                       fig_size = None,
-                                       ax_latent_space = None,
-                                       ax_feature_bars = None,
-                                       **params_init_lower_ukr)
+                                       params_contour={'colorscale': cmap_feature,
+                                                       'contours_coloring': 'heatmap',
+                                                       'line_smoothing': 0.85},
+                                       params_scat_z=params_init_lower_ukr['params_scat_z'],
+                                       params_fig_ls=None,
+                                       is_middle_color_zero=is_member_cp_middle_color_zero,
+                                       is_show_ticks_latent_space=False
+                                       )
 
 
         # 全体のレイアウト
@@ -362,38 +359,38 @@ class BaseGMMNetworkOwnOppPerformance():
             pass
         else:
             params_init_lower_ukr['params_scatter'] = None
-        self.lower_ukr._initialize_to_visualize(n_grid_points,
-                                                label_data=label_member,
-                                                label_feature=label_feature,
-                                                title_latent_space='Own member map',
-                                                title_feature_bars='Member feature',
-                                                is_show_all_label_data=False,
-                                                params_imshow={'cmap': cmap_feature,
+        self.lower_ukr._initialize_to_vis_mpl(n_grid_points,
+                                              label_data=label_member,
+                                              label_feature=label_feature,
+                                              title_latent_space='Own member map',
+                                              title_feature_bars='Member feature',
+                                              is_show_all_label_data=False,
+                                              params_imshow={'cmap': cmap_feature,
                                                                'interpolation': 'spline16'},
-                                                is_middle_color_zero=is_member_cp_middle_color_zero,
-                                                is_show_ticks_latent_space=False,
-                                                fig=self.fig,
-                                                fig_size=None,
-                                                ax_latent_space=ax_lower_ukr_latent_space,
-                                                ax_feature_bars=ax_lower_ukr_feature_bars,
-                                                **params_init_lower_ukr)
+                                              is_middle_color_zero=is_member_cp_middle_color_zero,
+                                              is_show_ticks_latent_space=False,
+                                              fig=self.fig,
+                                              fig_size=None,
+                                              ax_latent_space=ax_lower_ukr_latent_space,
+                                              ax_feature_bars=ax_lower_ukr_feature_bars,
+                                              **params_init_lower_ukr)
         temp_dict = params_init_lower_ukr.copy()
         temp_dict.update({'dict_marker_label': None})
-        self.opp_lower_ukr._initialize_to_visualize(n_grid_points,
-                                                label_data=label_member,
-                                                label_feature=label_feature,
-                                                title_latent_space='Opposing member map',
-                                                title_feature_bars='Member feature',
-                                                is_show_all_label_data=False,
-                                                is_show_ticks_latent_space=False,
-                                                params_imshow={'cmap': cmap_feature,
+        self.opp_lower_ukr._initialize_to_vis_mpl(n_grid_points,
+                                                  label_data=label_member,
+                                                  label_feature=label_feature,
+                                                  title_latent_space='Opposing member map',
+                                                  title_feature_bars='Member feature',
+                                                  is_show_all_label_data=False,
+                                                  is_show_ticks_latent_space=False,
+                                                  params_imshow={'cmap': cmap_feature,
                                                                'interpolation': 'spline16'},
-                                                is_middle_color_zero=is_member_cp_middle_color_zero,
-                                                fig=self.fig,
-                                                fig_size=None,
-                                                ax_latent_space=ax_opp_member_latent_space,
-                                                ax_feature_bars=None,
-                                                **temp_dict)
+                                                  is_middle_color_zero=is_member_cp_middle_color_zero,
+                                                  fig=self.fig,
+                                                  fig_size=None,
+                                                  ax_latent_space=ax_opp_member_latent_space,
+                                                  ax_feature_bars=None,
+                                                  **temp_dict)
         params_init_upper_ukr['params_scatter_data_space'] = None
         self.own_ukr_kde._initialize_to_visualize(n_grid_points,
                                                   params_imshow_latent_space={'cmap': self.cmap_ccp,
