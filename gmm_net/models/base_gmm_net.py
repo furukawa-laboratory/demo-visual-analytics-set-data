@@ -189,7 +189,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.own_lower_ukr = self.lower_ukr
 
         self.own_lower_ukr.define_figs(n_grid_points=n_grid_points,
-                                       label_data = label_member,
+                                       label_data=label_member,
                                        label_feature = label_feature,
                                        is_show_all_label_data = False,
                                        params_contour={'colorscale': cmap_feature,

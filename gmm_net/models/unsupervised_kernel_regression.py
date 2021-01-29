@@ -259,11 +259,11 @@ class UnsupervisedKernelRegression(object):
                 x=np.array(0.0), y=np.array(0.0),
                 visible=False,
                 marker=dict(
-                    size=10,
+                    size=12,
                     symbol='x',
-                    #color=color_sequence[len(np.unique(iris.target))],
+                    color='#e377c2',
                     line=dict(
-                        width=1,
+                        width=1.5,
                         color="white"
                     )
                 ),
@@ -282,10 +282,8 @@ class UnsupervisedKernelRegression(object):
         )
 
         self.fig_fb.add_trace(
-            go.Bar(x=label_feature, y=np.zeros(self.X.shape[1]))
-            # go.Bar(x=label_feature, y=np.zeros(self.X.shape[1]),
-            #        marker=dict(color=color_sequence[len(np.unique(iris.target))])
-            #        )
+            go.Bar(x=label_feature, y=np.zeros(self.X.shape[1]),
+                   marker=dict(color='#e377c2'))
         )
 
     def update_fb_from_ls(self, clickData):
@@ -352,7 +350,7 @@ class UnsupervisedKernelRegression(object):
                         y=np.array(clickData['points'][0]['y']),
                         visible=True,
                         marker=dict(
-                            symbol='circle'
+                            symbol='circle-x'
                         ),
                         selector=dict(name='clicked_point', type='scatter')
                     )
