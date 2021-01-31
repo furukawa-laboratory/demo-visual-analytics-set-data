@@ -196,32 +196,30 @@ class BaseGMMNetworkOwnOppPerformance():
         #     )
         # )
 
-        # for lower_ukr in [self.own_lower_ukr, self.opp_lower_ukr]:
-        self.own_lower_ukr.define_graphs(n_grid_points=n_grid_points,
-                                         label_data=label_member,
-                                         label_feature=label_feature,
-                                         is_show_all_label_data = False,
-                                         params_contour={'colorscale': cmap_feature,
-                                                       'contours_coloring': 'heatmap',
-                                                       'line_smoothing': 0.85},
-                                         params_scat_z=params_init_lower_ukr['params_scat_z'],
-                                         params_fig_ls=None,
-                                         is_middle_color_zero=is_member_cp_middle_color_zero,
-                                         is_show_ticks_latent_space=False,
-                                         id_ls='own_member_map',
-                                         id_dropdown='own_cp_db',
-                                         id_fb='own_fb'
-                                         )
+        for lower_ukr in [self.own_lower_ukr, self.opp_lower_ukr]:
+            lower_ukr.define_graphs(
+                n_grid_points=n_grid_points,
+                label_data=label_member,
+                label_feature=label_feature,
+                is_show_all_label_data = False,
+                params_contour={'colorscale': cmap_feature,
+                                'contours_coloring': 'heatmap',
+                                'line_smoothing': 0.85},
+                params_scat_z=params_init_lower_ukr['params_scat_z'],
+                params_fig_ls=None,
+                is_middle_color_zero=is_member_cp_middle_color_zero,
+                is_show_ticks_latent_space=False,
+                id_ls='member_map',
+                id_dropdown='cp_db',
+                id_fb='fb'
+            )
 
 
-        # 全体のレイアウト
+        # Define whole layout
         app.layout = html.Div(children=[
             # `dash_html_components`が提供するクラスは`childlen`属性を有している。
             # `childlen`属性を慣例的に最初の属性にしている。
             html.H1(children='Visual Analyticis of NBA dataset'),
-            # html.Div(children='by component plance of SOM.'),
-            # `dash_core_components`が`plotly`に従う機能を提供する。
-            # HTMLではSVG要素として表現される。
             html.Div(
                 [
                     self.own_lower_ukr.graph_ls,
