@@ -188,18 +188,30 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
         self.own_lower_ukr = self.lower_ukr
 
-        self.own_lower_ukr.define_figs(n_grid_points=n_grid_points,
-                                       label_data=label_member,
-                                       label_feature=label_feature,
-                                       is_show_all_label_data = False,
-                                       params_contour={'colorscale': cmap_feature,
+        # dic_id = dict(
+        #     own_lower_ukr=dict(
+        #         ls='own_member_map',
+        #         dropdown='own_feature_db',
+        #
+        #     )
+        # )
+
+        # for lower_ukr in [self.own_lower_ukr, self.opp_lower_ukr]:
+        self.own_lower_ukr.define_graphs(n_grid_points=n_grid_points,
+                                         label_data=label_member,
+                                         label_feature=label_feature,
+                                         is_show_all_label_data = False,
+                                         params_contour={'colorscale': cmap_feature,
                                                        'contours_coloring': 'heatmap',
                                                        'line_smoothing': 0.85},
-                                       params_scat_z=params_init_lower_ukr['params_scat_z'],
-                                       params_fig_ls=None,
-                                       is_middle_color_zero=is_member_cp_middle_color_zero,
-                                       is_show_ticks_latent_space=False
-                                       )
+                                         params_scat_z=params_init_lower_ukr['params_scat_z'],
+                                         params_fig_ls=None,
+                                         is_middle_color_zero=is_member_cp_middle_color_zero,
+                                         is_show_ticks_latent_space=False,
+                                         id_ls='own_member_map',
+                                         id_dropdown='own_cp_db',
+                                         id_fb='own_fb'
+                                         )
 
 
         # 全体のレイアウト
@@ -212,23 +224,9 @@ class BaseGMMNetworkOwnOppPerformance():
             # HTMLではSVG要素として表現される。
             html.Div(
                 [
-                    dcc.Graph(
-                        id='member-map',
-                        figure=self.own_lower_ukr.fig_ls,
-                        config=config
-                    ),
-                    html.P('Feature as contour'),
-                    dcc.Dropdown(
-                        id='feature_dropdown',
-                        options=[{"value": i, "label": x}
-                                 for i, x in enumerate(label_feature)],
-                        value=0
-                    ),
-                    dcc.Graph(
-                        id='feature_bars',
-                        figure=self.own_lower_ukr.fig_fb,
-                        config=config
-                    )
+                    self.own_lower_ukr.graph_ls,
+                    self.own_lower_ukr.dropdown_ls,
+                    self.own_lower_ukr.graph_fb
                 ],
                 style={'display': 'inline-block', 'width': '49%'}
             ),
@@ -240,18 +238,27 @@ class BaseGMMNetworkOwnOppPerformance():
 
         # Define callback function when data is clicked
         @app.callback(
-            Output(component_id='feature_bars', component_property='figure'),
-            Input(component_id='member-map', component_property='clickData')
+            Output(component_id=self.own_lower_ukr.graph_fb.id,
+                   component_property='figure'),
+            Input(component_id=self.own_lower_ukr.graph_ls.id,
+                  component_property='clickData')
         )
         def update_bar(clickData):
-            # print(clickData)
             return self.own_lower_ukr.update_fb_from_ls(clickData)
 
-        # 後でどっかしらには追加するけどとりあえずコメントアウト
         @app.callback(
-            Output(component_id='member-map', component_property='figure'),
-            [Input(component_id='feature_dropdown', component_property='value'),
-             Input(component_id='member-map', component_property='clickData')]
+            Output(component_id=self.own_lower_ukr.graph_ls.id,
+                   component_property='figure'),
+            [
+                Input(
+                    component_id=self.own_lower_ukr.dropdown_ls.id,
+                    component_property='value'
+                ),
+                Input(
+                    component_id=self.own_lower_ukr.graph_ls.id,
+                    component_property='clickData'
+                )
+            ]
         )
         def update_ls(index_selected_feature, clickData):
             return self.own_lower_ukr.update_ls(index_selected_feature=index_selected_feature,
