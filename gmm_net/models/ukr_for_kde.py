@@ -358,23 +358,29 @@ class UKRForWeightedKDE(UKR):
                 weights=smoothed_weight)
         return kde.pdf(x)  # MxK
 
-    def define_graphs(self, n_grid_points, label_data, label_feature,
-                      is_show_all_label_data, is_middle_color_zero,
-                      is_show_ticks_latent_space,
-                      params_contour, params_scat_z, params_fig_ls,
-                      id_ls, id_dropdown, id_fb):
-        super().define_graphs(n_grid_points=n_grid_points,
-                              label_data=label_data,
-                              label_feature=label_feature,
-                              is_show_all_label_data=is_show_all_label_data,
-                              is_middle_color_zero=is_middle_color_zero,
-                              is_show_ticks_latent_space=is_show_ticks_latent_space,
-                              params_contour=params_contour,
-                              params_scat_z=params_scat_z,
-                              params_fig_ls=params_fig_ls,
-                              id_ls=id_ls,
-                              id_dropdown=id_dropdown,
-                              id_fb=id_fb)
+    # def define_graphs(self, n_grid_points, label_data, label_feature,
+    #                   is_show_all_label_data, is_middle_color_zero,
+    #                   is_show_ticks_latent_space,
+    #                   params_contour, params_scat_z, params_fig_ls,
+    #                   id_ls, id_dropdown, id_fb):
+    #     self._initialize_to_visualize(n_grid_points=n_grid_points,
+    #                                   params_imshow_data_space=None)
+    def _initialize_to_vis_dash(self,
+                                params_contour: dict,
+                                params_scat_z: dict,
+                                params_fig_ls: dict,
+                                id_ls: str,
+                                id_dropdown: str,
+                                id_fb: str
+                                ):
+        self.is_middle_color_zero = self.is_latent_space_middle_color_zero
+        super()._initialize_to_vis_dash(params_contour=params_contour,
+                                        params_scat_z=params_scat_z,
+                                        params_fig_ls=params_fig_ls,
+                                        id_ls=id_ls,
+                                        id_dropdown=id_dropdown,
+                                        id_fb=id_fb)
+
     def visualize(self, n_grid_points=30, label_groups=None,
                   is_latent_space_middle_color_zero=False,
                   is_show_all_label_groups=False,

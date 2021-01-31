@@ -274,12 +274,22 @@ params_init_lower_ukr=dict(
         )
     )
 )
-params_init_upper_ukr = {
-'params_scatter_latent_space': {'c': label_club_train_encoded,
-                                'cmap': 'rainbow_r',
-                                    's': 5,
-                                    'alpha': 0.5}
-}
+params_init_upper_ukr=dict(
+    params_scat_z=dict(
+        colorscale='Turbo_r',
+        marker=dict(
+            size=5,
+            opacity=0.5,
+            color=label_club_train_encoded
+        )
+    )
+)
+# params_init_upper_ukr = {
+# 'params_scatter_latent_space': {'c': label_club_train_encoded,
+#                                 'cmap': 'rainbow_r',
+#                                     's': 5,
+#                                     'alpha': 0.5}
+# }
 n_epoch_to_change_member = 700
 learning_rate_to_change_member = 0.002
 path_meshed = path_joblib + 'meshes_to_ccp_resolution{}.npz'.format(resolution)

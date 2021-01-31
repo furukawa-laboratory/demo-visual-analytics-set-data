@@ -206,19 +206,46 @@ class BaseGMMNetworkOwnOppPerformance():
                 id_fb='fb'
             )
 
-        self.own_ukr_kde.define_graphs(
+        # self.own_ukr_kde.define_graphs(
+        #     n_grid_points=n_grid_points,
+        #     label_data=label_team,
+        #     label_feature=None,
+        #     is_show_all_label_data=None,
+        #     is_middle_color_zero=is_ccp_middle_color_zero,
+        #     is_show_ticks_latent_space=False,
+        #     params_contour={'contours_coloring': 'heatmap',
+        #                     'line_smoothing': 0.85},
+        #     params_scat_z=None,
+        #     params_fig_ls=None,
+        #     id_ls='team_map',
+        #     id_dropdown='rep_points_member_map',
+        #     id_fb='no meaning'
+        # )
+
+        self.own_ukr_kde._initialize_to_visualize(
             n_grid_points=n_grid_points,
-            label_data=label_team,
-            label_feature=None,
-            is_show_all_label_data=None,
-            is_middle_color_zero=is_ccp_middle_color_zero,
-            is_show_ticks_latent_space=False,
+            params_imshow_data_space=None,
+            params_imshow_latent_space=None,
+            params_scatter_data_space=None,
+            params_scatter_latent_space=None,
+            label_groups=label_team,
+            title_latent_space=None,
+            title_data_space=None,
+            fig=None,
+            fig_size=None,
+            ax_latent_space=None,
+            ax_data_space=None,
+            is_latent_space_middle_color_zero=is_ccp_middle_color_zero,
+            is_show_all_label_groups=False,
+            is_show_ticks=False
+        )
+        self.own_ukr_kde._initialize_to_vis_dash(
             params_contour={'contours_coloring': 'heatmap',
-                            'line_smoothing': 0.85},
-            params_scat_z=None,
+                             'line_smoothing': 0.85},
+            params_scat_z=params_init_upper_ukr['params_scat_z'],
             params_fig_ls=None,
             id_ls='team_map',
-            id_dropdown='rep_points_member_map',
+            id_dropdown='grid_points_in_member_map',
             id_fb='no meaning'
         )
 
