@@ -6,7 +6,7 @@ from gmm_net.tools.create_zeta import create_zeta
 from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 
 
-class UKRForWeightedKDE():
+class UKRForWeightedKDE(UKR):
     def __init__(self, weight_of_group, member_features, n_embedding,
                  bandwidth_kde, bandwidth_nadaraya,
                  is_compact, lambda_, metric_evaluation_method,
@@ -358,6 +358,23 @@ class UKRForWeightedKDE():
                 weights=smoothed_weight)
         return kde.pdf(x)  # MxK
 
+    def define_graphs(self, n_grid_points, label_data, label_feature,
+                      is_show_all_label_data, is_middle_color_zero,
+                      is_show_ticks_latent_space,
+                      params_contour, params_scat_z, params_fig_ls,
+                      id_ls, id_dropdown, id_fb):
+        super().define_graphs(n_grid_points=n_grid_points,
+                              label_data=label_data,
+                              label_feature=label_feature,
+                              is_show_all_label_data=is_show_all_label_data,
+                              is_middle_color_zero=is_middle_color_zero,
+                              is_show_ticks_latent_space=is_show_ticks_latent_space,
+                              params_contour=params_contour,
+                              params_scat_z=params_scat_z,
+                              params_fig_ls=params_fig_ls,
+                              id_ls=id_ls,
+                              id_dropdown=id_dropdown,
+                              id_fb=id_fb)
     def visualize(self, n_grid_points=30, label_groups=None,
                   is_latent_space_middle_color_zero=False,
                   is_show_all_label_groups=False,

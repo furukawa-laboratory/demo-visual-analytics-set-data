@@ -162,7 +162,6 @@ class BaseGMMNetworkOwnOppPerformance():
 
         app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-        config = {'displayModeBar': False}
         # Prepare variables to color
         self.cmap_density = cmap_density
         self.cmap_feature = cmap_feature
@@ -188,13 +187,6 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
         self.own_lower_ukr = self.lower_ukr
 
-        # dic_id = dict(
-        #     own_lower_ukr=dict(
-        #         ls='own_member_map',
-        #         dropdown='own_feature_db',
-        #
-        #     )
-        # )
 
         for lower_ukr in [self.own_lower_ukr, self.opp_lower_ukr]:
             lower_ukr.define_graphs(
@@ -214,6 +206,22 @@ class BaseGMMNetworkOwnOppPerformance():
                 id_fb='fb'
             )
 
+        self.own_ukr_kde.define_graphs(
+            n_grid_points=n_grid_points,
+            label_data=label_team,
+            label_feature=None,
+            is_show_all_label_data=None,
+            is_middle_color_zero=is_ccp_middle_color_zero,
+            is_show_ticks_latent_space=False,
+            params_contour={'contours_coloring': 'heatmap',
+                            'line_smoothing': 0.85},
+            params_scat_z=None,
+            params_fig_ls=None,
+            id_ls='team_map',
+            id_dropdown='rep_points_member_map',
+            id_fb='no meaning'
+        )
+
 
         # Define whole layout
         app.layout = html.Div(children=[
@@ -229,7 +237,11 @@ class BaseGMMNetworkOwnOppPerformance():
                 style={'display': 'inline-block', 'width': '49%'}
             ),
             html.Div(
-                [],
+                [
+                    self.own_ukr_kde.graph_ls,
+                    self.own_ukr_kde.dropdown_ls,
+                    self.own_ukr_kde.graph_fb
+                ],
                 style={'display': 'inline-block', 'width': '49%'}
             )
         ])
