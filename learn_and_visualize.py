@@ -276,10 +276,10 @@ params_init_lower_ukr=dict(
 )
 params_init_upper_ukr=dict(
     params_scat_z=dict(
-        colorscale='Turbo_r',
         marker=dict(
             size=5,
             opacity=0.5,
+            colorscale='Turbo_r',
             color=label_club_train_encoded
         )
     )

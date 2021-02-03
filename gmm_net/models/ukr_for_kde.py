@@ -358,28 +358,77 @@ class UKRForWeightedKDE():
                 weights=smoothed_weight)
         return kde.pdf(x)  # MxK
 
-    # def define_graphs(self, n_grid_points, label_data, label_feature,
-    #                   is_show_all_label_data, is_middle_color_zero,
-    #                   is_show_ticks_latent_space,
-    #                   params_contour, params_scat_z, params_fig_ls,
-    #                   id_ls, id_dropdown, id_fb):
-    #     self._initialize_to_visualize(n_grid_points=n_grid_points,
-    #                                   params_imshow_data_space=None)
-    def _initialize_to_vis_dash(self,
-                                params_contour: dict,
-                                params_scat_z: dict,
-                                params_fig_ls: dict,
-                                id_ls: str,
-                                id_dropdown: str,
-                                id_fb: str
-                                ):
-        self.is_middle_color_zero = self.is_latent_space_middle_color_zero
-        super()._initialize_to_vis_dash(params_contour=params_contour,
-                                        params_scat_z=params_scat_z,
-                                        params_fig_ls=params_fig_ls,
-                                        id_ls=id_ls,
-                                        id_dropdown=id_dropdown,
-                                        id_fb=id_fb)
+    def define_graphs(self, n_grid_points, label_groups,
+                      is_show_all_label_data, is_middle_color_zero,
+                      is_show_ticks_latent_space,
+                      params_contour, params_scat_z, params_fig_ls,
+                      id_ls, id_dropdown, id_fb):
+        import plotly.graph_objects as go
+        import dash_core_components as dcc
+
+        # invalid check
+        if self.n_embedding != 2 or self.n_features != 2:
+            raise ValueError('Now support only n_embedding = 2 and n_features = 2')
+
+        # if isinstance(n_grid_points, int):
+        #     # Keep resolution per one dimension
+        #     self.n_grid_points_latent_space = np.ones(self.n_embedding, dtype='int8') * n_grid_points
+        #     self.n_grid_points_data_space = np.ones(self.n_features, dtype='int8') * n_grid_points
+        # else:
+        #     raise ValueError('Only support n_grid_points is int')
+        if self.is_compact:
+            grid_points = create_zeta(-1.0, 1.0, self.n_embedding, n_grid_points)
+        else:
+            raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
+        self.ls = LatentSpace(data=self.Z, grid_points=grid_points)
+
+        grid_points = create_zeta(self.member_features.min(), self.member_features.max(),
+                                  self.n_features, n_grid_points)
+        self.fs = FeatureSpace(data=self.member_features, grid_points=grid_points)
+
+
+        config = {'displayModeBar': False}
+        fig_ls = go.Figure(
+            layout=go.Layout(
+                title=go.layout.Title(text='Latent space'),
+                xaxis={'range': [self.Z[:, 0].min() - 0.05, self.Z[:, 0].max() + 0.05]
+                       },
+                yaxis={
+                    'range': [self.Z[:, 1].min() - 0.05, self.Z[:, 1].max() + 0.05],
+                    'scaleanchor': 'x',
+                    'scaleratio': 1.0
+                },
+                showlegend=False
+            )
+        )
+        fig_ls.add_trace(
+            go.Scatter(
+                x=self.Z[:, 0], y=self.Z[:, 1],
+                mode='markers',
+                text=label_groups,
+                **params_scat_z
+            )
+        )
+        self.ls.graph = dcc.Graph(
+            id=id_ls,
+            figure=fig_ls,
+            config=config
+        )
+    # def _initialize_to_vis_dash(self,
+    #                             params_contour: dict,
+    #                             params_scat_z: dict,
+    #                             params_fig_ls: dict,
+    #                             id_ls: str,
+    #                             id_dropdown: str,
+    #                             id_fb: str
+    #                             ):
+    #     self.is_middle_color_zero = self.is_latent_space_middle_color_zero
+    #     super()._initialize_to_vis_dash(params_contour=params_contour,
+    #                                     params_scat_z=params_scat_z,
+    #                                     params_fig_ls=params_fig_ls,
+    #                                     id_ls=id_ls,
+    #                                     id_dropdown=id_dropdown,
+    #                                     id_fb=id_fb)
 
     def visualize(self, n_grid_points=30, label_groups=None,
                   is_latent_space_middle_color_zero=False,
@@ -950,3 +999,18 @@ class UKRForWeightedKDE():
         ax.add_collection(LineCollection(segs1, **kwargs))
         ax.add_collection(LineCollection(segs2, **kwargs))
 
+class Space():
+    def __init__(self, data: np.ndarray, grid_points: np.ndarray, grid_mapping=None, graph=None):
+        self.data = data.copy()
+        self.grids = grid_points.copy()
+        self.grid_mapping = grid_mapping
+        self.graph = graph
+
+    # def _set_grid(self, grid_points, n_grid_points):
+    #     self.grid_points = grid_points
+
+class LatentSpace(Space):
+    pass
+
+class FeatureSpace(Space):
+    pass
