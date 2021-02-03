@@ -3,7 +3,7 @@ from scipy.spatial.distance import cdist
 from tqdm import tqdm
 from gmm_net.models.kde import KDE
 from gmm_net.tools.create_zeta import create_zeta
-from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
+from gmm_net.models.core import LatentSpace,FeatureSpace
 
 
 class UKRForWeightedKDE():
@@ -999,18 +999,3 @@ class UKRForWeightedKDE():
         ax.add_collection(LineCollection(segs1, **kwargs))
         ax.add_collection(LineCollection(segs2, **kwargs))
 
-class Space():
-    def __init__(self, data: np.ndarray, grid_points: np.ndarray, grid_mapping=None, graph=None):
-        self.data = data.copy()
-        self.grids = grid_points.copy()
-        self.grid_mapping = grid_mapping
-        self.graph = graph
-
-    # def _set_grid(self, grid_points, n_grid_points):
-    #     self.grid_points = grid_points
-
-class LatentSpace(Space):
-    pass
-
-class FeatureSpace(Space):
-    pass
