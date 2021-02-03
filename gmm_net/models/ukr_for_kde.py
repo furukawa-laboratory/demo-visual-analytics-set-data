@@ -3,7 +3,7 @@ from scipy.spatial.distance import cdist
 from tqdm import tqdm
 from gmm_net.models.kde import KDE
 from gmm_net.tools.create_zeta import create_zeta
-from gmm_net.models.core import LatentSpace,FeatureSpace
+from gmm_net.models.core import LatentSpace, FeatureSpace
 
 
 class UKRForWeightedKDE():
@@ -362,7 +362,7 @@ class UKRForWeightedKDE():
                       is_show_all_label_data, is_middle_color_zero,
                       is_show_ticks_latent_space,
                       params_contour, params_scat_z, params_fig_ls,
-                      id_ls, id_dropdown, id_fb):
+                      id_ls, id_dropdown, id_fb, fs=None):
         import plotly.graph_objects as go
         import dash_core_components as dcc
 
@@ -382,24 +382,37 @@ class UKRForWeightedKDE():
             raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
         self.ls = LatentSpace(data=self.Z, grid_points=grid_points)
 
-        grid_points = create_zeta(self.member_features.min(), self.member_features.max(),
-                                  self.n_features, n_grid_points)
-        self.fs = FeatureSpace(data=self.member_features, grid_points=grid_points)
+        if fs is not None:
+            self.fs = fs
+        else:
+            grid_points = create_zeta(self.member_features.min(), self.member_features.max(),
+                                      self.n_features, n_grid_points)
+            self.fs = FeatureSpace(data=self.member_features, grid_points=grid_points)
 
 
         config = {'displayModeBar': False}
         fig_ls = go.Figure(
             layout=go.Layout(
                 title=go.layout.Title(text='Latent space'),
-                xaxis={'range': [self.Z[:, 0].min() - 0.05, self.Z[:, 0].max() + 0.05]
-                       },
+                xaxis={
+                    'range': [
+                        self.ls.data[:, 0].min() - 0.05,
+                        self.ls.data[:, 0].max() + 0.05
+                    ]
+                },
                 yaxis={
-                    'range': [self.Z[:, 1].min() - 0.05, self.Z[:, 1].max() + 0.05],
+                    'range': [
+                        self.ls.data[:, 1].min() - 0.05,
+                        self.ls.data[:, 1].max() + 0.05
+                    ],
                     'scaleanchor': 'x',
                     'scaleratio': 1.0
                 },
                 showlegend=False
             )
+        )
+        fig_ls.add_trace(
+            go.Contour()
         )
         fig_ls.add_trace(
             go.Scatter(
@@ -409,11 +422,49 @@ class UKRForWeightedKDE():
                 **params_scat_z
             )
         )
-        self.ls.graph = dcc.Graph(
+        self.ls.graph_whole = dcc.Graph(
             id=id_ls,
             figure=fig_ls,
             config=config
         )
+
+    def update_fs_from_ls(self, clickData):
+        import dash
+        if clickData is not None:
+            index = clickData['points'][0]['pointIndex']
+            if clickData['points'][0]['curveNumber'] == self.index_z:
+                # print('clicked latent variable')
+                # if latent variable is clicked
+                bag_of_members = self.normalized_weight_of_group[index]
+                # self.mask_shown_member = bag_of_members != 0.0
+                # self.bag_of_shown_member = bag_of_members[self.mask_shown_member]
+                kde = KDE()
+                kde.fit(dataset=self.member_features,
+                        bandwidth=self.bandwidth_kde,
+                        weights=bag_of_members)
+                grid_values = kde.pdf(self.fs.grid_points)
+                # self.click_coordinates_latent_space = self.Z[index_nearest_latent_variable]
+                # self.is_select_latent_variable = True
+                # self.index_team_selected = index_nearest_latent_variable
+                self.fs.graph_whole.figure.update_traces(
+                    z=grid_values,
+                    selector=dict(type='contour',name='cp')
+                )
+            elif clickData['points'][0]['curveNumber'] == self.index_grids:
+                # print('clicked map')
+                # if contour is clicked
+                #self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
+                grid_values = self.ls.grid_mapping[index, :]
+                self.fs.graph_whole.figure.update_traces(
+                    z=grid_values,
+                    selector=dict(type='contour', name='cp')
+                )
+            # elif clickData['points'][0]['curveNumber'] == 0:
+            #     print('clicked heatmap')
+            return self.fs.graph_whole.figure
+        else:
+            return dash.no_update
+
     # def _initialize_to_vis_dash(self,
     #                             params_contour: dict,
     #                             params_scat_z: dict,

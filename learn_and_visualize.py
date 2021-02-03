@@ -318,7 +318,7 @@ app = gmm_net.define_dash_app(
 server = app.server
 
 if __name__ == "__main__":
-    app.run_server()
+    app.run_server(debug=True)
     # gmm_net.visualize(
     #     n_grid_points=resolution,
     #     cmap_density=cmap_density,

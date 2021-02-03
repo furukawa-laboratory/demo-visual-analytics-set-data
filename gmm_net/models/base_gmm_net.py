@@ -218,7 +218,8 @@ class BaseGMMNetworkOwnOppPerformance():
             params_fig_ls={},
             id_ls='team_map',
             id_dropdown='rep_points_member_map',
-            id_fb='no meaning'
+            id_fb='no meaning',
+            fs=self.own_lower_ukr.ls
         )
 
         # self.own_ukr_kde._initialize_to_visualize(
@@ -256,15 +257,15 @@ class BaseGMMNetworkOwnOppPerformance():
             html.H1(children='Visual Analyticis of NBA dataset'),
             html.Div(
                 [
-                    self.own_lower_ukr.graph_ls,
-                    self.own_lower_ukr.dropdown_ls,
-                    self.own_lower_ukr.graph_fb
+                    self.own_lower_ukr.ls.graph_whole,
+                    self.own_lower_ukr.ls.dropdown,
+                    self.own_lower_ukr.os.graph_indiv
                 ],
                 style={'display': 'inline-block', 'width': '49%'}
             ),
             html.Div(
                 [
-                    self.own_ukr_kde.ls.graph
+                    self.own_ukr_kde.ls.graph_whole
                     # self.own_ukr_kde.dropdown_ls,
                     # self.own_ukr_kde.graph_fb
                 ],
@@ -274,31 +275,54 @@ class BaseGMMNetworkOwnOppPerformance():
 
         # Define callback function when data is clicked
         @app.callback(
-            Output(component_id=self.own_lower_ukr.graph_fb.id,
+            Output(component_id=self.own_lower_ukr.os.graph_indiv.id,
                    component_property='figure'),
-            Input(component_id=self.own_lower_ukr.graph_ls.id,
+            Input(component_id=self.own_lower_ukr.ls.graph_whole.id,
                   component_property='clickData')
         )
         def update_bar(clickData):
             return self.own_lower_ukr.update_fb_from_ls(clickData)
 
         @app.callback(
-            Output(component_id=self.own_lower_ukr.graph_ls.id,
+            Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
                    component_property='figure'),
             [
                 Input(
-                    component_id=self.own_lower_ukr.dropdown_ls.id,
+                    component_id=self.own_lower_ukr.ls.dropdown.id,
                     component_property='value'
                 ),
                 Input(
-                    component_id=self.own_lower_ukr.graph_ls.id,
+                    component_id=self.own_lower_ukr.ls.graph_whole.id,
+                    component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_ukr_kde.ls.graph_whole.id,
                     component_property='clickData'
                 )
             ]
         )
-        def update_ls(index_selected_feature, clickData):
-            return self.own_lower_ukr.update_ls(index_selected_feature=index_selected_feature,
-                                                clickData=clickData)
+        def update_member_map(index_selected_feature, clickData_mm, clickData_tm):
+            ctx = dash.callback_context
+            if not ctx.triggered or ctx.triggered[0]['value'] is None:
+                return dash.no_update
+            else:
+                clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+                if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
+                    return self.own_lower_ukr.update_ls(
+                        index_selected_feature=index_selected_feature,
+                        clickData=clickData_mm
+                    )
+                elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
+                    return self.own_lower_ukr.update_ls(
+                        index_selected_feature=index_selected_feature,
+                        clickData=clickData_mm
+                    )
+                elif clicked_id_text == self.own_ukr_kde.ls.graph_whole.id:
+                    return self.own_ukr_kde.update_fs_from_ls(clickData=clickData_tm)
+                else:
+                    return dash.no_update
+
+
         #     # print(clickData)
         #     print(index_selected_feature, clickData)
         #     ctx = dash.callback_context

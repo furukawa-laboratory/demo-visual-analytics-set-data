@@ -2,6 +2,7 @@ import numpy as np
 import scipy.spatial.distance as dist
 from tqdm import tqdm
 from ..tools.create_zeta import create_zeta
+from gmm_net.models.core import LatentSpace, ObservedSpace
 
 
 class UnsupervisedKernelRegression(object):
@@ -201,13 +202,17 @@ class UnsupervisedKernelRegression(object):
                                       is_show_all_label_data=is_show_all_label_data,
                                       is_middle_color_zero=is_middle_color_zero,
                                       is_show_ticks_latent_space=is_show_ticks_latent_space)
-        self._initialize_to_vis_dash(params_contour=params_contour,
-                                     params_scat_z=params_scat_z,
-                                     params_fig_ls=params_fig_ls,
-                                     id_ls=id_ls,
-                                     id_dropdown=id_dropdown,
-                                     id_fb=id_fb
-                                     )
+        self._initialize_to_vis_dash(
+            label_data=label_data,
+            label_feature=label_feature,
+            is_middle_color_zero=is_middle_color_zero,
+            params_contour=params_contour,
+            params_scat_z=params_scat_z,
+            params_fig_ls=params_fig_ls,
+            id_ls=id_ls,
+            id_dropdown=id_dropdown,
+            id_fb=id_fb
+        )
 
 
 
@@ -258,6 +263,9 @@ class UnsupervisedKernelRegression(object):
         self.is_show_all_label_data = is_show_all_label_data
 
     def _initialize_to_vis_dash(self,
+                                label_data,
+                                label_feature,
+                                is_middle_color_zero,
                                 params_contour: dict,
                                 params_scat_z: dict,
                                 params_fig_ls: dict,
@@ -269,6 +277,26 @@ class UnsupervisedKernelRegression(object):
         import dash_core_components as dcc
 
         config = {'displayModeBar': False}
+        
+        self.os = ObservedSpace(
+            data=self.X,
+            label_feature=label_feature
+        )
+        self.ls = LatentSpace(data=self.Z,
+                              grid_points=self.grid_points,
+                              grid_mapping=self.grid_mapping,
+                              graph_whole=None)
+        if label_data is None:
+            self.ls.label_data = label_data
+        elif isinstance(label_data, list):
+            self.ls.label_data = label_data
+        elif isinstance(label_data, np.ndarray):
+            if np.squeeze(label_data).ndim == 1:
+                self.ls.label_data = np.squeeze(label_data)
+            else:
+                raise ValueError('label_data must be 1d array')
+        else:
+            raise ValueError('label_data must be 1d array or list')
         if params_contour is None:
             self.params_contour = {}
         elif isinstance(params_contour, dict):
@@ -290,13 +318,21 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('invalid params_fig_ls={}'.format(params_fig_ls))
 
+        self.ls.is_middle_color_zero = is_middle_color_zero
         fig_ls = go.Figure(
             layout=go.Layout(
                 title=go.layout.Title(text='Latent space'),
-                xaxis={'range': [self.Z[:, 0].min() - 0.05, self.Z[:, 0].max() + 0.05]
-                       },
+                xaxis={
+                    'range': [
+                        self.ls.data[:, 0].min() - 0.05,
+                        self.ls.data[:, 0].max() + 0.05
+                    ]
+                },
                 yaxis={
-                    'range': [self.Z[:, 1].min() - 0.05, self.Z[:, 1].max() + 0.05],
+                    'range': [
+                        self.ls.data[:, 1].min() - 0.05,
+                        self.ls.data[:, 1].max() + 0.05
+                    ],
                     'scaleanchor': 'x',
                     'scaleratio': 1.0
                 },
@@ -304,13 +340,13 @@ class UnsupervisedKernelRegression(object):
             )
         )
         # draw contour of mapping
-        if self.is_middle_color_zero:
+        if self.ls.is_middle_color_zero:
             zmid = 0.0
         else:
             zmid = None
         fig_ls.add_trace(
-            go.Contour(x=self.grid_points[:, 0],
-                       y=self.grid_points[:, 1],
+            go.Contour(x=self.ls.grid_points[:, 0],
+                       y=self.ls.grid_points[:, 1],
                        z=self.grid_mapping[:, 0],
                        name='cp',
                        zmid=zmid,
@@ -319,7 +355,9 @@ class UnsupervisedKernelRegression(object):
         )
         # draw invisible grids to click
         fig_ls.add_trace(
-            go.Scatter(x=self.grid_points[:, 0], y=self.grid_points[:, 1], mode='markers',
+            go.Scatter(x=self.ls.grid_points[:, 0],
+                       y=self.ls.grid_points[:, 1],
+                       mode='markers',
                        visible=True,
                        marker=dict(symbol='square', size=10, opacity=0.0, color='black'),
                        name='latent space')
@@ -329,9 +367,10 @@ class UnsupervisedKernelRegression(object):
         # draw latent variables
         fig_ls.add_trace(
             go.Scatter(
-                x=self.Z[:, 0], y=self.Z[:, 1],
+                x=self.Z[:, 0],
+                y=self.Z[:, 1],
                 mode='markers',
-                text=self.label_data,
+                text=self.ls.label_data,
                 **self.params_scat_z
             )
         )
@@ -340,7 +379,8 @@ class UnsupervisedKernelRegression(object):
         # draw click point initialized by visible=False
         fig_ls.add_trace(
             go.Scatter(
-                x=np.array(0.0), y=np.array(0.0),
+                x=np.array(0.0),
+                y=np.array(0.0),
                 visible=False,
                 marker=dict(
                     size=12,
@@ -355,13 +395,13 @@ class UnsupervisedKernelRegression(object):
             )
         )
 
-        self.graph_ls = dcc.Graph(
+        self.ls.graph_whole = dcc.Graph(
             id=id_ls,
             figure=fig_ls,
             config=config
         )
 
-        self.dropdown_ls = dcc.Dropdown(
+        self.ls.dropdown = dcc.Dropdown(
             id=id_dropdown,
             options=[{"value": i, "label": x}
                      for i, x in enumerate(self.label_feature)],
@@ -381,7 +421,7 @@ class UnsupervisedKernelRegression(object):
                    marker=dict(color='#e377c2'))
         )
 
-        self.graph_fb = dcc.Graph(
+        self.os.graph_indiv = dcc.Graph(
             id=id_fb,
             figure=fig_fb,
             config=config
@@ -395,15 +435,15 @@ class UnsupervisedKernelRegression(object):
             if clickData['points'][0]['curveNumber'] == self.index_z:
                 # print('clicked latent variable')
                 # if latent variable is clicked
-                self.graph_fb.figure.update_traces(y=self.X[index])
+                self.os.graph_indiv.figure.update_traces(y=self.X[index])
                 #fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
             elif clickData['points'][0]['curveNumber'] == self.index_grids:
                 # print('clicked map')
                 # if contour is clicked
-                self.graph_fb.figure.update_traces(y=self.grid_mapping[index])
+                self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
             # elif clickData['points'][0]['curveNumber'] == 0:
             #     print('clicked heatmap')
-            return self.graph_fb.figure
+            return self.os.graph_indiv.figure
         else:
             return dash.no_update
 
@@ -417,13 +457,13 @@ class UnsupervisedKernelRegression(object):
         else:
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
             # print(clicked_id_text)
-            if clicked_id_text == self.dropdown_ls.id:
-                self.graph_ls.figure.update_traces(z=self.grid_mapping[:, index_selected_feature],
-                                                   selector=dict(type='contour', name='cp'))
-                return self.graph_ls.figure
-            elif clicked_id_text == self.graph_ls.id:
+            if clicked_id_text == self.ls.dropdown.id:
+                self.ls.graph_whole.figure.update_traces(z=self.ls.grid_mapping[:, index_selected_feature],
+                                                         selector=dict(type='contour', name='cp'))
+                return self.ls.graph_whole.figure
+            elif clicked_id_text == self.ls.graph_whole.id:
                 if clickData['points'][0]['curveNumber'] == self.index_grids:
-                    self.graph_ls.figure.update_traces(
+                    self.ls.graph_whole.figure.update_traces(
                         x=np.array(clickData['points'][0]['x']),
                         y=np.array(clickData['points'][0]['y']),
                         visible=True,
@@ -433,7 +473,7 @@ class UnsupervisedKernelRegression(object):
                         selector=dict(name='clicked_point', type='scatter')
                     )
                 elif clickData['points'][0]['curveNumber'] == self.index_z:
-                    self.graph_ls.figure.update_traces(
+                    self.ls.graph_whole.figure.update_traces(
                         x=np.array(clickData['points'][0]['x']),
                         y=np.array(clickData['points'][0]['y']),
                         visible=True,
@@ -445,9 +485,9 @@ class UnsupervisedKernelRegression(object):
                     # if latent variable is clicked
                     # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
 
-                self.graph_ls.figure.update_traces(z=self.grid_mapping[:, index_selected_feature],
-                                                   selector=dict(type='contour', name='cp'))
-                return self.graph_ls.figure
+                self.ls.graph_whole.figure.update_traces(z=self.ls.grid_mapping[:, index_selected_feature],
+                                                         selector=dict(type='contour', name='cp'))
+                return self.ls.graph_whole.figure
             else:
                 return dash.no_update
 
