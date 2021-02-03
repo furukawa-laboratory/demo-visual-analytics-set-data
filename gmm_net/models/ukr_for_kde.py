@@ -6,7 +6,7 @@ from gmm_net.tools.create_zeta import create_zeta
 from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 
 
-class UKRForWeightedKDE(UKR):
+class UKRForWeightedKDE():
     def __init__(self, weight_of_group, member_features, n_embedding,
                  bandwidth_kde, bandwidth_nadaraya,
                  is_compact, lambda_, metric_evaluation_method,
