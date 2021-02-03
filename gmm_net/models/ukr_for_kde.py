@@ -380,7 +380,10 @@ class UKRForWeightedKDE():
             grid_points = create_zeta(-1.0, 1.0, self.n_embedding, n_grid_points)
         else:
             raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
-        self.ls = LatentSpace(data=self.Z, grid_points=grid_points)
+        self.ls = LatentSpace(data=self.Z,
+                              grid_points=grid_points,
+                              params_scat_data=params_scat_z
+                              )
 
         if fs is not None:
             self.fs = fs
@@ -391,48 +394,13 @@ class UKRForWeightedKDE():
 
 
         config = {'displayModeBar': False}
-        fig_ls = go.Figure(
-            layout=go.Layout(
-                title=go.layout.Title(text='Latent space'),
-                xaxis={
-                    'range': [
-                        self.ls.data[:, 0].min() - 0.05,
-                        self.ls.data[:, 0].max() + 0.05
-                    ]
-                },
-                yaxis={
-                    'range': [
-                        self.ls.data[:, 1].min() - 0.05,
-                        self.ls.data[:, 1].max() + 0.05
-                    ],
-                    'scaleanchor': 'x',
-                    'scaleratio': 1.0
-                },
-                showlegend=False
-            )
-        )
-        fig_ls.add_trace(
-            go.Contour()
-        )
-        fig_ls.add_trace(
-            go.Scatter(
-                x=self.Z[:, 0], y=self.Z[:, 1],
-                mode='markers',
-                text=label_groups,
-                **params_scat_z
-            )
-        )
-        self.ls.graph_whole = dcc.Graph(
-            id=id_ls,
-            figure=fig_ls,
-            config=config
-        )
+        self.ls.set_graph_whole(id=id_ls, config=config)
 
     def update_fs_from_ls(self, clickData):
         import dash
         if clickData is not None:
             index = clickData['points'][0]['pointIndex']
-            if clickData['points'][0]['curveNumber'] == self.index_z:
+            if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
                 # print('clicked latent variable')
                 # if latent variable is clicked
                 bag_of_members = self.normalized_weight_of_group[index]
@@ -450,7 +418,7 @@ class UKRForWeightedKDE():
                     z=grid_values,
                     selector=dict(type='contour',name='cp')
                 )
-            elif clickData['points'][0]['curveNumber'] == self.index_grids:
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
                 # if contour is clicked
                 #self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])

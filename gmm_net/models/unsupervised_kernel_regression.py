@@ -285,7 +285,8 @@ class UnsupervisedKernelRegression(object):
         self.ls = LatentSpace(data=self.Z,
                               grid_points=self.grid_points,
                               grid_mapping=self.grid_mapping,
-                              graph_whole=None)
+                              graph_whole=None,
+                              is_middle_color_zero=is_middle_color_zero)
         if label_data is None:
             self.ls.label_data = label_data
         elif isinstance(label_data, list):
@@ -298,16 +299,16 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('label_data must be 1d array or list')
         if params_contour is None:
-            self.params_contour = {}
+            self.ls.params_contour = {}
         elif isinstance(params_contour, dict):
-            self.params_contour = params_contour
+            self.ls.params_contour = params_contour
         else:
             raise ValueError('invalid params_contour={}'.format(params_contour))
 
         if params_scat_z is None:
-            self.params_scat_z = {}
+            self.ls.params_scat_data = {}
         elif isinstance(params_scat_z, dict):
-            self.params_scat_z = params_scat_z
+            self.ls.params_scat_data = params_scat_z
         else:
             raise ValueError('invalid params_scat_z={}'.format(params_scat_z))
 
@@ -318,88 +319,89 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('invalid params_fig_ls={}'.format(params_fig_ls))
 
-        self.ls.is_middle_color_zero = is_middle_color_zero
-        fig_ls = go.Figure(
-            layout=go.Layout(
-                title=go.layout.Title(text='Latent space'),
-                xaxis={
-                    'range': [
-                        self.ls.data[:, 0].min() - 0.05,
-                        self.ls.data[:, 0].max() + 0.05
-                    ]
-                },
-                yaxis={
-                    'range': [
-                        self.ls.data[:, 1].min() - 0.05,
-                        self.ls.data[:, 1].max() + 0.05
-                    ],
-                    'scaleanchor': 'x',
-                    'scaleratio': 1.0
-                },
-                showlegend=False
-            )
-        )
-        # draw contour of mapping
-        if self.ls.is_middle_color_zero:
-            zmid = 0.0
-        else:
-            zmid = None
-        fig_ls.add_trace(
-            go.Contour(x=self.ls.grid_points[:, 0],
-                       y=self.ls.grid_points[:, 1],
-                       z=self.grid_mapping[:, 0],
-                       name='cp',
-                       zmid=zmid,
-                       **self.params_contour
-                       )
-        )
-        # draw invisible grids to click
-        fig_ls.add_trace(
-            go.Scatter(x=self.ls.grid_points[:, 0],
-                       y=self.ls.grid_points[:, 1],
-                       mode='markers',
-                       visible=True,
-                       marker=dict(symbol='square', size=10, opacity=0.0, color='black'),
-                       name='latent space')
-        )
-        self.index_grids = 1
-
-        # draw latent variables
-        fig_ls.add_trace(
-            go.Scatter(
-                x=self.Z[:, 0],
-                y=self.Z[:, 1],
-                mode='markers',
-                text=self.ls.label_data,
-                **self.params_scat_z
-            )
-        )
-        self.index_z = 2
-
-        # draw click point initialized by visible=False
-        fig_ls.add_trace(
-            go.Scatter(
-                x=np.array(0.0),
-                y=np.array(0.0),
-                visible=False,
-                marker=dict(
-                    size=12,
-                    symbol='x',
-                    color='#e377c2',
-                    line=dict(
-                        width=1.5,
-                        color="white"
-                    )
-                ),
-                name='clicked_point'
-            )
-        )
-
-        self.ls.graph_whole = dcc.Graph(
-            id=id_ls,
-            figure=fig_ls,
-            config=config
-        )
+        # set graph of latent space
+        self.ls.set_graph_whole(id=id_ls, config=config)
+        # fig_ls = go.Figure(
+        #     layout=go.Layout(
+        #         title=go.layout.Title(text='Latent space'),
+        #         xaxis={
+        #             'range': [
+        #                 self.ls.data[:, 0].min() - 0.05,
+        #                 self.ls.data[:, 0].max() + 0.05
+        #             ]
+        #         },
+        #         yaxis={
+        #             'range': [
+        #                 self.ls.data[:, 1].min() - 0.05,
+        #                 self.ls.data[:, 1].max() + 0.05
+        #             ],
+        #             'scaleanchor': 'x',
+        #             'scaleratio': 1.0
+        #         },
+        #         showlegend=False
+        #     )
+        # )
+        # # draw contour of mapping
+        # if self.ls.is_middle_color_zero:
+        #     zmid = 0.0
+        # else:
+        #     zmid = None
+        # fig_ls.add_trace(
+        #     go.Contour(x=self.ls.grid_points[:, 0],
+        #                y=self.ls.grid_points[:, 1],
+        #                z=self.grid_mapping[:, 0],
+        #                name='cp',
+        #                zmid=zmid,
+        #                **self.params_contour
+        #                )
+        # )
+        # # draw invisible grids to click
+        # fig_ls.add_trace(
+        #     go.Scatter(x=self.ls.grid_points[:, 0],
+        #                y=self.ls.grid_points[:, 1],
+        #                mode='markers',
+        #                visible=True,
+        #                marker=dict(symbol='square', size=10, opacity=0.0, color='black'),
+        #                name='latent space')
+        # )
+        # self.index_grids = 1
+        #
+        # # draw latent variables
+        # fig_ls.add_trace(
+        #     go.Scatter(
+        #         x=self.Z[:, 0],
+        #         y=self.Z[:, 1],
+        #         mode='markers',
+        #         text=self.ls.label_data,
+        #         **self.params_scat_z
+        #     )
+        # )
+        # self.index_z = 2
+        #
+        # # draw click point initialized by visible=False
+        # fig_ls.add_trace(
+        #     go.Scatter(
+        #         x=np.array(0.0),
+        #         y=np.array(0.0),
+        #         visible=False,
+        #         marker=dict(
+        #             size=12,
+        #             symbol='x',
+        #             color='#e377c2',
+        #             line=dict(
+        #                 width=1.5,
+        #                 color="white"
+        #             )
+        #         ),
+        #         name='clicked_point'
+        #     )
+        # )
+        #
+        # self.ls.graph_whole = dcc.Graph(
+        #     id=id_ls,
+        #     figure=fig_ls,
+        #     config=config
+        # )
 
         self.ls.dropdown = dcc.Dropdown(
             id=id_dropdown,
@@ -432,12 +434,12 @@ class UnsupervisedKernelRegression(object):
         if clickData is not None:
             index = clickData['points'][0]['pointIndex']
             # print('index={}'.format(index))
-            if clickData['points'][0]['curveNumber'] == self.index_z:
+            if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
                 # print('clicked latent variable')
                 # if latent variable is clicked
                 self.os.graph_indiv.figure.update_traces(y=self.X[index])
                 #fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
-            elif clickData['points'][0]['curveNumber'] == self.index_grids:
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
                 # if contour is clicked
                 self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
@@ -458,11 +460,12 @@ class UnsupervisedKernelRegression(object):
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
             # print(clicked_id_text)
             if clicked_id_text == self.ls.dropdown.id:
+                print('catch dropdown in ukr update method')
                 self.ls.graph_whole.figure.update_traces(z=self.ls.grid_mapping[:, index_selected_feature],
-                                                         selector=dict(type='contour', name='cp'))
+                                                         selector=dict(type='contour', name='contour'))
                 return self.ls.graph_whole.figure
             elif clicked_id_text == self.ls.graph_whole.id:
-                if clickData['points'][0]['curveNumber'] == self.index_grids:
+                if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                     self.ls.graph_whole.figure.update_traces(
                         x=np.array(clickData['points'][0]['x']),
                         y=np.array(clickData['points'][0]['y']),
@@ -472,7 +475,7 @@ class UnsupervisedKernelRegression(object):
                         ),
                         selector=dict(name='clicked_point', type='scatter')
                     )
-                elif clickData['points'][0]['curveNumber'] == self.index_z:
+                elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
                     self.ls.graph_whole.figure.update_traces(
                         x=np.array(clickData['points'][0]['x']),
                         y=np.array(clickData['points'][0]['y']),
@@ -486,7 +489,7 @@ class UnsupervisedKernelRegression(object):
                     # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
 
                 self.ls.graph_whole.figure.update_traces(z=self.ls.grid_mapping[:, index_selected_feature],
-                                                         selector=dict(type='contour', name='cp'))
+                                                         selector=dict(type='contour', name='contour'))
                 return self.ls.graph_whole.figure
             else:
                 return dash.no_update

@@ -302,12 +302,15 @@ class BaseGMMNetworkOwnOppPerformance():
             ]
         )
         def update_member_map(index_selected_feature, clickData_mm, clickData_tm):
+
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
                 return dash.no_update
             else:
                 clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+                print(clicked_id_text)
                 if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
+                    print(clicked_id_text)
                     return self.own_lower_ukr.update_ls(
                         index_selected_feature=index_selected_feature,
                         clickData=clickData_mm
