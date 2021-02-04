@@ -288,7 +288,9 @@ class BaseGMMNetworkOwnOppPerformance():
                 Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
                        component_property='figure'),
                 Output(component_id=self.own_lower_ukr.ls.dropdown.id,
-                       component_property='value')
+                       component_property='value'),
+                Output(component_id=self.own_ukr_kde.ls.graph_whole.id,
+                       component_property='figure')
             ],
             [
                 Input(
@@ -305,11 +307,10 @@ class BaseGMMNetworkOwnOppPerformance():
                 )
             ]
         )
-        def update_member_map(index_selected_feature, clickData_mm, clickData_tm):
-
+        def update_maps(index_selected_feature, clickData_mm, clickData_tm):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
-                return dash.no_update, dash.no_update
+                return dash.no_update, dash.no_update, dash.no_update
             else:
                 clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
                 print(clicked_id_text)
@@ -318,63 +319,21 @@ class BaseGMMNetworkOwnOppPerformance():
                     return self.own_lower_ukr.update_ls(
                         index_selected_feature=index_selected_feature,
                         clickData=clickData_mm
-                    ), dash.no_update
+                    ), dash.no_update, dash.no_update
                 elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
                     return self.own_lower_ukr.update_ls(
                         index_selected_feature=index_selected_feature,
                         clickData=clickData_mm
-                    ), dash.no_update
+                    ), dash.no_update, dash.no_update
                 elif clicked_id_text == self.own_ukr_kde.ls.graph_whole.id:
-                    return self.own_ukr_kde.update_fs_from_ls(clickData=clickData_tm), None
+                    rets = [
+                        self.own_ukr_kde.update_fs_from_ls(clickData=clickData_tm),
+                        None, # Reset value in dropdown
+                        self.own_ukr_kde.update_ls(clickData=clickData_tm)
+                    ]
+                    return rets
                 else:
-                    return dash.no_update, dash.no_update
-
-
-        #     # print(clickData)
-        #     print(index_selected_feature, clickData)
-        #     ctx = dash.callback_context
-        #     if not ctx.triggered or ctx.triggered[0]['value'] is None:
-        #         return dash.no_update
-        #     else:
-        #         clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
-        #         # print(clicked_id_text)
-        #         if clicked_id_text == 'feature_dropdown':
-        #             # print(index_selected_feature)
-        #             fig_ls.update_traces(z=som.Y[:, index_selected_feature],
-        #                                  selector=dict(type='contour', name='cp'))
-        #             return fig_ls
-        #         elif clicked_id_text == 'member-map':
-        #             if clickData['points'][0]['curveNumber'] == index_grids:
-        #                 # if contour is clicked
-        #                 # print('clicked map')
-        #                 fig_ls.update_traces(
-        #                     x=np.array(clickData['points'][0]['x']),
-        #                     y=np.array(clickData['points'][0]['y']),
-        #                     visible=True,
-        #                     marker=dict(
-        #                         symbol='x'
-        #                     ),
-        #                     selector=dict(name='clicked_point', type='scatter')
-        #                 )
-        #             elif clickData['points'][0]['curveNumber'] == index_z:
-        #                 # print('clicked latent variable')
-        #                 fig_ls.update_traces(
-        #                     x=np.array(clickData['points'][0]['x']),
-        #                     y=np.array(clickData['points'][0]['y']),
-        #                     visible=True,
-        #                     marker=dict(
-        #                         symbol='circle'
-        #                     ),
-        #                     selector=dict(name='clicked_point', type='scatter')
-        #                 )
-        #                 # if latent variable is clicked
-        #                 # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
-        #
-        #             fig_ls.update_traces(z=som.Y[:, index_selected_feature],
-        #                                  selector=dict(type='contour', name='cp'))
-        #             return fig_ls
-        #         else:
-        #             return dash.no_update
+                    return dash.no_update, dash.no_update, dash.no_update
 
         return app
 

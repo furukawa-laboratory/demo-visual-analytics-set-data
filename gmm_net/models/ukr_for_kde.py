@@ -384,7 +384,8 @@ class UKRForWeightedKDE():
         # In short, number of discretizing latent space x number of discretizing data space
         self.ls = LatentSpace(data=self.Z,
                               grid_points=grid_points,
-                              params_scat_data=params_scat_z
+                              params_scat_data=params_scat_z,
+                              label_data=label_groups
                               )
 
         if fs is not None:
@@ -438,6 +439,21 @@ class UKRForWeightedKDE():
             return self.fs.graph_whole.figure
         else:
             return dash.no_update
+
+    def update_ls(self, clickData):
+        import dash
+        ctx = dash.callback_context
+        if not ctx.triggered or ctx.triggered[0]['value'] is None:
+            return dash.no_update
+        else:
+            clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+            # print(clicked_id_text)
+            if clicked_id_text == self.ls.graph_whole.id:
+                self.ls.update_trace_clicked_point(clickData=clickData)
+                return self.ls.graph_whole.figure
+            else:
+                return dash.no_update
+
 
     # def _initialize_to_vis_dash(self,
     #                             params_contour: dict,

@@ -276,6 +276,7 @@ params_init_lower_ukr=dict(
 )
 params_init_upper_ukr=dict(
     params_scat_z=dict(
+        name='team',
         marker=dict(
             size=5,
             opacity=0.5,

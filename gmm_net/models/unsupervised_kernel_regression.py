@@ -321,87 +321,6 @@ class UnsupervisedKernelRegression(object):
 
         # set graph of latent space
         self.ls.set_graph_whole(id=id_ls, config=config)
-        # fig_ls = go.Figure(
-        #     layout=go.Layout(
-        #         title=go.layout.Title(text='Latent space'),
-        #         xaxis={
-        #             'range': [
-        #                 self.ls.data[:, 0].min() - 0.05,
-        #                 self.ls.data[:, 0].max() + 0.05
-        #             ]
-        #         },
-        #         yaxis={
-        #             'range': [
-        #                 self.ls.data[:, 1].min() - 0.05,
-        #                 self.ls.data[:, 1].max() + 0.05
-        #             ],
-        #             'scaleanchor': 'x',
-        #             'scaleratio': 1.0
-        #         },
-        #         showlegend=False
-        #     )
-        # )
-        # # draw contour of mapping
-        # if self.ls.is_middle_color_zero:
-        #     zmid = 0.0
-        # else:
-        #     zmid = None
-        # fig_ls.add_trace(
-        #     go.Contour(x=self.ls.grid_points[:, 0],
-        #                y=self.ls.grid_points[:, 1],
-        #                z=self.grid_mapping[:, 0],
-        #                name='cp',
-        #                zmid=zmid,
-        #                **self.params_contour
-        #                )
-        # )
-        # # draw invisible grids to click
-        # fig_ls.add_trace(
-        #     go.Scatter(x=self.ls.grid_points[:, 0],
-        #                y=self.ls.grid_points[:, 1],
-        #                mode='markers',
-        #                visible=True,
-        #                marker=dict(symbol='square', size=10, opacity=0.0, color='black'),
-        #                name='latent space')
-        # )
-        # self.index_grids = 1
-        #
-        # # draw latent variables
-        # fig_ls.add_trace(
-        #     go.Scatter(
-        #         x=self.Z[:, 0],
-        #         y=self.Z[:, 1],
-        #         mode='markers',
-        #         text=self.ls.label_data,
-        #         **self.params_scat_z
-        #     )
-        # )
-        # self.index_z = 2
-        #
-        # # draw click point initialized by visible=False
-        # fig_ls.add_trace(
-        #     go.Scatter(
-        #         x=np.array(0.0),
-        #         y=np.array(0.0),
-        #         visible=False,
-        #         marker=dict(
-        #             size=12,
-        #             symbol='x',
-        #             color='#e377c2',
-        #             line=dict(
-        #                 width=1.5,
-        #                 color="white"
-        #             )
-        #         ),
-        #         name='clicked_point'
-        #     )
-        # )
-        #
-        # self.ls.graph_whole = dcc.Graph(
-        #     id=id_ls,
-        #     figure=fig_ls,
-        #     config=config
-        # )
 
         self.ls.dropdown = dcc.Dropdown(
             id=id_dropdown,
@@ -472,28 +391,6 @@ class UnsupervisedKernelRegression(object):
                 return self.ls.graph_whole.figure
             elif clicked_id_text == self.ls.graph_whole.id:
                 self.ls.update_trace_clicked_point(clickData=clickData)
-                # if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
-                #     self.ls.graph_whole.figure.update_traces(
-                #         x=np.array(clickData['points'][0]['x']),
-                #         y=np.array(clickData['points'][0]['y']),
-                #         visible=True,
-                #         marker=dict(
-                #             symbol='x'
-                #         ),
-                #         selector=dict(name='clicked_point', type='scatter')
-                #     )
-                # elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
-                #     self.ls.graph_whole.figure.update_traces(
-                #         x=np.array(clickData['points'][0]['x']),
-                #         y=np.array(clickData['points'][0]['y']),
-                #         visible=True,
-                #         marker=dict(
-                #             symbol='circle-x'
-                #         ),
-                #         selector=dict(name='clicked_point', type='scatter')
-                #     )
-                #     # if latent variable is clicked
-                #     # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
 
                 print('index_selected_feature={}'.format(index_selected_feature))
                 if index_selected_feature is None:
