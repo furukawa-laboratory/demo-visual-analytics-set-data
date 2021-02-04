@@ -1,5 +1,6 @@
 from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
+from gmm_net.models.double_domain_gmm import DoubleDomainGMM as DDGMM
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from scipy.spatial.distance import cdist
@@ -187,6 +188,9 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
         self.own_lower_ukr = self.lower_ukr
 
+        self.own_opp_gplvm = DDGMM(data=self.training_performance,
+                                   label_feature=label_performance)
+
 
         # define graphs
         for lower_ukr, ukr_kde, which in zip([self.own_lower_ukr, self.opp_lower_ukr],
@@ -221,6 +225,10 @@ class BaseGMMNetworkOwnOppPerformance():
                 id_ls=which+'_team_map',
                 fs=lower_ukr.ls
             )
+
+        self.own_opp_gplvm.define_graphs(own_ls=self.own_ukr_kde.ls,
+                                         opp_ls=self.opp_ukr_kde.ls,
+                                         label_feature=label_performance)
 
 
         # Define whole layout

@@ -323,24 +323,27 @@ class UnsupervisedKernelRegression(object):
             clearable=True
         )
 
-        fig_fb = go.Figure(
-            layout=go.Layout(
-                title=go.layout.Title(text='Feature bars'),
-                yaxis={'range': [self.X.min(), self.X.max()]},
-                showlegend=False
-            )
-        )
+        self.os.set_graph_indiv(id=id_fb,config=config,
+                                params_figure_layout={'title': 'feature bars'})
 
-        fig_fb.add_trace(
-            go.Bar(x=self.label_feature, y=np.zeros(self.X.shape[1]),
-                   marker=dict(color='#e377c2'))
-        )
-
-        self.os.graph_indiv = dcc.Graph(
-            id=id_fb,
-            figure=fig_fb,
-            config=config
-        )
+        # fig_fb = go.Figure(
+        #     layout=go.Layout(
+        #         title=go.layout.Title(text='Feature bars'),
+        #         yaxis={'range': [self.X.min(), self.X.max()]},
+        #         showlegend=False
+        #     )
+        # )
+        #
+        # fig_fb.add_trace(
+        #     go.Bar(x=self.label_feature, y=np.zeros(self.X.shape[1]),
+        #            marker=dict(color='#e377c2'))
+        # )
+        #
+        # self.os.graph_indiv = dcc.Graph(
+        #     id=id_fb,
+        #     figure=fig_fb,
+        #     config=config
+        # )
 
     def update_fb_from_ls(self, clickData):
         import dash

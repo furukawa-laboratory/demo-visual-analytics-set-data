@@ -123,6 +123,27 @@ class Space():
             config=config
         )
 
+    def set_graph_indiv(self, id, config, params_figure_layout={}):
+        fig_fb = go.Figure(
+            layout=go.Layout(
+                yaxis={'range': [self.data.min(), self.data.max()]},
+                showlegend=False,
+                **params_figure_layout
+            )
+        )
+
+        fig_fb.add_trace(
+            go.Bar(x=self.label_feature, y=np.zeros(self.data.shape[1]),
+                   marker=dict(color='#e377c2'))
+        )
+
+        self.graph_indiv = dcc.Graph(
+            id=id,
+            figure=fig_fb,
+            config=config
+        )
+
+
     def update_trace_clicked_point(self, clickData):
         if clickData['points'][0]['curveNumber'] == self.dic_index_traces['grids']:
             self.graph_whole.figure.update_traces(
