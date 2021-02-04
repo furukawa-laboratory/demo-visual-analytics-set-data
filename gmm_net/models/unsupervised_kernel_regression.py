@@ -193,7 +193,7 @@ class UnsupervisedKernelRegression(object):
     def define_graphs(self, n_grid_points, label_data, label_feature,
                       is_show_all_label_data, is_middle_color_zero,
                       is_show_ticks_latent_space,
-                      params_contour, params_scat_z, params_fig_ls,
+                      params_contour, params_scat_z, params_figure_layout,
                       id_ls, id_dropdown, id_fb):
 
         self._initialize_to_vis_least(n_grid_points=n_grid_points,
@@ -208,7 +208,7 @@ class UnsupervisedKernelRegression(object):
             is_middle_color_zero=is_middle_color_zero,
             params_contour=params_contour,
             params_scat_z=params_scat_z,
-            params_fig_ls=params_fig_ls,
+            params_figure_layout=params_figure_layout,
             id_ls=id_ls,
             id_dropdown=id_dropdown,
             id_fb=id_fb
@@ -268,7 +268,7 @@ class UnsupervisedKernelRegression(object):
                                 is_middle_color_zero,
                                 params_contour: dict,
                                 params_scat_z: dict,
-                                params_fig_ls: dict,
+                                params_figure_layout: dict,
                                 id_ls: str,
                                 id_dropdown: str,
                                 id_fb: str
@@ -285,8 +285,8 @@ class UnsupervisedKernelRegression(object):
         self.ls = LatentSpace(data=self.Z,
                               grid_points=self.grid_points,
                               grid_mapping=self.grid_mapping,
-                              graph_whole=None,
-                              is_middle_color_zero=is_middle_color_zero)
+                              is_middle_color_zero=is_middle_color_zero,
+                              params_figure_layout=params_figure_layout)
         if label_data is None:
             self.ls.label_data = label_data
         elif isinstance(label_data, list):
@@ -311,13 +311,6 @@ class UnsupervisedKernelRegression(object):
             self.ls.params_scat_data = params_scat_z
         else:
             raise ValueError('invalid params_scat_z={}'.format(params_scat_z))
-
-        if params_fig_ls is None:
-            self.params_fig_ls = {}
-        elif isinstance(params_fig_ls, dict):
-            self.params_fig_ls = params_fig_ls
-        else:
-            raise ValueError('invalid params_fig_ls={}'.format(params_fig_ls))
 
         # set graph of latent space
         self.ls.set_graph_whole(id=id_ls, config=config)

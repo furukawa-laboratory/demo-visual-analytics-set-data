@@ -15,7 +15,8 @@ class Space():
                  label_feature=None,
                  is_middle_color_zero=None,
                  params_contour={},
-                 params_scat_data={}):
+                 params_scat_data={},
+                 params_figure_layout={}):
         self.data = data.copy()
         self.n_data = data.shape[0]
         self.n_dim = data.shape[1]
@@ -30,13 +31,13 @@ class Space():
         self.dic_index_traces = {}
         self.params_contour = params_contour
         self.params_scat_data = params_scat_data
+        self.params_figure_layout = params_figure_layout
     
     def set_graph_whole(self, id, config=None):
         if config is None:
             config = {'displayModeBar': False}
         fig = go.Figure(
             layout=go.Layout(
-                title=go.layout.Title(text='Latent space'),
                 xaxis={
                     'range': [
                         self.data[:, 0].min() - 0.05,
@@ -51,7 +52,8 @@ class Space():
                     'scaleanchor': 'x',
                     'scaleratio': 1.0
                 },
-                showlegend=False
+                showlegend=False,
+                **self.params_figure_layout
             )
         )
         # draw contour of mapping

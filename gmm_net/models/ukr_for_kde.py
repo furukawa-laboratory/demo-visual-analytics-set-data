@@ -361,8 +361,8 @@ class UKRForWeightedKDE():
     def define_graphs(self, n_grid_points, label_groups,
                       is_show_all_label_data, is_middle_color_zero,
                       is_show_ticks_latent_space,
-                      params_contour, params_scat_z, params_fig_ls,
-                      id_ls, id_dropdown, id_fb, fs=None):
+                      params_contour, params_scat_z, params_figure_layout,
+                      id_ls, fs=None):
         import plotly.graph_objects as go
         import dash_core_components as dcc
 
@@ -385,7 +385,8 @@ class UKRForWeightedKDE():
         self.ls = LatentSpace(data=self.Z,
                               grid_points=grid_points,
                               params_scat_data=params_scat_z,
-                              label_data=label_groups
+                              label_data=label_groups,
+                              params_figure_layout=params_figure_layout
                               )
 
         if fs is not None:

@@ -188,7 +188,10 @@ class BaseGMMNetworkOwnOppPerformance():
         self.own_lower_ukr = self.lower_ukr
 
 
-        for lower_ukr in [self.own_lower_ukr, self.opp_lower_ukr]:
+        # define graphs
+        for lower_ukr, ukr_kde, which in zip([self.own_lower_ukr, self.opp_lower_ukr],
+                                             [self.own_ukr_kde, self.opp_ukr_kde],
+                                             ['own', 'opp']):
             lower_ukr.define_graphs(
                 n_grid_points=n_grid_points,
                 label_data=label_member,
@@ -198,56 +201,26 @@ class BaseGMMNetworkOwnOppPerformance():
                                 'contours_coloring': 'heatmap',
                                 'line_smoothing': 0.85},
                 params_scat_z=params_init_lower_ukr['params_scat_z'],
-                params_fig_ls=None,
+                params_figure_layout={'title': which+' member map'},
                 is_middle_color_zero=is_member_cp_middle_color_zero,
                 is_show_ticks_latent_space=False,
-                id_ls='member_map',
-                id_dropdown='cp_db',
-                id_fb='fb'
+                id_ls=which+'_member_map',
+                id_dropdown=which+'_cp_db',
+                id_fb=which+'fb'
             )
-
-        self.own_ukr_kde.define_graphs(
-            n_grid_points=n_grid_points,
-            label_groups=label_team,
-            is_show_all_label_data=None,
-            is_middle_color_zero=is_ccp_middle_color_zero,
-            is_show_ticks_latent_space=False,
-            params_contour={'contours_coloring': 'heatmap',
-                            'line_smoothing': 0.85},
-            params_scat_z=params_init_upper_ukr['params_scat_z'],
-            params_fig_ls={},
-            id_ls='team_map',
-            id_dropdown='rep_points_member_map',
-            id_fb='no meaning',
-            fs=self.own_lower_ukr.ls
-        )
-
-        # self.own_ukr_kde._initialize_to_visualize(
-        #     n_grid_points=n_grid_points,
-        #     params_imshow_data_space=None,
-        #     params_imshow_latent_space=None,
-        #     params_scatter_data_space=None,
-        #     params_scatter_latent_space=None,
-        #     label_groups=label_team,
-        #     title_latent_space=None,
-        #     title_data_space=None,
-        #     fig=None,
-        #     fig_size=None,
-        #     ax_latent_space=None,
-        #     ax_data_space=None,
-        #     is_latent_space_middle_color_zero=is_ccp_middle_color_zero,
-        #     is_show_all_label_groups=False,
-        #     is_show_ticks=False
-        # )
-        # self.own_ukr_kde._initialize_to_vis_dash(
-        #     params_contour={'contours_coloring': 'heatmap',
-        #                      'line_smoothing': 0.85},
-        #     params_scat_z=params_init_upper_ukr['params_scat_z'],
-        #     params_fig_ls=None,
-        #     id_ls='team_map',
-        #     id_dropdown='grid_points_in_member_map',
-        #     id_fb='no meaning'
-        # )
+            ukr_kde.define_graphs(
+                n_grid_points=n_grid_points,
+                label_groups=label_team,
+                is_show_all_label_data=None,
+                is_middle_color_zero=is_ccp_middle_color_zero,
+                is_show_ticks_latent_space=False,
+                params_contour={'contours_coloring': 'heatmap',
+                                'line_smoothing': 0.85},
+                params_scat_z=params_init_upper_ukr['params_scat_z'],
+                params_figure_layout={'title': which+' team map'},
+                id_ls=which+'_team_map',
+                fs=lower_ukr.ls
+            )
 
 
         # Define whole layout
@@ -261,16 +234,21 @@ class BaseGMMNetworkOwnOppPerformance():
                     self.own_lower_ukr.ls.dropdown,
                     self.own_lower_ukr.os.graph_indiv
                 ],
-                style={'display': 'inline-block', 'width': '49%'}
+                style={'display': 'inline-block', 'width': '33%'}
             ),
             html.Div(
                 [
                     self.own_ukr_kde.ls.graph_whole
-                    # self.own_ukr_kde.dropdown_ls,
-                    # self.own_ukr_kde.graph_fb
                 ],
-                style={'display': 'inline-block', 'width': '49%'}
-            )
+                style={'display': 'inline-block', 'width': '33%'}
+            ),
+            html.Div(
+                [
+                    self.opp_ukr_kde.ls.graph_whole,
+                    self.opp_lower_ukr.ls.graph_whole
+                ],
+                style={'display': 'inline-block', 'width': '33%'}
+            ),
         ])
 
         # Define callback function when data is clicked
