@@ -121,7 +121,29 @@ class Space():
             config=config
         )
 
-
+    def update_trace_clicked_point(self, clickData):
+        if clickData['points'][0]['curveNumber'] == self.dic_index_traces['grids']:
+            self.graph_whole.figure.update_traces(
+                x=np.array(clickData['points'][0]['x']),
+                y=np.array(clickData['points'][0]['y']),
+                visible=True,
+                marker=dict(
+                    symbol='x'
+                ),
+                selector=dict(name='clicked_point', type='scatter')
+            )
+        elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['data']:
+            self.graph_whole.figure.update_traces(
+                x=np.array(clickData['points'][0]['x']),
+                y=np.array(clickData['points'][0]['y']),
+                visible=True,
+                marker=dict(
+                    symbol='circle-x'
+                ),
+                selector=dict(name='clicked_point', type='scatter')
+            )
+            # if latent variable is clicked
+            # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
 
     # def _set_grid(self, grid_points, n_grid_points):
     #     self.grid_points = grid_points

@@ -407,7 +407,8 @@ class UnsupervisedKernelRegression(object):
             id=id_dropdown,
             options=[{"value": i, "label": x}
                      for i, x in enumerate(self.label_feature)],
-            value=0
+            placeholder="Select feature shown as contour",
+            clearable=True
         )
 
         fig_fb = go.Figure(
@@ -460,36 +461,49 @@ class UnsupervisedKernelRegression(object):
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
             # print(clicked_id_text)
             if clicked_id_text == self.ls.dropdown.id:
-                # print('catch dropdown in ukr update method')
-                self.ls.graph_whole.figure.update_traces(z=self.ls.grid_mapping[:, index_selected_feature],
-                                                         selector=dict(type='contour', name='contour'))
+                if index_selected_feature is None:
+                    z = None
+                else:
+                    z = self.ls.grid_mapping[:, index_selected_feature]
+                self.ls.graph_whole.figure.update_traces(
+                    z=z,
+                    selector=dict(type='contour', name='contour')
+                )
                 return self.ls.graph_whole.figure
             elif clicked_id_text == self.ls.graph_whole.id:
-                if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
-                    self.ls.graph_whole.figure.update_traces(
-                        x=np.array(clickData['points'][0]['x']),
-                        y=np.array(clickData['points'][0]['y']),
-                        visible=True,
-                        marker=dict(
-                            symbol='x'
-                        ),
-                        selector=dict(name='clicked_point', type='scatter')
-                    )
-                elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
-                    self.ls.graph_whole.figure.update_traces(
-                        x=np.array(clickData['points'][0]['x']),
-                        y=np.array(clickData['points'][0]['y']),
-                        visible=True,
-                        marker=dict(
-                            symbol='circle-x'
-                        ),
-                        selector=dict(name='clicked_point', type='scatter')
-                    )
-                    # if latent variable is clicked
-                    # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
+                self.ls.update_trace_clicked_point(clickData=clickData)
+                # if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
+                #     self.ls.graph_whole.figure.update_traces(
+                #         x=np.array(clickData['points'][0]['x']),
+                #         y=np.array(clickData['points'][0]['y']),
+                #         visible=True,
+                #         marker=dict(
+                #             symbol='x'
+                #         ),
+                #         selector=dict(name='clicked_point', type='scatter')
+                #     )
+                # elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
+                #     self.ls.graph_whole.figure.update_traces(
+                #         x=np.array(clickData['points'][0]['x']),
+                #         y=np.array(clickData['points'][0]['y']),
+                #         visible=True,
+                #         marker=dict(
+                #             symbol='circle-x'
+                #         ),
+                #         selector=dict(name='clicked_point', type='scatter')
+                #     )
+                #     # if latent variable is clicked
+                #     # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
 
-                self.ls.graph_whole.figure.update_traces(z=self.ls.grid_mapping[:, index_selected_feature],
-                                                         selector=dict(type='contour', name='contour'))
+                print('index_selected_feature={}'.format(index_selected_feature))
+                if index_selected_feature is None:
+                    z = None
+                else:
+                    z = self.ls.grid_mapping[:, index_selected_feature]
+                self.ls.graph_whole.figure.update_traces(
+                    z=z,
+                    selector=dict(type='contour', name='contour')
+                )
                 return self.ls.graph_whole.figure
             else:
                 return dash.no_update

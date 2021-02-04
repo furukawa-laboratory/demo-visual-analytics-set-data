@@ -422,7 +422,7 @@ class UKRForWeightedKDE():
                 # self.index_team_selected = index_nearest_latent_variable
                 self.fs.graph_whole.figure.update_traces(
                     z=grid_values,
-                    selector=dict(type='contour',name='contour')
+                    selector=dict(type='contour', name='contour')
                 )
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
