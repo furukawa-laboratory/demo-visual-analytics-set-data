@@ -59,14 +59,14 @@ class Space():
             zmid = 0.0
         else:
             zmid = None
-        if self.grid_mapping is not None:
-            z = self.grid_mapping[:, 0]
-        else:
-            z = None
+        # if self.grid_mapping is not None:
+        #     z = self.grid_mapping[:, 0]
+        # else:
+        #     z = None
         fig.add_trace(
             go.Contour(x=self.grid_points[:, 0],
                        y=self.grid_points[:, 1],
-                       z=z,
+                       z=None,
                        name='contour',
                        zmid=zmid,
                        **self.params_contour

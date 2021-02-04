@@ -460,7 +460,7 @@ class UnsupervisedKernelRegression(object):
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
             # print(clicked_id_text)
             if clicked_id_text == self.ls.dropdown.id:
-                print('catch dropdown in ukr update method')
+                # print('catch dropdown in ukr update method')
                 self.ls.graph_whole.figure.update_traces(z=self.ls.grid_mapping[:, index_selected_feature],
                                                          selector=dict(type='contour', name='contour'))
                 return self.ls.graph_whole.figure

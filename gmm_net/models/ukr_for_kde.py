@@ -380,6 +380,8 @@ class UKRForWeightedKDE():
             grid_points = create_zeta(-1.0, 1.0, self.n_embedding, n_grid_points)
         else:
             raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
+        # shape=(grid_points**self.n_embedding, self.resolution_quadrature**self.n_feature)
+        # In short, number of discretizing latent space x number of discretizing data space
         self.ls = LatentSpace(data=self.Z,
                               grid_points=grid_points,
                               params_scat_data=params_scat_z
@@ -392,6 +394,10 @@ class UKRForWeightedKDE():
                                       self.n_features, n_grid_points)
             self.fs = FeatureSpace(data=self.member_features, grid_points=grid_points)
 
+        self.ls.grid_mapping = self.inverse_transformed_pdf(
+            x=self.fs.grid_points,
+            latent_variables=self.ls.grid_points
+        )
 
         config = {'displayModeBar': False}
         self.ls.set_graph_whole(id=id_ls, config=config)
@@ -416,7 +422,7 @@ class UKRForWeightedKDE():
                 # self.index_team_selected = index_nearest_latent_variable
                 self.fs.graph_whole.figure.update_traces(
                     z=grid_values,
-                    selector=dict(type='contour',name='cp')
+                    selector=dict(type='contour',name='contour')
                 )
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
@@ -425,7 +431,7 @@ class UKRForWeightedKDE():
                 grid_values = self.ls.grid_mapping[index, :]
                 self.fs.graph_whole.figure.update_traces(
                     z=grid_values,
-                    selector=dict(type='contour', name='cp')
+                    selector=dict(type='contour', name='contour')
                 )
             # elif clickData['points'][0]['curveNumber'] == 0:
             #     print('clicked heatmap')
