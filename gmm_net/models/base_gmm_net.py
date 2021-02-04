@@ -188,8 +188,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
         self.own_lower_ukr = self.lower_ukr
 
-        self.own_opp_gplvm = DDGMM(data=self.training_performance,
-                                   label_feature=label_performance)
+        self.own_opp_gplvm = DDGMM(data=self.training_performance)
 
 
         # define graphs
@@ -205,7 +204,8 @@ class BaseGMMNetworkOwnOppPerformance():
                                 'contours_coloring': 'heatmap',
                                 'line_smoothing': 0.85},
                 params_scat_z=params_init_lower_ukr['params_scat_z'],
-                params_figure_layout={'title': which+' member map'},
+                params_fig_layout_ls={'title': which+' member map'},
+                params_fig_layout_fb={'title': which+' member feature'},
                 is_middle_color_zero=is_member_cp_middle_color_zero,
                 is_show_ticks_latent_space=False,
                 id_ls=which+'_member_map',
@@ -228,7 +228,9 @@ class BaseGMMNetworkOwnOppPerformance():
 
         self.own_opp_gplvm.define_graphs(own_ls=self.own_ukr_kde.ls,
                                          opp_ls=self.opp_ukr_kde.ls,
-                                         label_feature=label_performance)
+                                         label_feature=label_performance,
+                                         id_fb='performance_bar',
+                                         params_figure_layout={'title': 'own team performance'})
 
 
         # Define whole layout
@@ -246,7 +248,8 @@ class BaseGMMNetworkOwnOppPerformance():
             ),
             html.Div(
                 [
-                    self.own_ukr_kde.ls.graph_whole
+                    self.own_ukr_kde.ls.graph_whole,
+                    self.own_opp_gplvm.os.graph_indiv
                 ],
                 style={'display': 'inline-block', 'width': '33%'}
             ),

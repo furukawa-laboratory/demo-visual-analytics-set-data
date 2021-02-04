@@ -193,7 +193,8 @@ class UnsupervisedKernelRegression(object):
     def define_graphs(self, n_grid_points, label_data, label_feature,
                       is_show_all_label_data, is_middle_color_zero,
                       is_show_ticks_latent_space,
-                      params_contour, params_scat_z, params_figure_layout,
+                      params_contour, params_scat_z, params_fig_layout_ls,
+                      params_fig_layout_fb,
                       id_ls, id_dropdown, id_fb):
 
         self._initialize_to_vis_least(n_grid_points=n_grid_points,
@@ -208,7 +209,8 @@ class UnsupervisedKernelRegression(object):
             is_middle_color_zero=is_middle_color_zero,
             params_contour=params_contour,
             params_scat_z=params_scat_z,
-            params_figure_layout=params_figure_layout,
+            params_fig_layout_ls=params_fig_layout_ls,
+            params_fig_layout_fb=params_fig_layout_fb,
             id_ls=id_ls,
             id_dropdown=id_dropdown,
             id_fb=id_fb
@@ -268,7 +270,8 @@ class UnsupervisedKernelRegression(object):
                                 is_middle_color_zero,
                                 params_contour: dict,
                                 params_scat_z: dict,
-                                params_figure_layout: dict,
+                                params_fig_layout_ls: dict,
+                                params_fig_layout_fb: dict,
                                 id_ls: str,
                                 id_dropdown: str,
                                 id_fb: str
@@ -286,7 +289,7 @@ class UnsupervisedKernelRegression(object):
                               grid_points=self.grid_points,
                               grid_mapping=self.grid_mapping,
                               is_middle_color_zero=is_middle_color_zero,
-                              params_figure_layout=params_figure_layout)
+                              params_figure_layout=params_fig_layout_ls)
         if label_data is None:
             self.ls.label_data = label_data
         elif isinstance(label_data, list):
@@ -323,27 +326,9 @@ class UnsupervisedKernelRegression(object):
             clearable=True
         )
 
-        self.os.set_graph_indiv(id=id_fb,config=config,
-                                params_figure_layout={'title': 'feature bars'})
+        self.os.set_graph_indiv(id=id_fb, config=config,
+                                params_figure_layout=params_fig_layout_fb)
 
-        # fig_fb = go.Figure(
-        #     layout=go.Layout(
-        #         title=go.layout.Title(text='Feature bars'),
-        #         yaxis={'range': [self.X.min(), self.X.max()]},
-        #         showlegend=False
-        #     )
-        # )
-        #
-        # fig_fb.add_trace(
-        #     go.Bar(x=self.label_feature, y=np.zeros(self.X.shape[1]),
-        #            marker=dict(color='#e377c2'))
-        # )
-        #
-        # self.os.graph_indiv = dcc.Graph(
-        #     id=id_fb,
-        #     figure=fig_fb,
-        #     config=config
-        # )
 
     def update_fb_from_ls(self, clickData):
         import dash
