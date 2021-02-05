@@ -5,9 +5,8 @@ class DoubleDomainGMM(object):
     def __init__(self, data):
         self.mesh_grid_mapping = None
         self.mesh_grid_precision = None
-        self.own_ls = None
-        self.opp_ls = None
         self.os = ObservedSpace(data=data)
+        self.dic_ls = {}
 
     def define_graphs(self, own_ls, opp_ls, label_feature, id_fb,
                       params_figure_layout={}):
@@ -41,26 +40,34 @@ class DoubleDomainGMM(object):
         else:
             raise ValueError('invalid which_update={}'.format(which_update))
 
-        if clickData is not None:
-            index = clickData['points'][0]['pointIndex']
-            # print('index={}'.format(index))
-            if clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['data']:
-                # print('clicked latent variable')
-                # if latent variable is clicked
-                # self.os.graph_indiv.figure.update_traces(y=self.X[index])
-            elif clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['grids']:
-                # self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
-                if which_update == 'own':
-                    grid_value = self.mesh_grid_mapping[:, index, index_selected_feature]
-                else:
-                    grid_value = self.mesh_grid_mapping[index, :, index_selected_feature]
+        if index_selected_feature is not None:
+            if clickData is not None:
+                index = clickData['points'][0]['pointIndex']
+                # print('index={}'.format(index))
+                if clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['data']:
+                    # print('clicked latent variable')
+                    # if latent variable is clicked
+                    # self.os.graph_indiv.figure.update_traces(y=self.X[index])
+                    grid_value = None
+                elif clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['grids']:
+                    # self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
+                    if which_update == 'own':
+                        grid_value = self.mesh_grid_mapping[:, index, index_selected_feature]
+                    else:
+                        grid_value = self.mesh_grid_mapping[index, :, index_selected_feature]
 
+                ls_updated.graph_whole.figure.update_traces(
+                    z=grid_value,
+                    selector=dict(type='contour', name='contour')
+                )
+
+                return self.os.graph_indiv.figure
+            else:
+                return dash.no_update
+        else:
             ls_updated.figure.update_traces(
-                z=grid_value,
+                z=None,
                 selector=dict(type='contour', name='contour')
             )
 
-            return self.os.graph_indiv.figure
-        else:
-            return dash.no_update
 

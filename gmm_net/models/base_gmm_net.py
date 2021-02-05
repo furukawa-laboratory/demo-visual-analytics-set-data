@@ -249,6 +249,7 @@ class BaseGMMNetworkOwnOppPerformance():
             html.Div(
                 [
                     self.own_ukr_kde.ls.graph_whole,
+                    self.own_opp_gplvm.dic_ls['own'].dropdown,
                     self.own_opp_gplvm.os.graph_indiv
                 ],
                 style={'display': 'inline-block', 'width': '33%'}
@@ -256,6 +257,7 @@ class BaseGMMNetworkOwnOppPerformance():
             html.Div(
                 [
                     self.opp_ukr_kde.ls.graph_whole,
+                    self.own_opp_gplvm.dic_ls['opp'].dropdown,
                     self.opp_lower_ukr.ls.graph_whole
                 ],
                 style={'display': 'inline-block', 'width': '33%'}
@@ -291,34 +293,58 @@ class BaseGMMNetworkOwnOppPerformance():
                     component_property='clickData'
                 ),
                 Input(
+                    component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
+                    component_property='value'
+                ),
+                Input(
                     component_id=self.own_ukr_kde.ls.graph_whole.id,
+                    component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
+                    component_property='value'
+                ),
+                Input(
+                    component_id=self.opp_ukr_kde.ls.graph_whole.id,
                     component_property='clickData'
                 )
             ]
         )
-        def update_maps(index_selected_feature, clickData_mm, clickData_tm):
+        def update_maps(index_feature_own_member, clickData_mm,
+                        index_own_performance_own_tm, clickData_own_tm,
+                        index_opp_performance_opp_tm, clickData_opp_tm):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
                 return dash.no_update, dash.no_update, dash.no_update
             else:
                 clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
                 print(clicked_id_text)
-                print(index_selected_feature)
                 if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
                     return self.own_lower_ukr.update_ls(
-                        index_selected_feature=index_selected_feature,
+                        index_selected_feature=index_feature_own_member,
                         clickData=clickData_mm
                     ), dash.no_update, dash.no_update
                 elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
                     return self.own_lower_ukr.update_ls(
-                        index_selected_feature=index_selected_feature,
+                        index_selected_feature=index_feature_own_member,
                         clickData=clickData_mm
                     ), dash.no_update, dash.no_update
                 elif clicked_id_text == self.own_ukr_kde.ls.graph_whole.id:
                     rets = [
-                        self.own_ukr_kde.update_fs_from_ls(clickData=clickData_tm),
+                        self.own_ukr_kde.update_fs_from_ls(clickData=clickData_own_tm),
                         None, # Reset value in dropdown
-                        self.own_ukr_kde.update_ls(clickData=clickData_tm)
+                        self.own_ukr_kde.update_ls(clickData=clickData_own_tm)
+                    ]
+                    return rets
+                elif clicked_id_text == self.own_opp_gplvm.dic_ls['own'].dropdown.id:
+                    rets = [
+                        dash.no_update,
+                        dash.no_update,
+                        self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_own_tm,
+                            clickData=clickData_opp_tm,
+                            which_update='own'
+                        )
                     ]
                     return rets
                 else:
