@@ -189,7 +189,6 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
         self.own_lower_ukr = self.lower_ukr
 
-        self.own_opp_gplvm = DDGMM(data=self.training_performance)
 
 
         # define graphs
@@ -227,6 +226,18 @@ class BaseGMMNetworkOwnOppPerformance():
                 fs=lower_ukr.ls
             )
 
+        # Create tensor to draw ccp
+        if 'mesh_grid_mapping' in vars(self) and 'mesh_grid_precision':
+            if self.mesh_grid_mapping.shape[0] == self.upper_ukr_kde.ls.grid_points.shape[0]:
+                pass
+            else:
+                raise ValueError('invalid previous mesh_grid_mapping or mesh_grid_precision')
+        else:
+            self.mesh_grid_mapping, mesh_grid_uncertainty = self._create_tensor_mapping_for_ccp(return_std=True)
+            self.mesh_grid_precision = np.reciprocal(mesh_grid_uncertainty)
+        self.own_opp_gplvm = DDGMM(data=self.training_performance)
+        self.own_opp_gplvm.mesh_grid_mapping = self.mesh_grid_mapping
+        self.own_opp_gplvm.mesh_grid_precision = self.mesh_grid_precision
         self.own_opp_gplvm.define_graphs(own_ls=self.own_ukr_kde.ls,
                                          opp_ls=self.opp_ukr_kde.ls,
                                          label_feature=label_performance,
@@ -320,10 +331,11 @@ class BaseGMMNetworkOwnOppPerformance():
         )
         def update_maps(index_feature_own_member, clickData_mm,
                         index_own_performance_own_tm, clickData_own_tm,
-                        index_opp_performance_opp_tm, clickData_opp_tm):
+                        index_own_performance_opp_tm, clickData_opp_tm):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
-                return dash.no_update, dash.no_update, dash.no_update
+                # no update
+                return self.get_return_list(**{})
             else:
                 clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
                 print(clicked_id_text)
@@ -343,6 +355,15 @@ class BaseGMMNetworkOwnOppPerformance():
                         )
                     }
                     return self.get_return_list(**dict_update)
+                elif clicked_id_text == self.own_opp_gplvm.dic_ls['own'].dropdown.id:
+                    dict_update = {
+                        self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_own_tm,
+                            clickData=clickData_opp_tm,
+                            which_update='own'
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
                 elif clicked_id_text == self.own_ukr_kde.ls.graph_whole.id:
                     dict_update = {
                         self.own_lower_ukr.ls.graph_whole.id: self.own_ukr_kde.update_fs_from_ls(
@@ -351,10 +372,24 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_lower_ukr.ls.dropdown.id: None, # Reset value in dropdown
                         self.own_ukr_kde.ls.graph_whole.id: self.own_ukr_kde.update_ls(
                             clickData=clickData_own_tm
+                        ),
+                        self.own_opp_gplvm.dic_ls['opp'].graph_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_opp_tm,
+                            clickData=clickData_own_tm,
+                            which_update='opp'
                         )
                     }
                     return self.get_return_list(**dict_update)
-                elif clicked_id_text == self.own_opp_gplvm.dic_ls['own'].dropdown.id:
+                elif clicked_id_text == self.own_opp_gplvm.dic_ls['opp'].dropdown.id:
+                    dict_update = {
+                        self.own_opp_gplvm.dic_ls['opp'].graph_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_opp_tm,
+                            clickData=clickData_own_tm,
+                            which_update='opp'
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
+                elif clicked_id_text == self.own_opp_gplvm.dic_ls['opp'].graph_whole.id:
                     dict_update = {
                         self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
                             index_selected_feature=index_own_performance_own_tm,

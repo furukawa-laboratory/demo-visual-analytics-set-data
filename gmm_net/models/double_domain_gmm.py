@@ -39,10 +39,14 @@ class DoubleDomainGMM(object):
             ls_triggered = self.dic_ls['own']
         else:
             raise ValueError('invalid which_update={}'.format(which_update))
+        print('in own_opp_gplvm.update_ls')
+        print('index_selected_feature={}'.format(index_selected_feature))
+        print('clickData={}'.format(clickData))
+        print('which={}'.format(which_update))
 
         if index_selected_feature is not None:
             if clickData is not None:
-                index = clickData['points'][0]['pointIndex']
+                index_clickdata = clickData['points'][0]['pointIndex']
                 # print('index={}'.format(index))
                 if clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['data']:
                     # print('clicked latent variable')
@@ -52,22 +56,23 @@ class DoubleDomainGMM(object):
                 elif clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['grids']:
                     # self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
                     if which_update == 'own':
-                        grid_value = self.mesh_grid_mapping[:, index, index_selected_feature]
+                        grid_value = self.mesh_grid_mapping[:, index_clickdata, index_selected_feature]
                     else:
-                        grid_value = self.mesh_grid_mapping[index, :, index_selected_feature]
+                        grid_value = self.mesh_grid_mapping[index_clickdata, :, index_selected_feature]
 
                 ls_updated.graph_whole.figure.update_traces(
                     z=grid_value,
                     selector=dict(type='contour', name='contour')
                 )
 
-                return self.os.graph_indiv.figure
+                return ls_updated.graph_whole.figure
             else:
                 return dash.no_update
         else:
-            ls_updated.figure.update_traces(
+            ls_updated.graph_whole.figure.update_traces(
                 z=None,
                 selector=dict(type='contour', name='contour')
             )
+            return ls_updated.graph_whole.figure
 
 
