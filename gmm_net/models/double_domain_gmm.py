@@ -21,7 +21,7 @@ class DoubleDomainGMM(object):
                                 config=config)
         for key, ls in self.dic_ls.items():
             ls.dropdown = dcc.Dropdown(
-                id=key+'_dropdown',
+                id=key+'_team_dropdown',
                 options=[{"value": i, "label": x}
                          for i, x in enumerate(self.os.label_feature)],
                 placeholder="Select own team performance shown as contour",
