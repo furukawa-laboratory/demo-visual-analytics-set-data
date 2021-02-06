@@ -216,7 +216,7 @@ else:
 resolution = 30
 cmap_density = "Greys"
 cmap_feature = "RdBu_r"
-cmap_ccp = "bwr"
+cmap_ccp = "RdBu_r"
 is_member_cp_middle_color_zero = True
 is_ccp_middle_color_zero = True
 dict_position_marker = {

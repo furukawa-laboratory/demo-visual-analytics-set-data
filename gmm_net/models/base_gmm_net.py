@@ -245,6 +245,10 @@ class BaseGMMNetworkOwnOppPerformance():
                                          opp_ls=self.opp_ukr_kde.ls,
                                          label_feature=label_performance,
                                          id_fb='performance_bar',
+                                         params_contour={'colorscale': cmap_ccp,
+                                                         'contours_coloring': 'heatmap',
+                                                         'line_smoothing': 0.85,
+                                                         'zmid': 0.0},
                                          params_figure_layout={'title': 'own team performance'})
 
 
@@ -301,7 +305,9 @@ class BaseGMMNetworkOwnOppPerformance():
             Output(component_id=self.opp_ukr_kde.ls.graph_whole.id,
                    component_property='figure'),
             Output(component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
-                   component_property='value')
+                   component_property='value'),
+            Output(component_id=self.own_opp_gplvm.os.graph_indiv.id,
+                   component_property='figure')
         ]
         @app.callback(
             self.output_lists,
@@ -380,6 +386,10 @@ class BaseGMMNetworkOwnOppPerformance():
                             index_selected_feature=index_own_performance_opp_tm,
                             clickData=clickData_own_tm,
                             which_update='opp'
+                        ),
+                        self.own_opp_gplvm.os.graph_indiv.id: self.own_opp_gplvm.update_bar(
+                            own_clickData=clickData_own_tm,
+                            opp_clickData=clickData_opp_tm
                         )
                     }
                     return self.get_return_list(**dict_update)
@@ -398,6 +408,13 @@ class BaseGMMNetworkOwnOppPerformance():
                             index_selected_feature=index_own_performance_own_tm,
                             clickData=clickData_opp_tm,
                             which_update='own'
+                        ),
+                        self.opp_ukr_kde.ls.graph_whole.id: self.opp_ukr_kde.update_ls(
+                            clickData=clickData_opp_tm
+                        ),
+                        self.own_opp_gplvm.os.graph_indiv.id: self.own_opp_gplvm.update_bar(
+                            own_clickData=clickData_own_tm,
+                            opp_clickData=clickData_opp_tm
                         )
                     }
                     return self.get_return_list(**dict_update)

@@ -1,5 +1,8 @@
 from gmm_net.models.core import ObservedSpace
 import numpy as np
+import dash
+from scipy.spatial.distance import cdist
+
 
 class DoubleDomainGMM(object):
     def __init__(self, data):
@@ -7,8 +10,10 @@ class DoubleDomainGMM(object):
         self.mesh_grid_precision = None
         self.os = ObservedSpace(data=data)
         self.dic_ls = {}
+        self.params_contour = {}
 
     def define_graphs(self, own_ls, opp_ls, label_feature, id_fb,
+                      params_contour,
                       params_figure_layout={}):
         import plotly.graph_objects as go
         import dash_core_components as dcc
@@ -27,16 +32,61 @@ class DoubleDomainGMM(object):
                 placeholder="Select own team performance shown as contour",
                 clearable=True
             )
-        pass
+        self.params_contour = params_contour
+
+    def update_bar(self, own_clickData, opp_clickData):
+        print('in update_bar')
+        print("own_clickData={}".format(own_clickData))
+        print("opp_clickData={}".format(opp_clickData))
+        if own_clickData is not None and opp_clickData is not None:
+            index_own_clickdata = own_clickData['points'][0]['pointIndex']
+            index_opp_clickdata = opp_clickData['points'][0]['pointIndex']
+
+            # check which trace is clicked in own team map
+            if own_clickData['points'][0]['curveNumber'] == self.dic_ls['own'].dic_index_traces['grids']:
+                index_own_nearest_grid = index_own_clickdata
+            elif own_clickData['points'][0]['curveNumber'] == self.dic_ls['own'].dic_index_traces['data']:
+                index_own_nearest_grid = self._get_index_nearest_grid(
+                    x=own_clickData['points'][0]['x'],
+                    y=own_clickData['points'][0]['y'],
+                    which='own'
+                )
+                print(
+                    'own nearest grid={}th grid {}'.format(
+                        index_own_nearest_grid,
+                        self.dic_ls['own'].grid_points[index_own_nearest_grid]
+                    )
+                )
+            else:
+                return dash.no_update
+            # check which trace is clicked in opp team map
+            if opp_clickData['points'][0]['curveNumber'] == self.dic_ls['opp'].dic_index_traces['grids']:
+                index_opp_nearest_grid = index_opp_clickdata
+            elif opp_clickData['points'][0]['curveNumber'] == self.dic_ls['opp'].dic_index_traces['data']:
+                index_opp_nearest_grid = self._get_index_nearest_grid(
+                    x=opp_clickData['points'][0]['x'],
+                    y=opp_clickData['points'][0]['y'],
+                    which='opp'
+                )
+            else:
+                return dash.no_update
+            self.os.graph_indiv.figure.update_traces(
+                y=self.mesh_grid_mapping[index_own_nearest_grid, index_opp_nearest_grid, :]
+            )
+            return self.os.graph_indiv.figure
+
+        else:
+            return dash.no_update
 
     def update_ls(self, index_selected_feature, clickData, which_update: str):
-        import dash
         if which_update == 'own':
             ls_updated = self.dic_ls['own']
             ls_triggered = self.dic_ls['opp']
+            which_triggerd = 'opp'
         elif which_update == 'opp':
             ls_updated = self.dic_ls['opp']
             ls_triggered = self.dic_ls['own']
+            which_triggerd = 'own'
         else:
             raise ValueError('invalid which_update={}'.format(which_update))
         print('in own_opp_gplvm.update_ls')
@@ -49,20 +99,25 @@ class DoubleDomainGMM(object):
                 index_clickdata = clickData['points'][0]['pointIndex']
                 # print('index={}'.format(index))
                 if clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['data']:
-                    # print('clicked latent variable')
-                    # if latent variable is clicked
-                    # self.os.graph_indiv.figure.update_traces(y=self.X[index])
-                    grid_value = None
+                    index_nearest_grid = self._get_index_nearest_grid(
+                        x=clickData['points'][0]['x'],
+                        y=clickData['points'][0]['y'],
+                        which=which_triggerd
+                    )
                 elif clickData['points'][0]['curveNumber'] == ls_triggered.dic_index_traces['grids']:
-                    # self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
-                    if which_update == 'own':
-                        grid_value = self.mesh_grid_mapping[:, index_clickdata, index_selected_feature]
-                    else:
-                        grid_value = self.mesh_grid_mapping[index_clickdata, :, index_selected_feature]
+                    index_nearest_grid = index_clickdata
+                else:
+                    return dash.no_update
+
+                if which_update == 'own':
+                    grid_value = self.mesh_grid_mapping[:, index_nearest_grid, index_selected_feature]
+                else:
+                    grid_value = self.mesh_grid_mapping[index_nearest_grid, :, index_selected_feature]
 
                 ls_updated.graph_whole.figure.update_traces(
+                    selector=dict(type='contour', name='contour'),
                     z=grid_value,
-                    selector=dict(type='contour', name='contour')
+                    **self.params_contour
                 )
 
                 return ls_updated.graph_whole.figure
@@ -74,5 +129,13 @@ class DoubleDomainGMM(object):
                 selector=dict(type='contour', name='contour')
             )
             return ls_updated.graph_whole.figure
+    def _get_index_nearest_grid(self, x, y, which: str):
+        coordinate = np.array([x, y])[None, :]
+        grids = self.dic_ls[which].grid_points
+
+        distance = cdist(grids, coordinate, metric='sqeuclidean')
+        index_nearest = np.argmin(distance.ravel())
+        return index_nearest
+
 
 
