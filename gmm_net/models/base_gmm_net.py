@@ -376,18 +376,26 @@ class BaseGMMNetworkOwnOppPerformance():
                     }
                     return self.get_return_list(**dict_update)
                 elif clicked_id_text == self.own_ukr_kde.ls.graph_whole.id:
+                    _ = self.own_ukr_kde.update_ls(
+                        clickData=clickData_own_tm
+                    )
                     dict_update = {
                         self.own_lower_ukr.ls.graph_whole.id: self.own_ukr_kde.update_fs_from_ls(
                             clickData=clickData_own_tm
                         ),
                         self.own_lower_ukr.ls.dropdown.id: None, # Reset value in dropdown
-                        self.own_ukr_kde.ls.graph_whole.id: self.own_ukr_kde.update_ls(
-                            clickData=clickData_own_tm
-                        ),
+                        # self.own_ukr_kde.ls.graph_whole.id: self.own_ukr_kde.update_ls(
+                        #     clickData=clickData_own_tm
+                        # ),
                         self.own_opp_gplvm.dic_ls['opp'].graph_whole.id: self.own_opp_gplvm.update_ls(
                             index_selected_feature=index_own_performance_opp_tm,
                             clickData=clickData_own_tm,
                             which_update='opp'
+                        ),
+                        self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_own_tm,
+                            clickData=clickData_opp_tm,
+                            which_update='own'
                         ),
                         self.own_opp_gplvm.os.graph_indiv.id: self.own_opp_gplvm.update_bar(
                             own_clickData=clickData_own_tm,
@@ -405,11 +413,19 @@ class BaseGMMNetworkOwnOppPerformance():
                     }
                     return self.get_return_list(**dict_update)
                 elif clicked_id_text == self.own_opp_gplvm.dic_ls['opp'].graph_whole.id:
+                    _ = self.opp_ukr_kde.update_ls(
+                        clickData=clickData_opp_tm
+                    )
                     dict_update = {
                         self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
                             index_selected_feature=index_own_performance_own_tm,
                             clickData=clickData_opp_tm,
                             which_update='own'
+                        ),
+                        self.own_opp_gplvm.dic_ls['opp'].graph_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_opp_tm,
+                            clickData=clickData_own_tm,
+                            which_update='opp'
                         ),
                         self.opp_ukr_kde.ls.graph_whole.id: self.opp_ukr_kde.update_ls(
                             clickData=clickData_opp_tm
