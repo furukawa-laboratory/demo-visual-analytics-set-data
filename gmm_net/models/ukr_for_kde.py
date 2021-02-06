@@ -396,6 +396,8 @@ class UKRForWeightedKDE():
                                       self.n_features, n_grid_points)
             self.fs = FeatureSpace(data=self.member_features, grid_points=grid_points)
 
+        self.params_contour_density = params_contour
+
         self.ls.grid_mapping = self.inverse_transformed_pdf(
             x=self.fs.grid_points,
             latent_variables=self.ls.grid_points
@@ -424,7 +426,8 @@ class UKRForWeightedKDE():
                 # self.index_team_selected = index_nearest_latent_variable
                 self.fs.graph_whole.figure.update_traces(
                     z=grid_values,
-                    selector=dict(type='contour', name='contour')
+                    selector=dict(type='contour', name='contour'),
+                    **self.params_contour_density
                 )
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
@@ -432,8 +435,9 @@ class UKRForWeightedKDE():
                 #self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
                 grid_values = self.ls.grid_mapping[index, :]
                 self.fs.graph_whole.figure.update_traces(
+                    selector=dict(type='contour', name='contour'),
                     z=grid_values,
-                    selector=dict(type='contour', name='contour')
+                    **self.params_contour_density
                 )
             # elif clickData['points'][0]['curveNumber'] == 0:
             #     print('clicked heatmap')

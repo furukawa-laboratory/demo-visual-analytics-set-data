@@ -303,8 +303,10 @@ class UnsupervisedKernelRegression(object):
             raise ValueError('label_data must be 1d array or list')
         if params_contour is None:
             self.ls.params_contour = {}
+            self.params_contour = {}
         elif isinstance(params_contour, dict):
             self.ls.params_contour = params_contour
+            self.params_contour = params_contour
         else:
             raise ValueError('invalid params_contour={}'.format(params_contour))
 
@@ -367,7 +369,8 @@ class UnsupervisedKernelRegression(object):
                     z = self.ls.grid_mapping[:, index_selected_feature]
                 self.ls.graph_whole.figure.update_traces(
                     z=z,
-                    selector=dict(type='contour', name='contour')
+                    selector=dict(type='contour', name='contour'),
+                    **self.params_contour
                 )
                 return self.ls.graph_whole.figure
             elif clicked_id_text == self.ls.graph_whole.id:

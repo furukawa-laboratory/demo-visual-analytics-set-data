@@ -58,9 +58,9 @@ class Space():
         )
         # draw contour of mapping
         if self.is_middle_color_zero:
-            zmid = 0.0
+            self.params_contour.update(dict(zmid=0.0))
         else:
-            zmid = None
+            self.params_contour.update(dict(zmid=None))
         # if self.grid_mapping is not None:
         #     z = self.grid_mapping[:, 0]
         # else:
@@ -70,7 +70,6 @@ class Space():
                        y=self.grid_points[:, 1],
                        z=None,
                        name='contour',
-                       zmid=zmid,
                        **self.params_contour
                        )
         )

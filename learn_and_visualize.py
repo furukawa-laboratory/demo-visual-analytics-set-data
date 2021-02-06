@@ -214,7 +214,7 @@ else:
 
 # set parameters to visualize
 resolution = 30
-cmap_density = "binary"
+cmap_density = "Greys"
 cmap_feature = "RdBu_r"
 cmap_ccp = "bwr"
 is_member_cp_middle_color_zero = True
