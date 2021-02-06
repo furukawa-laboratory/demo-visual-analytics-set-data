@@ -302,6 +302,8 @@ class BaseGMMNetworkOwnOppPerformance():
                    component_property='figure'),
             Output(component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
                    component_property='value'),
+            Output(component_id=self.opp_lower_ukr.ls.graph_whole.id,
+                   component_property='figure'),
             Output(component_id=self.opp_ukr_kde.ls.graph_whole.id,
                    component_property='figure'),
             Output(component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
@@ -415,6 +417,9 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_opp_gplvm.os.graph_indiv.id: self.own_opp_gplvm.update_bar(
                             own_clickData=clickData_own_tm,
                             opp_clickData=clickData_opp_tm
+                        ),
+                        self.opp_lower_ukr.ls.graph_whole.id: self.opp_ukr_kde.update_fs_from_ls(
+                            clickData=clickData_opp_tm
                         )
                     }
                     return self.get_return_list(**dict_update)
