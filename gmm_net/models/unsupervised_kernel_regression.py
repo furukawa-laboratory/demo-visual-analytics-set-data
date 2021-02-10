@@ -363,28 +363,25 @@ class UnsupervisedKernelRegression(object):
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
             # print(clicked_id_text)
             if clicked_id_text == self.ls.dropdown.id:
-                if index_selected_feature is None:
-                    z = None
-                else:
-                    z = self.ls.grid_mapping[:, index_selected_feature]
-                self.ls.graph_whole.figure.update_traces(
-                    z=z,
-                    selector=dict(type='contour', name='contour'),
-                    **self.params_contour
-                )
+                if index_selected_feature is not None:
+                    self.ls.graph_whole.figure.update_traces(
+                        z=self.ls.grid_mapping[:, index_selected_feature],
+                        selector=dict(type='contour', name='contour'),
+                        **self.params_contour
+                    )
                 return self.ls.graph_whole.figure
             elif clicked_id_text == self.ls.graph_whole.id:
                 self.ls.update_trace_clicked_point(clickData=clickData)
 
-                print('index_selected_feature={}'.format(index_selected_feature))
-                if index_selected_feature is None:
-                    z = None
-                else:
-                    z = self.ls.grid_mapping[:, index_selected_feature]
-                self.ls.graph_whole.figure.update_traces(
-                    z=z,
-                    selector=dict(type='contour', name='contour')
-                )
+                # print('index_selected_feature={}'.format(index_selected_feature))
+                # if index_selected_feature is None:
+                #     z = None
+                # else:
+                #     z = self.ls.grid_mapping[:, index_selected_feature]
+                # self.ls.graph_whole.figure.update_traces(
+                #     z=z,
+                #     selector=dict(type='contour', name='contour')
+                # )
                 return self.ls.graph_whole.figure
             else:
                 return dash.no_update
