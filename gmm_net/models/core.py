@@ -36,19 +36,23 @@ class Space():
     def set_graph_whole(self, id, config=None):
         if config is None:
             config = {'displayModeBar': False}
+        x_range = [
+            self.data[:, 0].min(),
+            self.data[:, 0].max()
+        ]
+        y_range = [
+            self.data[:, 1].min(),
+            self.data[:, 1].max()
+        ]
         fig = go.Figure(
             layout=go.Layout(
                 xaxis={
-                    'range': [
-                        self.data[:, 0].min() - 0.05,
-                        self.data[:, 0].max() + 0.05
-                    ]
+                    'range': [self.data[:, 0].min()-0.1, self.data[:, 0].max()+0.1],
+                    'visible': False
                 },
                 yaxis={
-                    'range': [
-                        self.data[:, 1].min() - 0.05,
-                        self.data[:, 1].max() + 0.05
-                    ],
+                    'range': [self.data[:, 1].min()-0.1, self.data[:, 1].max()+0.1],
+                    'visible': False,
                     'scaleanchor': 'x',
                     'scaleratio': 1.0
                 },
@@ -73,6 +77,36 @@ class Space():
                        **self.params_contour
                        )
         )
+        # plot frame line of latent space
+        line_property=dict(color='dimgray', width=3)
+        fig.add_trace(
+            go.Scatter(
+                x=[x_range[1], x_range[1]],
+                y=y_range,
+                line=line_property,
+                mode='lines')
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=x_range,
+                y=[y_range[0], y_range[0]],
+                line=line_property,
+                mode='lines')
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=x_range,
+                y=[y_range[1], y_range[1]],
+                line=line_property,
+                mode='lines')
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[x_range[0], x_range[0]],
+                y=y_range,
+                line=line_property,
+                mode='lines')
+        )
         # draw invisible grids to click
         fig.add_trace(
             go.Scatter(x=self.grid_points[:, 0],
@@ -82,7 +116,7 @@ class Space():
                        marker=dict(symbol='square', size=10, opacity=0.0, color='black'),
                        name='latent space')
         )
-        self.dic_index_traces['grids'] = 1
+        self.dic_index_traces['grids'] = 5
 
         # draw latent variables
         fig.add_trace(
@@ -94,7 +128,7 @@ class Space():
                 **self.params_scat_data
             )
         )
-        self.dic_index_traces['data'] = 2
+        self.dic_index_traces['data'] = 6
 
         # draw click point initialized by visible=False
         fig.add_trace(
@@ -114,7 +148,7 @@ class Space():
                 name='clicked_point'
             )
         )
-        self.dic_index_traces['clicked_point'] = 3
+        self.dic_index_traces['clicked_point'] = 7
 
         self.graph_whole = dcc.Graph(
             id=id,

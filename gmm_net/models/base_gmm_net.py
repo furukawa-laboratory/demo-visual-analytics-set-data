@@ -205,8 +205,17 @@ class BaseGMMNetworkOwnOppPerformance():
                                 'line_smoothing': 0.85,
                                 'zmid': 0.0},
                 params_scat_z=params_init_lower_ukr['params_scat_z'],
-                params_fig_layout_ls={'title': which+' member map'},
-                params_fig_layout_fb={'title': which+' member feature'},
+                params_fig_layout_ls={
+                    'plot_bgcolor': '#ffffff',
+                    #'title': which+' member map',
+                    #'grid': dict(rows=2, columns=2)
+                    #'grid': dict(domain=dict(x=[0.5,1],y=[0.5,1]))
+                    'margin': dict(l=10, r=10, t=10, b=10)
+                },
+                params_fig_layout_fb={
+                    ##'title': which+' member feature',
+                    'margin': dict(l=10, r=10, t=10, b=10)
+                },
                 is_middle_color_zero=is_member_cp_middle_color_zero,
                 is_show_ticks_latent_space=False,
                 id_ls=which+'_member_map',
@@ -224,7 +233,11 @@ class BaseGMMNetworkOwnOppPerformance():
                                 'line_smoothing': 0.85,
                                 'zmid': None},
                 params_scat_z=params_init_upper_ukr['params_scat_z'],
-                params_figure_layout={'title': which+' team map'},
+                params_figure_layout={
+                    #'title': which+' team map',
+                    'plot_bgcolor': '#ffffff',
+                    'margin': dict(l=10, r=10, t=10, b=10)
+                },
                 id_ls=which+'_team_map',
                 fs=lower_ukr.ls
             )
@@ -249,34 +262,67 @@ class BaseGMMNetworkOwnOppPerformance():
                                                          'contours_coloring': 'heatmap',
                                                          'line_smoothing': 0.85,
                                                          'zmid': 0.0},
-                                         params_figure_layout={'title': 'own team performance'})
+                                         params_figure_layout={
+                                             #'title': 'own team performance',
+                                             'margin': dict(l=10, r=10, t=10, b=10)
+                                         }
+                                         )
 
 
         # Define whole layout
+
+        title_style = {'whiteSpace': 'pre-line'}
         app.layout = html.Div(children=[
             # `dash_html_components`が提供するクラスは`childlen`属性を有している。
             # `childlen`属性を慣例的に最初の属性にしている。
             html.H1(children='Visual Analyticis of NBA dataset'),
             html.Div(
                 [
+                    html.Div(id='title_own_member_map',
+                             style=title_style,
+                             children='Own member map'),
                     self.own_lower_ukr.ls.graph_whole,
+                    # html.Div(id='text_under_member_map',
+                    #          style={'whiteSpace': 'pre-line'},
+                    #          children='test under member map'),
                     self.own_lower_ukr.ls.dropdown,
+                    html.Div(id='title_member_feature_bar',
+                             style=title_style,
+                             children='Own member feature'),
                     self.own_lower_ukr.os.graph_indiv
                 ],
                 style={'display': 'inline-block', 'width': '33%'}
             ),
             html.Div(
                 [
+                    html.Div(id='title_own_team_map',
+                             style=title_style,
+                             children='Own team map'),
                     self.own_ukr_kde.ls.graph_whole,
+                    # html.Div(id='text_under_own_team_map',
+                    #          style={'whiteSpace': 'pre-line'},
+                    #          children='test under own team map'),
                     self.own_opp_gplvm.dic_ls['own'].dropdown,
+                    html.Div(id='title_own_team_performance',
+                             style=title_style,
+                             children='Own team performance'),
                     self.own_opp_gplvm.os.graph_indiv
                 ],
                 style={'display': 'inline-block', 'width': '33%'}
             ),
             html.Div(
                 [
+                    html.Div(id='title_opp_team_map',
+                             style=title_style,
+                             children='Opposing team map'),
                     self.opp_ukr_kde.ls.graph_whole,
+                    # html.Div(id='text_under_opp_team_map',
+                    #          style={'whiteSpace': 'pre-line'},
+                    #          children='test under opp team map'),
                     self.own_opp_gplvm.dic_ls['opp'].dropdown,
+                    html.Div(id='title_opp_member_map',
+                             style=title_style,
+                             children='Opposing member map'),
                     self.opp_lower_ukr.ls.graph_whole
                 ],
                 style={'display': 'inline-block', 'width': '33%'}
