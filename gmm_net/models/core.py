@@ -32,7 +32,7 @@ class Space():
         self.params_contour = params_contour
         self.params_scat_data = params_scat_data
         self.params_figure_layout = params_figure_layout
-    
+
     def set_graph_whole(self, id, config=None):
         if config is None:
             config = {'displayModeBar': False}
@@ -47,11 +47,11 @@ class Space():
         fig = go.Figure(
             layout=go.Layout(
                 xaxis={
-                    'range': [self.data[:, 0].min()-0.1, self.data[:, 0].max()+0.1],
+                    'range': [self.data[:, 0].min() - 0.1, self.data[:, 0].max() + 0.1],
                     'visible': False
                 },
                 yaxis={
-                    'range': [self.data[:, 1].min()-0.1, self.data[:, 1].max()+0.1],
+                    'range': [self.data[:, 1].min() - 0.1, self.data[:, 1].max() + 0.1],
                     'visible': False,
                     'scaleanchor': 'x',
                     'scaleratio': 1.0
@@ -78,7 +78,7 @@ class Space():
                        )
         )
         # plot frame line of latent space
-        line_property=dict(color='dimgray', width=3)
+        line_property = dict(color='dimgray', width=3)
         fig.add_trace(
             go.Scatter(
                 x=[x_range[1], x_range[1]],
@@ -176,7 +176,6 @@ class Space():
             config=config
         )
 
-
     def update_trace_clicked_point(self, clickData):
         if clickData['points'][0]['curveNumber'] == self.dic_index_traces['grids']:
             self.graph_whole.figure.update_traces(
@@ -209,11 +208,14 @@ class Space():
     # def _set_grid(self, grid_points, n_grid_points):
     #     self.grid_points = grid_points
 
+
 class LatentSpace(Space):
     pass
 
+
 class ObservedSpace(Space):
     pass
+
 
 class FeatureSpace(Space):
     pass
