@@ -198,6 +198,11 @@ class Space():
                 ),
                 selector=dict(name='clicked_point', type='scatter')
             )
+        elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['clicked_point']:
+            self.graph_whole.figure.update_traces(
+                selector=dict(name='clicked_point', type='scatter'),
+                visible=False
+            )
             # if latent variable is clicked
             # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
 

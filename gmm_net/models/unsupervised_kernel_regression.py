@@ -342,13 +342,17 @@ class UnsupervisedKernelRegression(object):
                 # if latent variable is clicked
                 self.os.graph_indiv.figure.update_traces(y=self.X[index])
                 #fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
+                return self.os.graph_indiv.figure
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
                 # if contour is clicked
                 self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
-            # elif clickData['points'][0]['curveNumber'] == 0:
-            #     print('clicked heatmap')
-            return self.os.graph_indiv.figure
+                return self.os.graph_indiv.figure
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
+                self.os.graph_indiv.figure.update_traces(y=np.zeros(self.X.shape[1]))
+                return self.os.graph_indiv.figure
+            else:
+                return dash.no_update
         else:
             return dash.no_update
 
