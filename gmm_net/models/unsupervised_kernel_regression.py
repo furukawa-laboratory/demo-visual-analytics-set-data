@@ -369,8 +369,9 @@ class UnsupervisedKernelRegression(object):
             if clicked_id_text == self.ls.dropdown.id:
                 if index_selected_feature is not None:
                     self.ls.graph_whole.figure.update_traces(
+                        selector=dict(type='contour'),
                         z=self.ls.grid_mapping[:, index_selected_feature],
-                        selector=dict(type='contour', name='contour'),
+                        name='cp',
                         **self.params_contour
                     )
                 return self.ls.graph_whole.figure

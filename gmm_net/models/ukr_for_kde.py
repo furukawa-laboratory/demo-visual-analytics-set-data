@@ -425,23 +425,36 @@ class UKRForWeightedKDE():
                 # self.is_select_latent_variable = True
                 # self.index_team_selected = index_nearest_latent_variable
                 self.fs.graph_whole.figure.update_traces(
+                    selector=dict(type='contour'),
                     z=grid_values,
-                    selector=dict(type='contour', name='contour'),
+                    name='density',
                     **self.params_contour_density
                 )
+                return self.fs.graph_whole.figure
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
                 # if contour is clicked
                 #self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
                 grid_values = self.ls.grid_mapping[index, :]
                 self.fs.graph_whole.figure.update_traces(
-                    selector=dict(type='contour', name='contour'),
+                    selector=dict(type='contour'),
                     z=grid_values,
+                    name='density',
                     **self.params_contour_density
                 )
-            # elif clickData['points'][0]['curveNumber'] == 0:
-            #     print('clicked heatmap')
-            return self.fs.graph_whole.figure
+                return self.fs.graph_whole.figure
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
+                # if self.fs.graph_whole.figure.traces[]
+                print('in ukr kde clicked point')
+                self.fs.graph_whole.figure.update_traces(
+                    selector=dict(type='contour'),
+                    z=None,
+                    name='no value',
+                    **self.params_contour_density
+                )
+                return self.fs.graph_whole.figure
+            else:
+                return dash.no_update
         else:
             return dash.no_update
 
