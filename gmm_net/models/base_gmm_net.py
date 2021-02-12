@@ -425,14 +425,16 @@ class BaseGMMNetworkOwnOppPerformance():
                     _ = self.own_ukr_kde.update_ls(
                         clickData=clickData_own_tm
                     )
+                    ret_olu_graph, ret_olu_dd = self.own_ukr_kde.update_fs_and_dd_from_ls(
+                        clickData=clickData_own_tm
+                    )
                     dict_update = {
-                        self.own_lower_ukr.ls.graph_whole.id: self.own_ukr_kde.update_fs_from_ls(
-                            clickData=clickData_own_tm
-                        ),
-                        self.own_lower_ukr.ls.dropdown.id: None, # Reset value in dropdown
-                        # self.own_ukr_kde.ls.graph_whole.id: self.own_ukr_kde.update_ls(
+                        # self.own_lower_ukr.ls.graph_whole.id: self.own_ukr_kde.update_fs_and_dd_from_ls(
                         #     clickData=clickData_own_tm
                         # ),
+                        # self.own_lower_ukr.ls.dropdown.id: None, # Reset value in dropdown
+                        self.own_lower_ukr.ls.graph_whole.id: ret_olu_graph,
+                        self.own_lower_ukr.ls.dropdown.id: ret_olu_dd,
                         self.own_opp_gplvm.dic_ls['opp'].graph_whole.id: self.own_opp_gplvm.update_ls(
                             index_selected_feature=index_own_performance_opp_tm,
                             clickData=clickData_own_tm,
@@ -462,6 +464,9 @@ class BaseGMMNetworkOwnOppPerformance():
                     _ = self.opp_ukr_kde.update_ls(
                         clickData=clickData_opp_tm
                     )
+                    ret_opplu_graph, temp = self.opp_ukr_kde.update_fs_and_dd_from_ls(
+                        clickData=clickData_opp_tm
+                    )
                     dict_update = {
                         self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
                             index_selected_feature=index_own_performance_own_tm,
@@ -480,9 +485,7 @@ class BaseGMMNetworkOwnOppPerformance():
                             own_clickData=clickData_own_tm,
                             opp_clickData=clickData_opp_tm
                         ),
-                        self.opp_lower_ukr.ls.graph_whole.id: self.opp_ukr_kde.update_fs_from_ls(
-                            clickData=clickData_opp_tm
-                        )
+                        self.opp_lower_ukr.ls.graph_whole.id: ret_opplu_graph
                     }
                     return self.get_return_list(**dict_update)
                 else:

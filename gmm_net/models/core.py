@@ -77,6 +77,7 @@ class Space():
                        **self.params_contour
                        )
         )
+        self.dic_index_traces['contour'] = 0
         # plot frame line of latent space
         line_property = dict(color='dimgray', width=3)
         fig.add_trace(
