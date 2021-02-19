@@ -32,6 +32,7 @@ class Space():
         self.params_contour = params_contour
         self.params_scat_data = params_scat_data
         self.params_figure_layout = params_figure_layout
+        self.is_clicked = False
 
     def set_graph_whole(self, id, config=None):
         if config is None:
@@ -188,6 +189,7 @@ class Space():
                 ),
                 selector=dict(name='clicked_point', type='scatter')
             )
+            self.is_clicked = True
         elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['data']:
             self.graph_whole.figure.update_traces(
                 x=np.array(clickData['points'][0]['x']),
@@ -198,16 +200,13 @@ class Space():
                 ),
                 selector=dict(name='clicked_point', type='scatter')
             )
+            self.is_clicked = True
         elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['clicked_point']:
             self.graph_whole.figure.update_traces(
                 selector=dict(name='clicked_point', type='scatter'),
                 visible=False
             )
-            # if latent variable is clicked
-            # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
-
-    # def _set_grid(self, grid_points, n_grid_points):
-    #     self.grid_points = grid_points
+            self.is_clicked = False
 
 
 class LatentSpace(Space):
