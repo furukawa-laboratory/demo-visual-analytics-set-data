@@ -325,6 +325,7 @@ class UnsupervisedKernelRegression(object):
             options=[{"value": i, "label": x}
                      for i, x in enumerate(self.label_feature)],
             placeholder="Select feature shown as contour",
+            style={'width': '95%', 'margin': '0 auto'},
             clearable=True
         )
 

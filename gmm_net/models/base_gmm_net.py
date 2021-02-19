@@ -272,62 +272,66 @@ class BaseGMMNetworkOwnOppPerformance():
         # Define whole layout
 
         title_style = {'whiteSpace': 'pre-line'}
-        app.layout = html.Div(children=[
-            # `dash_html_components`が提供するクラスは`childlen`属性を有している。
-            # `childlen`属性を慣例的に最初の属性にしている。
-            html.H1(children='Visual Analyticis of NBA dataset'),
-            html.Div(
-                [
-                    html.Div(id='title_own_member_map',
-                             style=title_style,
-                             children='Own member map'),
-                    self.own_lower_ukr.ls.graph_whole,
-                    # html.Div(id='text_under_member_map',
-                    #          style={'whiteSpace': 'pre-line'},
-                    #          children='test under member map'),
-                    self.own_lower_ukr.ls.dropdown,
-                    html.Div(id='title_member_feature_bar',
-                             style=title_style,
-                             children='Own member feature'),
-                    self.own_lower_ukr.os.graph_indiv
-                ],
-                style={'display': 'inline-block', 'width': '33%'}
-            ),
-            html.Div(
-                [
-                    html.Div(id='title_own_team_map',
-                             style=title_style,
-                             children='Own team map'),
-                    self.own_ukr_kde.ls.graph_whole,
-                    # html.Div(id='text_under_own_team_map',
-                    #          style={'whiteSpace': 'pre-line'},
-                    #          children='test under own team map'),
-                    self.own_opp_gplvm.dic_ls['own'].dropdown,
-                    html.Div(id='title_own_team_performance',
-                             style=title_style,
-                             children='Own team performance'),
-                    self.own_opp_gplvm.os.graph_indiv
-                ],
-                style={'display': 'inline-block', 'width': '33%'}
-            ),
-            html.Div(
-                [
-                    html.Div(id='title_opp_team_map',
-                             style=title_style,
-                             children='Opposing team map'),
-                    self.opp_ukr_kde.ls.graph_whole,
-                    # html.Div(id='text_under_opp_team_map',
-                    #          style={'whiteSpace': 'pre-line'},
-                    #          children='test under opp team map'),
-                    self.own_opp_gplvm.dic_ls['opp'].dropdown,
-                    html.Div(id='title_opp_member_map',
-                             style=title_style,
-                             children='Opposing member map'),
-                    self.opp_lower_ukr.ls.graph_whole
-                ],
-                style={'display': 'inline-block', 'width': '33%'}
-            ),
-        ])
+        app.layout = html.Div(
+            children=[
+                # `dash_html_components`が提供するクラスは`childlen`属性を有している。
+                # `childlen`属性を慣例的に最初の属性にしている。
+                html.H1(children='Visual Analyticis of NBA dataset'),
+                html.Div(
+                    [
+                        html.H3(id='title_own_member_map',
+                                 style=title_style,
+                                 children='Own athlete map'),
+                        self.own_lower_ukr.ls.graph_whole,
+                        # html.Div(id='text_under_member_map',
+                        #          style={'whiteSpace': 'pre-line'},
+                        #          children='test under member map'),
+                        self.own_lower_ukr.ls.dropdown,
+                        html.H3(id='title_member_feature_bar',
+                                 style=title_style,
+                                 children='Own athlete feature'),
+                        self.own_lower_ukr.os.graph_indiv
+                    ],
+                    style={'display': 'inline-block', 'width': '33%'}
+        ),
+                html.Div(
+                    [
+                        html.H3(id='title_own_team_map',
+                                 # style=title_style,
+                                 children='Own team map'),
+                        self.own_ukr_kde.ls.graph_whole,
+                        # html.Div(id='text_under_own_team_map',
+                        #          style={'whiteSpace': 'pre-line'},
+                        #          children='test under own team map'),
+                        self.own_opp_gplvm.dic_ls['own'].dropdown,
+                        html.H3(id='title_own_team_performance',
+                                 style=title_style,
+                                 children='Own team performance'),
+                        self.own_opp_gplvm.os.graph_indiv
+                    ],
+                    style={'display': 'inline-block', 'width': '33%'}
+                ),
+                html.Div(
+                    [
+                        html.H3(id='title_opp_team_map',
+                                 style=title_style,
+                                 children='Opposing team map'),
+                        self.opp_ukr_kde.ls.graph_whole,
+                        # html.Div(id='text_under_opp_team_map',
+                        #          style={'whiteSpace': 'pre-line'},
+                        #          children='test under opp team map'),
+                        self.own_opp_gplvm.dic_ls['opp'].dropdown,
+                        html.H3(id='title_opp_member_map',
+                                 style=title_style,
+                                 children='Opposing athlete map'),
+                        self.opp_lower_ukr.ls.graph_whole
+                    ],
+                    style={'display': 'inline-block', 'width': '33%'}
+                ),
+            ],
+            style={'margin': '50px'}
+
+        )
 
         # Define callback function when data is clicked
         @app.callback(

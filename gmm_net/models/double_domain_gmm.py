@@ -30,6 +30,7 @@ class DoubleDomainGMM(object):
                 options=[{"value": i, "label": x}
                          for i, x in enumerate(self.os.label_feature)],
                 placeholder="Select own team performance shown as contour",
+                style={'width': '95%', 'margin': '0 auto'},
                 clearable=True
             )
         self.params_contour = params_contour
