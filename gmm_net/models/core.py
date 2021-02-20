@@ -1,6 +1,7 @@
 import numpy as np
 import plotly.graph_objects as go
 import dash_core_components as dcc
+from scipy.spatial.distance import cdist
 
 
 class Space():
@@ -32,7 +33,7 @@ class Space():
         self.params_contour = params_contour
         self.params_scat_data = params_scat_data
         self.params_figure_layout = params_figure_layout
-        self.is_clicked = False
+        self.index_clicked_grid = None
 
     def set_graph_whole(self, id, config=None):
         if config is None:
@@ -189,7 +190,7 @@ class Space():
                 ),
                 selector=dict(name='clicked_point', type='scatter')
             )
-            self.is_clicked = True
+            self.index_clicked_grid = clickData['points'][0]['pointIndex']
         elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['data']:
             self.graph_whole.figure.update_traces(
                 x=np.array(clickData['points'][0]['x']),
@@ -200,14 +201,20 @@ class Space():
                 ),
                 selector=dict(name='clicked_point', type='scatter')
             )
-            self.is_clicked = True
+            self.index_clicked_grid = self._get_index_nearest_grid(x=clickData['points'][0]['x'],
+                                                                   y=clickData['points'][0]['y'])
         elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['clicked_point']:
             self.graph_whole.figure.update_traces(
                 selector=dict(name='clicked_point', type='scatter'),
                 visible=False
             )
-            self.is_clicked = False
+            self.index_clicked_grid = None
 
+    def _get_index_nearest_grid(self, x, y):
+        coordinate = np.array([x, y])[None, :]
+        distance = cdist(self.grid_points, coordinate, metric='sqeuclidean')
+        index_nearest = np.argmin(distance.ravel())
+        return index_nearest
 
 class LatentSpace(Space):
     pass
