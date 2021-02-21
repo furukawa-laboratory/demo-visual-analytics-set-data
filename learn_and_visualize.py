@@ -264,10 +264,10 @@ params_init_lower_ukr=dict(
     params_scat_z=dict(
         name='member',
         marker=dict(
-            size=8,
+            size=13,
             color=position_color,
             line=dict(
-                width=1,
+                width=1.5,
                 color="white"
             ),
             symbol=position_symbol
@@ -278,8 +278,8 @@ params_init_upper_ukr=dict(
     params_scat_z=dict(
         name='team',
         marker=dict(
-            size=5,
-            opacity=0.5,
+            size=8,
+            opacity=0.7,
             colorscale='Turbo_r',
             color=label_club_train_encoded
         )
