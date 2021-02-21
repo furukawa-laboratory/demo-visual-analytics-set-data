@@ -36,48 +36,39 @@ class DoubleDomainGMM(object):
         self.params_contour = params_contour
 
     def update_bar(self, own_clickData, opp_clickData):
-        print('in update_bar')
-        print("own_clickData={}".format(own_clickData))
-        print("opp_clickData={}".format(opp_clickData))
-        if own_clickData is not None and opp_clickData is not None:
-            index_own_clickdata = own_clickData['points'][0]['pointIndex']
-            index_opp_clickdata = opp_clickData['points'][0]['pointIndex']
-
-            # check which trace is clicked in own team map
-            if own_clickData['points'][0]['curveNumber'] == self.dic_ls['own'].dic_index_traces['grids']:
-                index_own_nearest_grid = index_own_clickdata
-            elif own_clickData['points'][0]['curveNumber'] == self.dic_ls['own'].dic_index_traces['data']:
-                index_own_nearest_grid = self._get_index_nearest_grid(
-                    x=own_clickData['points'][0]['x'],
-                    y=own_clickData['points'][0]['y'],
-                    which='own'
-                )
-                print(
-                    'own nearest grid={}th grid {}'.format(
-                        index_own_nearest_grid,
-                        self.dic_ls['own'].grid_points[index_own_nearest_grid]
+        import dash
+        ctx = dash.callback_context
+        if not ctx.triggered or ctx.triggered[0]['value'] is None:
+            return dash.no_update
+        else:
+            # callback of this method is assumpted that update ls method is called before this method is called
+            print('in update_bar')
+            print("own_clickData={}".format(own_clickData))
+            print("opp_clickData={}".format(opp_clickData))
+            if self.dic_ls['own'].index_clicked_grid is not None:
+                # own team map is clicked
+                if self.dic_ls['opp'].index_clicked_grid is not None:
+                    # opp team map is clicked
+                    self.os.graph_indiv.figure.update_traces(
+                        y=self.mesh_grid_mapping[self.dic_ls['own'].index_clicked_grid, self.dic_ls['opp'].index_clicked_grid, :]
                     )
-                )
+                else:
+                    # opp team map is not clicked
+                    self.os.graph_indiv.figure.update_traces(
+                        y=np.mean(self.mesh_grid_mapping[self.dic_ls['own'].index_clicked_grid, : , :], axis=0)
+                    )
             else:
-                return dash.no_update
-            # check which trace is clicked in opp team map
-            if opp_clickData['points'][0]['curveNumber'] == self.dic_ls['opp'].dic_index_traces['grids']:
-                index_opp_nearest_grid = index_opp_clickdata
-            elif opp_clickData['points'][0]['curveNumber'] == self.dic_ls['opp'].dic_index_traces['data']:
-                index_opp_nearest_grid = self._get_index_nearest_grid(
-                    x=opp_clickData['points'][0]['x'],
-                    y=opp_clickData['points'][0]['y'],
-                    which='opp'
-                )
-            else:
-                return dash.no_update
-            self.os.graph_indiv.figure.update_traces(
-                y=self.mesh_grid_mapping[index_own_nearest_grid, index_opp_nearest_grid, :]
-            )
+                if self.dic_ls['opp'].index_clicked_grid is not None:
+                    self.os.graph_indiv.figure.update_traces(
+                        y=np.mean(self.mesh_grid_mapping[:, self.dic_ls['opp'].index_clicked_grid, :], axis=0)
+                    )
+                else:
+                    self.os.graph_indiv.figure.update_traces(
+                        y=np.zeros(self.mesh_grid_mapping.shape[2])
+                    )
+
             return self.os.graph_indiv.figure
 
-        else:
-            return dash.no_update
 
     def update_ls(self, index_selected_feature, clickData, which_update: str):
         import dash
