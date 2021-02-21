@@ -92,33 +92,26 @@ class DoubleDomainGMM(object):
             print('which={}'.format(which_update))
 
             if index_selected_feature is not None:
-                if clickData is not None:
-                    # update clicked point in map triggered
-                    ls_triggered.update_trace_clicked_point(clickData=clickData)
-                    # print('index={}'.format(index))
-                    if ls_triggered.index_clicked_grid is not None:
-                        # set value to conditional component plane
-                        index_nearest_grid = ls_triggered.index_clicked_grid
-                        if which_update == 'own':
-                            grid_value = self.mesh_grid_mapping[:, ls_triggered.index_clicked_grid, index_selected_feature]
-                        else:
-                            grid_value = self.mesh_grid_mapping[index_nearest_grid, :, index_selected_feature]
+                ls_triggered.update_trace_clicked_point(clickData=clickData)
+                if ls_triggered.index_clicked_grid is not None:
+                    # set value to conditional component plane
+                    index_nearest_grid = ls_triggered.index_clicked_grid
+                    if which_update == 'own':
+                        grid_value = self.mesh_grid_mapping[:, ls_triggered.index_clicked_grid, index_selected_feature]
                     else:
-                        # set value to marginal
-                        if which_update == 'own':
-                            grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=1)
-                        else:
-                            grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=0)
-
-                    ls_updated.graph_whole.figure.update_traces(
-                        selector=dict(type='contour'),
-                        z=grid_value,
-                        **self.params_contour
-                    )
-
-                    return ls_updated.graph_whole.figure
+                        grid_value = self.mesh_grid_mapping[index_nearest_grid, :, index_selected_feature]
                 else:
-                    return dash.no_update
+                    # set value to marginal
+                    if which_update == 'own':
+                        grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=1)
+                    else:
+                        grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=0)
+                ls_updated.graph_whole.figure.update_traces(
+                    selector=dict(type='contour'),
+                    z=grid_value,
+                    **self.params_contour
+                )
+                return ls_updated.graph_whole.figure
             else:
                 ls_updated.graph_whole.figure.update_traces(
                     z=None,

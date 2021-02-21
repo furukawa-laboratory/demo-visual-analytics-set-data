@@ -180,35 +180,40 @@ class Space():
         )
 
     def update_trace_clicked_point(self, clickData):
-        if clickData['points'][0]['curveNumber'] == self.dic_index_traces['grids']:
-            self.graph_whole.figure.update_traces(
-                x=np.array(clickData['points'][0]['x']),
-                y=np.array(clickData['points'][0]['y']),
-                visible=True,
-                marker=dict(
-                    symbol='x'
-                ),
-                selector=dict(name='clicked_point', type='scatter')
-            )
-            self.index_clicked_grid = clickData['points'][0]['pointIndex']
-        elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['data']:
-            self.graph_whole.figure.update_traces(
-                x=np.array(clickData['points'][0]['x']),
-                y=np.array(clickData['points'][0]['y']),
-                visible=True,
-                marker=dict(
-                    symbol='circle-x'
-                ),
-                selector=dict(name='clicked_point', type='scatter')
-            )
-            self.index_clicked_grid = self._get_index_nearest_grid(x=clickData['points'][0]['x'],
-                                                                   y=clickData['points'][0]['y'])
-        elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['clicked_point']:
-            self.graph_whole.figure.update_traces(
-                selector=dict(name='clicked_point', type='scatter'),
-                visible=False
-            )
-            self.index_clicked_grid = None
+        if clickData is not None:
+            if clickData['points'][0]['curveNumber'] == self.dic_index_traces['grids']:
+                self.graph_whole.figure.update_traces(
+                    x=np.array(clickData['points'][0]['x']),
+                    y=np.array(clickData['points'][0]['y']),
+                    visible=True,
+                    marker=dict(
+                        symbol='x'
+                    ),
+                    selector=dict(name='clicked_point', type='scatter')
+                )
+                self.index_clicked_grid = clickData['points'][0]['pointIndex']
+            elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['data']:
+                self.graph_whole.figure.update_traces(
+                    x=np.array(clickData['points'][0]['x']),
+                    y=np.array(clickData['points'][0]['y']),
+                    visible=True,
+                    marker=dict(
+                        symbol='circle-x'
+                    ),
+                    selector=dict(name='clicked_point', type='scatter')
+                )
+                self.index_clicked_grid = self._get_index_nearest_grid(x=clickData['points'][0]['x'],
+                                                                       y=clickData['points'][0]['y'])
+            elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['clicked_point']:
+                self.graph_whole.figure.update_traces(
+                    selector=dict(name='clicked_point', type='scatter'),
+                    visible=False
+                )
+                self.index_clicked_grid = None
+            else:
+                pass
+        else:
+            pass
 
     def _get_index_nearest_grid(self, x, y):
         coordinate = np.array([x, y])[None, :]
