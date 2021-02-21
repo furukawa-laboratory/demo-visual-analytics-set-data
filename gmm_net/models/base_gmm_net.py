@@ -203,7 +203,8 @@ class BaseGMMNetworkOwnOppPerformance():
                 params_contour={'colorscale': cmap_feature,
                                 'contours_coloring': 'heatmap',
                                 'line_smoothing': 0.85,
-                                'zmid': 0.0},
+                                'zmid': 0.0,
+                                'zmin': None},
                 params_scat_z=params_init_lower_ukr['params_scat_z'],
                 params_fig_layout_ls={
                     'plot_bgcolor': '#ffffff',
@@ -231,7 +232,8 @@ class BaseGMMNetworkOwnOppPerformance():
                 params_contour={'contours_coloring': 'heatmap',
                                 'colorscale': cmap_density,
                                 'line_smoothing': 0.85,
-                                'zmid': None},
+                                'zmid': None,
+                                'zmin': 0.0},
                 params_scat_z=params_init_upper_ukr['params_scat_z'],
                 params_figure_layout={
                     #'title': which+' team map',
