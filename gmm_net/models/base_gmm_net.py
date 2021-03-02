@@ -285,6 +285,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                  style=title_style,
                                  children='Own athlete map'),
                         self.own_lower_ukr.ls.graph_whole,
+                        self.own_lower_ukr.ls.store_fig_whole,
                         # html.Div(id='text_under_member_map',
                         #          style={'whiteSpace': 'pre-line'},
                         #          children='test under member map'),
@@ -292,7 +293,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_member_feature_bar',
                                  style=title_style,
                                  children='Own athlete feature'),
-                        self.own_lower_ukr.os.graph_indiv
+                        self.own_lower_ukr.os.graph_indiv,
+                        self.own_lower_ukr.os.store_fig_indiv
                     ],
                     style={'display': 'inline-block', 'width': '33%'}
         ),
@@ -302,6 +304,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                  # style=title_style,
                                  children='Own team map'),
                         self.own_ukr_kde.ls.graph_whole,
+                        self.own_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_own_team_map',
                         #          style={'whiteSpace': 'pre-line'},
                         #          children='test under own team map'),
@@ -309,7 +312,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_own_team_performance',
                                  style=title_style,
                                  children='Own team performance'),
-                        self.own_opp_gplvm.os.graph_indiv
+                        self.own_opp_gplvm.os.graph_indiv,
+                        self.own_opp_gplvm.os.store_fig_indiv
                     ],
                     style={'display': 'inline-block', 'width': '33%'}
                 ),
@@ -319,6 +323,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                  style=title_style,
                                  children='Opposing team map'),
                         self.opp_ukr_kde.ls.graph_whole,
+                        self.opp_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_opp_team_map',
                         #          style={'whiteSpace': 'pre-line'},
                         #          children='test under opp team map'),
@@ -326,7 +331,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_opp_member_map',
                                  style=title_style,
                                  children='Opposing athlete map'),
-                        self.opp_lower_ukr.ls.graph_whole
+                        self.opp_lower_ukr.ls.graph_whole,
+                        self.opp_lower_ukr.ls.store_fig_whole
                     ],
                     style={'display': 'inline-block', 'width': '33%'}
                 ),
