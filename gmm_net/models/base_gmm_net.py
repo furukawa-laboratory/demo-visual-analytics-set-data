@@ -342,6 +342,7 @@ class BaseGMMNetworkOwnOppPerformance():
         )
 
         # Define callback function when data is clicked
+        # Callback function related own member feature bars
         @app.callback(
             Output(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
                    component_property='data'),
@@ -356,8 +357,8 @@ class BaseGMMNetworkOwnOppPerformance():
             return self.own_lower_ukr.update_fb_from_ls(clickData, prev_fb_fig_json)
 
         self.output_lists = [
-            Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
-                   component_property='figure'),
+            Output(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                   component_property='data'),
             Output(component_id=self.own_lower_ukr.ls.dropdown.id,
                    component_property='value'),
             Output(component_id=self.own_ukr_kde.ls.graph_whole.id,
@@ -421,15 +422,17 @@ class BaseGMMNetworkOwnOppPerformance():
                     dict_update = {
                         self.own_lower_ukr.ls.graph_whole.id: self.own_lower_ukr.update_ls(
                             index_selected_feature=index_feature_own_member,
-                            clickData=clickData_mm
+                            clickData=clickData_mm,
+                            prev_ls_fig_json=prev_own_mm_json
                         )
                     }
                     return self.get_return_list(**dict_update)
                 elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
                     dict_update = {
-                        self.own_lower_ukr.ls.graph_whole.id: self.own_lower_ukr.update_ls(
+                        self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
                             index_selected_feature=index_feature_own_member,
-                            clickData=clickData_mm
+                            clickData=clickData_mm,
+                            prev_ls_fig_json=prev_own_mm_json
                         )
                     }
                     return self.get_return_list(**dict_update)
@@ -514,17 +517,17 @@ class BaseGMMNetworkOwnOppPerformance():
                     return self.get_return_list(**{})
 
         # Define clientside callback to connect store in the browser and figure in graph
-        # app.clientside_callback(
-        #     """
-        #     function(data){
-        #         return data
-        #     }
-        #     """,
-        #     Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
-        #            component_property='figure'),
-        #     Input(component_id=self.own_lower_ukr.ls.store_fig_whole,
-        #           component_property='data')
-        # )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
+                   component_property='figure'),
+            Input(component_id=self.own_lower_ukr.ls.store_fig_whole,
+                  component_property='data')
+        )
         app.clientside_callback(
             """
             function(data){

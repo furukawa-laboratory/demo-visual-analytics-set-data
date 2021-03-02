@@ -2,6 +2,7 @@ import numpy as np
 import plotly.graph_objects as go
 import dash_core_components as dcc
 from scipy.spatial.distance import cdist
+import dash
 
 
 class Space():
@@ -196,10 +197,10 @@ class Space():
         )
 
 
-    def update_trace_clicked_point(self, clickData):
+    def update_trace_clicked_point(self, clickData, fig):
         if clickData is not None:
             if clickData['points'][0]['curveNumber'] == self.dic_index_traces['grids']:
-                self.graph_whole.figure.update_traces(
+                fig.update_traces(
                     x=np.array(clickData['points'][0]['x']),
                     y=np.array(clickData['points'][0]['y']),
                     visible=True,
@@ -208,9 +209,10 @@ class Space():
                     ),
                     selector=dict(name='clicked_point', type='scatter')
                 )
-                self.index_clicked_grid = clickData['points'][0]['pointIndex']
+                #self.index_clicked_grid = clickData['points'][0]['pointIndex']
+                return fig
             elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['data']:
-                self.graph_whole.figure.update_traces(
+                fig.update_traces(
                     x=np.array(clickData['points'][0]['x']),
                     y=np.array(clickData['points'][0]['y']),
                     visible=True,
@@ -219,18 +221,20 @@ class Space():
                     ),
                     selector=dict(name='clicked_point', type='scatter')
                 )
-                self.index_clicked_grid = self._get_index_nearest_grid(x=clickData['points'][0]['x'],
-                                                                       y=clickData['points'][0]['y'])
+                return fig
+                # self.index_clicked_grid = self._get_index_nearest_grid(x=clickData['points'][0]['x'],
+                #                                                        y=clickData['points'][0]['y'])
             elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['clicked_point']:
-                self.graph_whole.figure.update_traces(
+                fig.update_traces(
                     selector=dict(name='clicked_point', type='scatter'),
                     visible=False
                 )
-                self.index_clicked_grid = None
+                return fig
+                # self.index_clicked_grid = None
             else:
-                pass
+                return dash.no_update 
         else:
-            pass
+            return dash.no_update
 
     def _get_index_nearest_grid(self, x, y):
         coordinate = np.array([x, y])[None, :]

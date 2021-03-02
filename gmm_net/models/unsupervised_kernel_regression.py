@@ -359,38 +359,30 @@ class UnsupervisedKernelRegression(object):
         else:
             return dash.no_update
 
-    def update_ls(self, index_selected_feature, clickData):
+    def update_ls(self, index_selected_feature, clickData, prev_ls_fig_json):
         import dash
+        import plotly.graph_objects as go
         # print(clickData)
-        print(index_selected_feature, clickData)
+        # print(index_selected_feature, clickData)
         ctx = dash.callback_context
         if not ctx.triggered or ctx.triggered[0]['value'] is None:
             return dash.no_update
         else:
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+            fig_ls = go.Figure(**prev_ls_fig_json)
             # print(clicked_id_text)
             if clicked_id_text == self.ls.dropdown.id:
                 if index_selected_feature is not None:
-                    self.ls.graph_whole.figure.update_traces(
+                    fig_ls.update_traces(
                         selector=dict(type='contour'),
                         z=self.ls.grid_mapping[:, index_selected_feature],
                         name='cp',
                         **self.params_contour
                     )
-                return self.ls.graph_whole.figure
+                return fig_ls
             elif clicked_id_text == self.ls.graph_whole.id:
-                self.ls.update_trace_clicked_point(clickData=clickData)
-
-                # print('index_selected_feature={}'.format(index_selected_feature))
-                # if index_selected_feature is None:
-                #     z = None
-                # else:
-                #     z = self.ls.grid_mapping[:, index_selected_feature]
-                # self.ls.graph_whole.figure.update_traces(
-                #     z=z,
-                #     selector=dict(type='contour', name='contour')
-                # )
-                return self.ls.graph_whole.figure
+                # self.ls.update_trace_clicked_point(clickData=clickData)
+                return self.ls.update_trace_clicked_point(clickData=clickData, fig=fig_ls)
             else:
                 return dash.no_update
 
