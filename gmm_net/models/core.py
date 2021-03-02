@@ -39,7 +39,7 @@ class Space():
         self.params_figure_layout = params_figure_layout
         self.index_clicked_grid = None
 
-    def set_graph_whole(self, id_graph, config=None):
+    def set_graph_whole(self, id_graph, id_store, config=None):
         if config is None:
             config = {'displayModeBar': False}
         x_range = [
@@ -163,8 +163,14 @@ class Space():
             config=config
         )
 
-    def set_graph_indiv(self, id_graph, config, params_figure_layout={}):
-        fig_fb = go.Figure(
+        self.store_fig_whole = dcc.Store(
+            id=id_store,
+            data=fig,
+            storage_type='memory'
+        )
+
+    def set_graph_indiv(self, id_graph, id_store, config, params_figure_layout={}):
+        fig = go.Figure(
             layout=go.Layout(
                 yaxis={'range': [self.data.min(), self.data.max()]},
                 showlegend=False,
@@ -172,15 +178,21 @@ class Space():
             )
         )
 
-        fig_fb.add_trace(
+        fig.add_trace(
             go.Bar(x=self.label_feature, y=np.zeros(self.data.shape[1]),
                    marker=dict(color='#e377c2'))
         )
 
         self.graph_indiv = dcc.Graph(
             id=id_graph,
-            figure=fig_fb,
+            figure=fig,
             config=config
+        )
+
+        self.store_fig_indiv = dcc.Store(
+            id=id_store,
+            data=fig,
+            storage_type='memory'
         )
 
 
