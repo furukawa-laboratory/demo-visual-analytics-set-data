@@ -318,7 +318,7 @@ class UnsupervisedKernelRegression(object):
             raise ValueError('invalid params_scat_z={}'.format(params_scat_z))
 
         # set graph of latent space
-        self.ls.set_graph_whole(id_graph=id_ls, config=config)
+        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls+'_fig_store', config=config)
 
         self.ls.dropdown = dcc.Dropdown(
             id=id_dropdown,
@@ -329,7 +329,7 @@ class UnsupervisedKernelRegression(object):
             clearable=True
         )
 
-        self.os.set_graph_indiv(id_graph=id_fb, config=config,
+        self.os.set_graph_indiv(id_graph=id_fb, id_store=id_fb+'_fig_store', config=config,
                                 params_figure_layout=params_fig_layout_fb)
 
 
