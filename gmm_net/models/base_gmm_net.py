@@ -343,12 +343,12 @@ class BaseGMMNetworkOwnOppPerformance():
 
         # Define callback function when data is clicked
         @app.callback(
-            Output(component_id=self.own_lower_ukr.os.store_fig_indiv,
+            Output(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
                    component_property='data'),
             [
                 Input(component_id=self.own_lower_ukr.ls.graph_whole.id,
                       component_property='clickData'),
-                Input(component_id=self.own_lower_ukr.os.store_fig_indiv,
+                Input(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
                       component_property='data')
             ]
         )
@@ -531,9 +531,9 @@ class BaseGMMNetworkOwnOppPerformance():
                 return data
             }
             """,
-            Output(component_id=self.own_lower_ukr.os.graph_indiv,
+            Output(component_id=self.own_lower_ukr.os.graph_indiv.id,
                    component_property='figure'),
-            Input(component_id=self.own_lower_ukr.os.store_fig_indiv,
+            Input(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
                   component_property='data')
         )
 
