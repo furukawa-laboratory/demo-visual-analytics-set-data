@@ -297,7 +297,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_lower_ukr.os.store_fig_indiv
                     ],
                     style={'display': 'inline-block', 'width': '33%'}
-        ),
+                ),
                 html.Div(
                     [
                         html.H3(id='title_own_team_map',
@@ -343,13 +343,17 @@ class BaseGMMNetworkOwnOppPerformance():
 
         # Define callback function when data is clicked
         @app.callback(
-            Output(component_id=self.own_lower_ukr.os.graph_indiv.id,
-                   component_property='figure'),
-            Input(component_id=self.own_lower_ukr.ls.graph_whole.id,
-                  component_property='clickData')
+            Output(component_id=self.own_lower_ukr.os.store_fig_indiv,
+                   component_property='data'),
+            [
+                Input(component_id=self.own_lower_ukr.ls.graph_whole.id,
+                      component_property='clickData'),
+                Input(component_id=self.own_lower_ukr.os.store_fig_indiv,
+                      component_property='data')
+            ]
         )
-        def update_bar(clickData):
-            return self.own_lower_ukr.update_fb_from_ls(clickData)
+        def update_bar(clickData, prev_fb_fig_json):
+            return self.own_lower_ukr.update_fb_from_ls(clickData, prev_fb_fig_json)
 
         self.output_lists = [
             Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
@@ -395,12 +399,17 @@ class BaseGMMNetworkOwnOppPerformance():
                 Input(
                     component_id=self.opp_ukr_kde.ls.graph_whole.id,
                     component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                    component_property='data',
                 )
             ]
         )
         def update_maps(index_feature_own_member, clickData_mm,
                         index_own_performance_own_tm, clickData_own_tm,
-                        index_own_performance_opp_tm, clickData_opp_tm):
+                        index_own_performance_opp_tm, clickData_opp_tm,
+                        prev_own_mm_json):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
                 # no update
@@ -503,6 +512,30 @@ class BaseGMMNetworkOwnOppPerformance():
                 else:
                     # no update
                     return self.get_return_list(**{})
+
+        # Define clientside callback to connect store in the browser and figure in graph
+        # app.clientside_callback(
+        #     """
+        #     function(data){
+        #         return data
+        #     }
+        #     """,
+        #     Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
+        #            component_property='figure'),
+        #     Input(component_id=self.own_lower_ukr.ls.store_fig_whole,
+        #           component_property='data')
+        # )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_lower_ukr.os.graph_indiv,
+                   component_property='figure'),
+            Input(component_id=self.own_lower_ukr.os.store_fig_indiv,
+                  component_property='data')
+        )
 
         return app
 

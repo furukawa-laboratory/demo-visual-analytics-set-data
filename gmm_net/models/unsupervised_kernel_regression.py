@@ -333,25 +333,27 @@ class UnsupervisedKernelRegression(object):
                                 params_figure_layout=params_fig_layout_fb)
 
 
-    def update_fb_from_ls(self, clickData):
+    def update_fb_from_ls(self, clickData, prev_fb_fig_json):
         import dash
+        import plotly.graph_objects as go
         if clickData is not None:
+            fig_bar = go.Figure(**prev_fb_fig_json)
             index = clickData['points'][0]['pointIndex']
             # print('index={}'.format(index))
             if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
                 # print('clicked latent variable')
                 # if latent variable is clicked
-                self.os.graph_indiv.figure.update_traces(y=self.X[index])
+                fig_bar.update_traces(y=self.X[index])
                 #fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
-                return self.os.graph_indiv.figure
+                return fig_bar
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
                 # if contour is clicked
-                self.os.graph_indiv.figure.update_traces(y=self.ls.grid_mapping[index])
-                return self.os.graph_indiv.figure
+                fig_bar.update_traces(y=self.ls.grid_mapping[index])
+                return fig_bar
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
-                self.os.graph_indiv.figure.update_traces(y=np.zeros(self.X.shape[1]))
-                return self.os.graph_indiv.figure
+                fig_bar.update_traces(y=np.zeros(self.X.shape[1]))
+                return fig_bar
             else:
                 return dash.no_update
         else:
