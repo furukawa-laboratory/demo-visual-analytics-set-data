@@ -395,6 +395,7 @@ class UKRForWeightedKDE():
             grid_points = create_zeta(self.member_features.min(), self.member_features.max(),
                                       self.n_features, n_grid_points)
             self.fs = FeatureSpace(data=self.member_features, grid_points=grid_points)
+            self.fs.set_graph_whole(id_graph='feature_space', id_store='feature_space_fig_store')
 
         self.params_contour_density = params_contour
 
@@ -404,7 +405,7 @@ class UKRForWeightedKDE():
         )
 
         config = {'displayModeBar': False}
-        self.ls.set_graph_whole(id_graph=id_ls, config=config)
+        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls+'_fig_store', config=config)
 
     def update_fs_and_dd_from_ls(self, clickData):
         import dash
