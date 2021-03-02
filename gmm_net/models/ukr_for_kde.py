@@ -404,7 +404,7 @@ class UKRForWeightedKDE():
         )
 
         config = {'displayModeBar': False}
-        self.ls.set_graph_whole(id=id_ls, config=config)
+        self.ls.set_graph_whole(id_graph=id_ls, config=config)
 
     def update_fs_and_dd_from_ls(self, clickData):
         import dash

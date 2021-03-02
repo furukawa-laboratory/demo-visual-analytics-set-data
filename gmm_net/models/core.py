@@ -39,7 +39,7 @@ class Space():
         self.params_figure_layout = params_figure_layout
         self.index_clicked_grid = None
 
-    def set_graph_whole(self, id, config=None):
+    def set_graph_whole(self, id_graph, config=None):
         if config is None:
             config = {'displayModeBar': False}
         x_range = [
@@ -158,7 +158,7 @@ class Space():
         self.dic_index_traces['clicked_point'] = 7
 
         self.graph_whole = dcc.Graph(
-            id=id,
+            id=id_graph,
             figure=fig,
             config=config
         )
