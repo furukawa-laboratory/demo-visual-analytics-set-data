@@ -22,6 +22,7 @@ class DoubleDomainGMM(object):
         self.dic_ls = {'own': own_ls, 'opp': opp_ls}
         self.os.label_feature = label_feature
         self.os.set_graph_indiv(id_graph=id_fb,
+                                id_store=id_fb+'_fig_store',
                                 params_figure_layout=params_figure_layout,
                                 config=config)
         for key, ls in self.dic_ls.items():
