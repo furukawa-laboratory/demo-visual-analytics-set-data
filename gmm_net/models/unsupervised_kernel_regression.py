@@ -329,7 +329,7 @@ class UnsupervisedKernelRegression(object):
             clearable=True
         )
 
-        self.os.set_graph_indiv(id=id_fb, config=config,
+        self.os.set_graph_indiv(id_graph=id_fb, config=config,
                                 params_figure_layout=params_fig_layout_fb)
 
 

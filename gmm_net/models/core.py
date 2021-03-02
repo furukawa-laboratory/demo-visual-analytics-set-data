@@ -11,6 +11,8 @@ class Space():
                  grid_mapping=None,
                  graph_whole=None,
                  graph_indv=None,
+                 store_fig_whole=None,
+                 store_fig_indv=None,
                  dropdown=None,
                  label_data=None,
                  label_feature=None,
@@ -25,6 +27,8 @@ class Space():
         self.grid_mapping = grid_mapping
         self.graph_whole = graph_whole
         self.graph_indiv = graph_indv
+        self.store_fig_whole = store_fig_whole
+        self.store_fig_indiv = store_fig_indv
         self.dropdown = dropdown
         self.label_data = label_data
         self.label_feature = label_feature
@@ -159,7 +163,7 @@ class Space():
             config=config
         )
 
-    def set_graph_indiv(self, id, config, params_figure_layout={}):
+    def set_graph_indiv(self, id_graph, config, params_figure_layout={}):
         fig_fb = go.Figure(
             layout=go.Layout(
                 yaxis={'range': [self.data.min(), self.data.max()]},
@@ -174,10 +178,11 @@ class Space():
         )
 
         self.graph_indiv = dcc.Graph(
-            id=id,
+            id=id_graph,
             figure=fig_fb,
             config=config
         )
+
 
     def update_trace_clicked_point(self, clickData):
         if clickData is not None:
