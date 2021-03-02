@@ -420,7 +420,7 @@ class BaseGMMNetworkOwnOppPerformance():
                 print(clicked_id_text)
                 if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
                     dict_update = {
-                        self.own_lower_ukr.ls.graph_whole.id: self.own_lower_ukr.update_ls(
+                        self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
                             index_selected_feature=index_feature_own_member,
                             clickData=clickData_mm,
                             prev_ls_fig_json=prev_own_mm_json
@@ -525,7 +525,7 @@ class BaseGMMNetworkOwnOppPerformance():
             """,
             Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
                    component_property='figure'),
-            Input(component_id=self.own_lower_ukr.ls.store_fig_whole,
+            Input(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
                   component_property='data')
         )
         app.clientside_callback(
