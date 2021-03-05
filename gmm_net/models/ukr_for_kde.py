@@ -4,6 +4,8 @@ from tqdm import tqdm
 from gmm_net.models.kde import KDE
 from gmm_net.tools.create_zeta import create_zeta
 from gmm_net.models.core import LatentSpace, FeatureSpace
+import dash
+import plotly.graph_objects as go
 
 
 class UKRForWeightedKDE():
@@ -457,8 +459,7 @@ class UKRForWeightedKDE():
         else:
             return dash.no_update, dash.no_update
 
-    def update_ls(self, clickData):
-        import dash
+    def update_ls(self, clickData, prev_ls_fig_json):
         ctx = dash.callback_context
         if not ctx.triggered or ctx.triggered[0]['value'] is None:
             return dash.no_update
@@ -466,8 +467,9 @@ class UKRForWeightedKDE():
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
             # print(clicked_id_text)
             if clicked_id_text == self.ls.graph_whole.id:
-                self.ls.update_trace_clicked_point(clickData=clickData)
-                return self.ls.graph_whole.figure
+                fig_ls = go.Figure(** prev_ls_fig_json)
+                return self.ls.update_trace_clicked_point(clickData=clickData,
+                                                          fig=fig_ls)
             else:
                 return dash.no_update
 
