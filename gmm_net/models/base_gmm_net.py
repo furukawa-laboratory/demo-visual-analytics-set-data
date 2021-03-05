@@ -454,13 +454,13 @@ class BaseGMMNetworkOwnOppPerformance():
                         clickData=clickData_own_tm,
                         prev_ls_fig_json=prev_own_tm_json
                     )
-                    # ittan comment out
-                    # ret_olu_graph, ret_olu_dd = self.own_ukr_kde.update_fs_and_dd_from_ls(
-                    #     clickData=clickData_own_tm
-                    # )
+                    ret_own_lower_ukr_fig_ls, ret_own_lower_ukr_dropdown = self.own_ukr_kde.update_fs_dropdown_from_ls(
+                        clickData=clickData_own_tm,
+                        prev_fs_fig_json=prev_own_mm_json
+                    )
                     dict_update = {
-                        # self.own_lower_ukr.ls.store_fig_whole.id: ret_olu_graph,
-                        # self.own_lower_ukr.ls.dropdown.id: ret_olu_dd,
+                        self.own_lower_ukr.ls.store_fig_whole.id: ret_own_lower_ukr_fig_ls,
+                        self.own_lower_ukr.ls.dropdown.id: ret_own_lower_ukr_dropdown,
                         self.own_ukr_kde.ls.store_fig_whole.id: ret_own_ukr_kde_fig_ls
                         # ittan comment out
                         # self.own_opp_gplvm.dic_ls['opp'].graph_whole.id: self.own_opp_gplvm.update_ls(
@@ -494,7 +494,7 @@ class BaseGMMNetworkOwnOppPerformance():
                     _ = self.opp_ukr_kde.update_ls(
                         clickData=clickData_opp_tm
                     )
-                    ret_opplu_graph, temp = self.opp_ukr_kde.update_fs_and_dd_from_ls(
+                    ret_opplu_graph, temp = self.opp_ukr_kde.update_fs_dropdown_from_ls(
                         clickData=clickData_opp_tm
                     )
                     dict_update = {

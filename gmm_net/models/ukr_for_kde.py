@@ -409,9 +409,9 @@ class UKRForWeightedKDE():
         config = {'displayModeBar': False}
         self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls+'_fig_store', config=config)
 
-    def update_fs_and_dd_from_ls(self, clickData):
-        import dash
+    def update_fs_dropdown_from_ls(self, clickData, prev_fs_fig_json):
         if clickData is not None:
+            fig_fs = go.Figure(**prev_fs_fig_json)
             index = clickData['points'][0]['pointIndex']
             if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
                 # if latent variable is clicked
@@ -426,32 +426,32 @@ class UKRForWeightedKDE():
                 # self.click_coordinates_latent_space = self.Z[index_nearest_latent_variable]
                 # self.is_select_latent_variable = True
                 # self.index_team_selected = index_nearest_latent_variable
-                self.fs.graph_whole.figure.update_traces(
+                fig_fs.update_traces(
                     selector=dict(type='contour'),
                     z=grid_values,
                     name='density',
                     **self.params_contour_density
                 )
-                return self.fs.graph_whole.figure, None
+                return fig_fs, None
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # if contour is clicked
                 grid_values = self.ls.grid_mapping[index, :]
-                self.fs.graph_whole.figure.update_traces(
+                fig_fs.update_traces(
                     selector=dict(type='contour'),
                     z=grid_values,
                     name='density',
                     **self.params_contour_density
                 )
-                return self.fs.graph_whole.figure, None
+                return fig_fs, None
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
-                if self.fs.graph_whole.figure.data[self.fs.dic_index_traces['contour']].name == 'density':
-                    self.fs.graph_whole.figure.update_traces(
+                if fig_fs.data[self.fs.dic_index_traces['contour']].name == 'density':
+                    fig_fs.update_traces(
                         selector=dict(type='contour'),
                         z=None,
                         name='no value',
                         **self.params_contour_density
                     )
-                    return self.fs.graph_whole.figure, dash.no_update
+                    return fig_fs, dash.no_update
                 else:
                     return dash.no_update, dash.no_update
             else:
