@@ -44,9 +44,9 @@ class DoubleDomainGMM(object):
             return dash.no_update
         else:
             # callback of this method is assumpted that update ls method is called before this method is called
-            print('in update_bar')
-            print("own_clickData={}".format(own_clickData))
-            print("opp_clickData={}".format(opp_clickData))
+            # print('in update_bar')
+            # print("own_clickData={}".format(own_clickData))
+            # print("opp_clickData={}".format(opp_clickData))
             if self.dic_ls['own'].index_clicked_grid is not None:
                 # own team map is clicked
                 if self.dic_ls['opp'].index_clicked_grid is not None:
