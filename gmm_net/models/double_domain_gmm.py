@@ -112,9 +112,9 @@ class DoubleDomainGMM(object):
                 which_triggered = 'own'
             else:
                 raise ValueError('invalid which_update={}'.format(which_update))
-            print('in own_opp_gplvm.update_ls')
-            print('index_selected_feature={}'.format(index_selected_feature))
-            print('which={}'.format(which_update))
+            # print('in own_opp_gplvm.update_ls')
+            # print('index_selected_feature={}'.format(index_selected_feature))
+            # print('which={}'.format(which_update))
 
             if index_selected_feature is not None:
                 index_trace_clicked_point = self.dic_ls[which_triggered].dic_index_traces['clicked_point']
