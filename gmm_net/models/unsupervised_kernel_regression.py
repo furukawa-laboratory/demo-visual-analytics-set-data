@@ -216,8 +216,6 @@ class UnsupervisedKernelRegression(object):
             id_fb=id_fb
         )
 
-
-
     def _initialize_to_vis_least(self, n_grid_points, label_data, label_feature,
                                  is_show_all_label_data, is_middle_color_zero,
                                  is_show_ticks_latent_space):
@@ -280,7 +278,7 @@ class UnsupervisedKernelRegression(object):
         import dash_core_components as dcc
 
         config = {'displayModeBar': False}
-        
+
         self.os = ObservedSpace(
             data=self.X,
             label_feature=label_feature
@@ -318,7 +316,7 @@ class UnsupervisedKernelRegression(object):
             raise ValueError('invalid params_scat_z={}'.format(params_scat_z))
 
         # set graph of latent space
-        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls+'_fig_store', config=config)
+        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls + '_fig_store', config=config)
 
         self.ls.dropdown = dcc.Dropdown(
             id=id_dropdown,
@@ -329,9 +327,8 @@ class UnsupervisedKernelRegression(object):
             clearable=True
         )
 
-        self.os.set_graph_indiv(id_graph=id_fb, id_store=id_fb+'_fig_store', config=config,
+        self.os.set_graph_indiv(id_graph=id_fb, id_store=id_fb + '_fig_store', config=config,
                                 params_figure_layout=params_fig_layout_fb)
-
 
     def update_fb_from_ls(self, clickData, prev_fb_fig_json):
         import dash
@@ -344,7 +341,7 @@ class UnsupervisedKernelRegression(object):
                 # print('clicked latent variable')
                 # if latent variable is clicked
                 fig_bar.update_traces(y=self.X[index])
-                #fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
+                # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
                 return fig_bar
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # print('clicked map')
@@ -505,7 +502,6 @@ class UnsupervisedKernelRegression(object):
             elif event.inaxes == self.ax_feature_bars:
                 pass
 
-
     def _initialize_to_vis_mpl(self, n_grid_points, label_data, label_feature,
                                is_show_all_label_data, is_middle_color_zero,
                                is_show_ticks_latent_space,
@@ -553,7 +549,6 @@ class UnsupervisedKernelRegression(object):
             self.title_feature_bars = 'Feature bars'
         else:
             self.title_feature_bars = title_feature_bars
-
 
         # set variables
         if fig is None:
@@ -664,7 +659,6 @@ class UnsupervisedKernelRegression(object):
 
     def set_scatter_cross(self, coordinates):
         self.cross_points = coordinates
-
 
     def set_comment_in_latent_space(self, comment: str):
         self.comment_latent_space = comment

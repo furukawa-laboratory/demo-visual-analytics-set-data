@@ -147,10 +147,10 @@ class BaseGMMNetworkOwnOppPerformance():
                                 return_std=return_std, return_cov=return_cov)
 
     def define_dash_app(self, n_grid_points=30, cmap_feature=None, cmap_density=None, cmap_ccp=None,
-                  label_member=None, label_feature=None, label_team=None, label_performance=None,
-                  fig_size=None, is_member_cp_middle_color_zero=False, is_ccp_middle_color_zero=False,
-                  params_init_lower_ukr=None, params_init_upper_ukr=None, is_available_simulation_mode=False,
-                  n_epoch_to_change_member=1500, learning_rate_to_change_member=0.001):
+                        label_member=None, label_feature=None, label_team=None, label_performance=None,
+                        fig_size=None, is_member_cp_middle_color_zero=False, is_ccp_middle_color_zero=False,
+                        params_init_lower_ukr=None, params_init_upper_ukr=None, is_available_simulation_mode=False,
+                        n_epoch_to_change_member=1500, learning_rate_to_change_member=0.001):
 
         import dash
         import dash_core_components as dcc
@@ -173,7 +173,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.is_member_cp_middle_color_zero = is_member_cp_middle_color_zero
 
         # Variables to simulate new member
-        self.n_epoch_to_change_member =n_epoch_to_change_member
+        self.n_epoch_to_change_member = n_epoch_to_change_member
         self.learning_rate_to_change_member = learning_rate_to_change_member
         self.is_simulate_changing_member = False
         self.is_available_simulation_mode = is_available_simulation_mode
@@ -190,8 +190,6 @@ class BaseGMMNetworkOwnOppPerformance():
         self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
         self.own_lower_ukr = self.lower_ukr
 
-
-
         # define graphs
         for lower_ukr, ukr_kde, which in zip([self.own_lower_ukr, self.opp_lower_ukr],
                                              [self.own_ukr_kde, self.opp_ukr_kde],
@@ -200,7 +198,7 @@ class BaseGMMNetworkOwnOppPerformance():
                 n_grid_points=n_grid_points,
                 label_data=label_member,
                 label_feature=label_feature,
-                is_show_all_label_data = False,
+                is_show_all_label_data=False,
                 params_contour={'colorscale': cmap_feature,
                                 'contours_coloring': 'heatmap',
                                 'line_smoothing': 0.85,
@@ -209,9 +207,9 @@ class BaseGMMNetworkOwnOppPerformance():
                 params_scat_z=params_init_lower_ukr['params_scat_z'],
                 params_fig_layout_ls={
                     'plot_bgcolor': '#ffffff',
-                    #'title': which+' member map',
-                    #'grid': dict(rows=2, columns=2)
-                    #'grid': dict(domain=dict(x=[0.5,1],y=[0.5,1]))
+                    # 'title': which+' member map',
+                    # 'grid': dict(rows=2, columns=2)
+                    # 'grid': dict(domain=dict(x=[0.5,1],y=[0.5,1]))
                     'margin': dict(l=10, r=10, t=10, b=10)
                 },
                 params_fig_layout_fb={
@@ -220,9 +218,9 @@ class BaseGMMNetworkOwnOppPerformance():
                 },
                 is_middle_color_zero=is_member_cp_middle_color_zero,
                 is_show_ticks_latent_space=False,
-                id_ls=which+'_member_map',
-                id_dropdown=which+'_cp_db',
-                id_fb=which+'fb'
+                id_ls=which + '_member_map',
+                id_dropdown=which + '_cp_db',
+                id_fb=which + 'fb'
             )
             ukr_kde.define_graphs(
                 n_grid_points=n_grid_points,
@@ -237,11 +235,11 @@ class BaseGMMNetworkOwnOppPerformance():
                                 'zmin': 0.0},
                 params_scat_z=params_init_upper_ukr['params_scat_z'],
                 params_figure_layout={
-                    #'title': which+' team map',
+                    # 'title': which+' team map',
                     'plot_bgcolor': '#ffffff',
                     'margin': dict(l=10, r=10, t=10, b=10)
                 },
-                id_ls=which+'_team_map',
+                id_ls=which + '_team_map',
                 fs=lower_ukr.ls
             )
 
@@ -266,11 +264,10 @@ class BaseGMMNetworkOwnOppPerformance():
                                                          'line_smoothing': 0.85,
                                                          'zmid': 0.0},
                                          params_figure_layout={
-                                             #'title': 'own team performance',
+                                             # 'title': 'own team performance',
                                              'margin': dict(l=10, r=10, t=10, b=10)
                                          }
                                          )
-
 
         # Define whole layout
 
@@ -283,8 +280,8 @@ class BaseGMMNetworkOwnOppPerformance():
                 html.Div(
                     [
                         html.H3(id='title_own_member_map',
-                                 style=title_style,
-                                 children='Own athlete map'),
+                                style=title_style,
+                                children='Own athlete map'),
                         self.own_lower_ukr.ls.graph_whole,
                         self.own_lower_ukr.ls.store_fig_whole,
                         # html.Div(id='text_under_member_map',
@@ -292,8 +289,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         #          children='test under member map'),
                         self.own_lower_ukr.ls.dropdown,
                         html.H3(id='title_member_feature_bar',
-                                 style=title_style,
-                                 children='Own athlete feature'),
+                                style=title_style,
+                                children='Own athlete feature'),
                         self.own_lower_ukr.os.graph_indiv,
                         self.own_lower_ukr.os.store_fig_indiv
                     ],
@@ -302,8 +299,8 @@ class BaseGMMNetworkOwnOppPerformance():
                 html.Div(
                     [
                         html.H3(id='title_own_team_map',
-                                 # style=title_style,
-                                 children='Own team map'),
+                                # style=title_style,
+                                children='Own team map'),
                         self.own_ukr_kde.ls.graph_whole,
                         self.own_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_own_team_map',
@@ -311,8 +308,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         #          children='test under own team map'),
                         self.own_opp_gplvm.dic_ls['own'].dropdown,
                         html.H3(id='title_own_team_performance',
-                                 style=title_style,
-                                 children='Own team performance'),
+                                style=title_style,
+                                children='Own team performance'),
                         self.own_opp_gplvm.os.graph_indiv,
                         self.own_opp_gplvm.os.store_fig_indiv
                     ],
@@ -321,8 +318,8 @@ class BaseGMMNetworkOwnOppPerformance():
                 html.Div(
                     [
                         html.H3(id='title_opp_team_map',
-                                 style=title_style,
-                                 children='Opposing team map'),
+                                style=title_style,
+                                children='Opposing team map'),
                         self.opp_ukr_kde.ls.graph_whole,
                         self.opp_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_opp_team_map',
@@ -330,8 +327,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         #          children='test under opp team map'),
                         self.own_opp_gplvm.dic_ls['opp'].dropdown,
                         html.H3(id='title_opp_member_map',
-                                 style=title_style,
-                                 children='Opposing athlete map'),
+                                style=title_style,
+                                children='Opposing athlete map'),
                         self.opp_lower_ukr.ls.graph_whole,
                         self.opp_lower_ukr.ls.store_fig_whole
                     ],
@@ -375,6 +372,7 @@ class BaseGMMNetworkOwnOppPerformance():
             Output(component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
                    component_property='data')
         ]
+
         @app.callback(
             self.output_lists,
             [
@@ -656,7 +654,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.is_member_cp_middle_color_zero = is_member_cp_middle_color_zero
 
         # Variables to simulate new member
-        self.n_epoch_to_change_member =n_epoch_to_change_member
+        self.n_epoch_to_change_member = n_epoch_to_change_member
         self.learning_rate_to_change_member = learning_rate_to_change_member
         self.is_simulate_changing_member = False
         self.is_available_simulation_mode = is_available_simulation_mode
@@ -688,7 +686,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                               title_feature_bars='Member feature',
                                               is_show_all_label_data=False,
                                               params_imshow={'cmap': cmap_feature,
-                                                               'interpolation': 'spline16'},
+                                                             'interpolation': 'spline16'},
                                               is_middle_color_zero=is_member_cp_middle_color_zero,
                                               is_show_ticks_latent_space=False,
                                               fig=self.fig,
@@ -706,7 +704,7 @@ class BaseGMMNetworkOwnOppPerformance():
                                                   is_show_all_label_data=False,
                                                   is_show_ticks_latent_space=False,
                                                   params_imshow={'cmap': cmap_feature,
-                                                               'interpolation': 'spline16'},
+                                                                 'interpolation': 'spline16'},
                                                   is_middle_color_zero=is_member_cp_middle_color_zero,
                                                   fig=self.fig,
                                                   fig_size=None,
@@ -796,7 +794,6 @@ class BaseGMMNetworkOwnOppPerformance():
                 else:
                     self.is_simulate_changing_member = False
                 self.lower_ukr._set_feature_bar_from_latent_space(click_coordinates)
-
 
                 # set the value to draw in own team map
                 self.own_ukr_kde._set_latent_space_from_data_space(click_coordinates)
@@ -910,7 +907,7 @@ class BaseGMMNetworkOwnOppPerformance():
 
                 # draw
                 self.opp_lower_ukr._draw_latent_space()
-                #self.opp_lower_ukr._draw_feature_bars()
+                # self.opp_lower_ukr._draw_feature_bars()
                 self.opp_ukr_kde._draw_latent_space()
             elif event.inaxes == self.ax_performance_bars.axes:
                 self._set_two_team_latent_spaces_from_target_bars(click_coordinates)
@@ -923,9 +920,6 @@ class BaseGMMNetworkOwnOppPerformance():
                 self.opp_ukr_kde._draw_latent_space()
                 self._draw_target_bars()
                 self.lower_ukr._draw_latent_space()
-
-
-
 
     def __mouse_over_fig(self, event):
         if event.xdata is not None:
@@ -1026,7 +1020,7 @@ class BaseGMMNetworkOwnOppPerformance():
             else:
                 # marginal component plane
                 grid_values = np.mean(self.mesh_grid_mapping[:, :, self.selected_performance], axis=1)[:, None]
-                grid_precision = np.mean(self.mesh_grid_precision[:, :], axis=1)[:,None]
+                grid_precision = np.mean(self.mesh_grid_precision[:, :], axis=1)[:, None]
                 annotation_text = 'Heat map of {} (marginal)'.format(
                     self.label_performance[self.selected_performance]
                 )
@@ -1133,13 +1127,13 @@ class BaseGMMNetworkOwnOppPerformance():
         else:
             raise ValueError('arg shape {} is not consistent'.format(grid_array.shape))
 
-
     def _set_to_simulate_changing_member(self, click_coordinates):
         member_features = self.own_ukr_kde.member_features[self.own_ukr_kde.mask_shown_member]
         index_nearest, distance = self.__calc_nearest_candidate(click_coordinates=click_coordinates,
                                                                 candidates=member_features,
                                                                 retdist=True)
-        epsilon = 0.02 * np.abs(self.own_ukr_kde.grid_points_data_space.max() - self.own_ukr_kde.grid_points_data_space.min())
+        epsilon = 0.02 * np.abs(
+            self.own_ukr_kde.grid_points_data_space.max() - self.own_ukr_kde.grid_points_data_space.min())
         if distance < epsilon and self.selected_performance is not None:
             self.is_simulate_changing_member = True
             self.deleted_member_coordinates = member_features[index_nearest]
@@ -1233,4 +1227,3 @@ class BaseGMMNetworkOwnOppPerformance():
         self.grid_simulated_latent_variables = None
         self.lower_ukr.set_scatter_cross(None)
         self.own_ukr_kde.set_mesh_in_latent_space(None)
-

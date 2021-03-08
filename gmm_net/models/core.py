@@ -196,7 +196,6 @@ class Space():
             storage_type='memory'
         )
 
-
     def update_trace_clicked_point(self, clickData, fig):
         if clickData is not None:
             if clickData['points'][0]['curveNumber'] == self.dic_index_traces['grids']:
@@ -209,7 +208,7 @@ class Space():
                     ),
                     selector=dict(name='clicked_point', type='scatter')
                 )
-                #self.index_clicked_grid = clickData['points'][0]['pointIndex']
+                # self.index_clicked_grid = clickData['points'][0]['pointIndex']
                 return fig
             elif clickData['points'][0]['curveNumber'] == self.dic_index_traces['data']:
                 fig.update_traces(
@@ -232,7 +231,7 @@ class Space():
                 return fig
                 # self.index_clicked_grid = None
             else:
-                return dash.no_update 
+                return dash.no_update
         else:
             return dash.no_update
 
@@ -241,6 +240,7 @@ class Space():
         distance = cdist(self.grid_points, coordinate, metric='sqeuclidean')
         index_nearest = np.argmin(distance.ravel())
         return index_nearest
+
 
 class LatentSpace(Space):
     pass

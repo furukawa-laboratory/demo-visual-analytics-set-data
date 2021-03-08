@@ -267,7 +267,6 @@ class UKRForWeightedKDE():
                                              learning_rate=learning_rate,
                                              verbose=verbose)
 
-
     def transform_from_densities(self, target_densities, n_epoch, learning_rate, verbose=True):
         # calcualte nearest data density to initialize
         if target_densities.shape[1] != self.data_densities.shape[1]:
@@ -407,7 +406,7 @@ class UKRForWeightedKDE():
         )
 
         config = {'displayModeBar': False}
-        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls+'_fig_store', config=config)
+        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls + '_fig_store', config=config)
 
     def update_fs_dropdown_from_ls(self, clickData, prev_fs_fig_json):
         if clickData is not None:
@@ -467,12 +466,11 @@ class UKRForWeightedKDE():
             clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
             # print(clicked_id_text)
             if clicked_id_text == self.ls.graph_whole.id:
-                fig_ls = go.Figure(** prev_ls_fig_json)
+                fig_ls = go.Figure(**prev_ls_fig_json)
                 return self.ls.update_trace_clicked_point(clickData=clickData,
                                                           fig=fig_ls)
             else:
                 return dash.no_update
-
 
     # def _initialize_to_vis_dash(self,
     #                             params_contour: dict,
@@ -674,7 +672,8 @@ class UKRForWeightedKDE():
         if self.click_coordinates_latent_space is not None:
             # If a coordinates are clicked previously
             _, dist_previous_click_coordinates = self.__calc_nearest_candidate(click_coordinates,
-                                                                               self.click_coordinates_latent_space.reshape(1, -1),
+                                                                               self.click_coordinates_latent_space.reshape(
+                                                                                   1, -1),
                                                                                retdist=True)
             epsilon = 0.02 * np.abs(self.grid_points_latent_space.max() - self.grid_points_latent_space.min())
             if dist_previous_click_coordinates < epsilon:
@@ -719,7 +718,8 @@ class UKRForWeightedKDE():
         if self.click_coordinates_data_space is not None:
             # If a coodinates are clicked previously
             _, dist_previous_click_coordinates = self.__calc_nearest_candidate(click_coordinates,
-                                                                               self.click_coordinates_data_space.reshape(1, -1),
+                                                                               self.click_coordinates_data_space.reshape(
+                                                                                   1, -1),
                                                                                retdist=True)
             epsilon = 0.02 * np.abs(self.grid_points_data_space.max() - self.grid_points_data_space.min())
             if dist_previous_click_coordinates < epsilon:
@@ -735,8 +735,8 @@ class UKRForWeightedKDE():
             pass
         else:
             index_nearest_grid_point, dist_min_grid = self.__calc_nearest_candidate(click_coordinates,
-                                                                                          self.grid_points_data_space,
-                                                                                          retdist=True)
+                                                                                    self.grid_points_data_space,
+                                                                                    retdist=True)
             self.grid_values_to_draw_latent_space = self.grid_mapping[:, index_nearest_grid_point]
             self.click_coordinates_data_space = self.grid_points_data_space[index_nearest_grid_point]
 
@@ -908,7 +908,8 @@ class UKRForWeightedKDE():
                                              marker='o', s=50, c='r',
                                              edgecolors='w', linewidths=2.0)
             else:
-                self.ax_latent_space.scatter(self.click_coordinates_latent_space[0], self.click_coordinates_latent_space[1],
+                self.ax_latent_space.scatter(self.click_coordinates_latent_space[0],
+                                             self.click_coordinates_latent_space[1],
                                              marker="o", color="k", s=40, edgecolors='w', linewidths=2.0)
 
         if self.mesh_in_latent_space is not None:
@@ -1028,13 +1029,13 @@ class UKRForWeightedKDE():
         #                                   ha='center', va='bottom', color='black')
         if not self.is_show_ticks:
             self.ax_data_space.tick_params(labelbottom=False,
-                                             labelleft=False,
-                                             labelright=False,
-                                             labeltop=False)
+                                           labelleft=False,
+                                           labelright=False,
+                                           labeltop=False)
             self.ax_data_space.tick_params(bottom=False,
-                                             left=False,
-                                             right=False,
-                                             top=False)
+                                           left=False,
+                                           right=False,
+                                           top=False)
         self.fig.show()
 
     def __calc_nearest_candidate(self, click_coordinates, candidates, retdist=False):
@@ -1058,4 +1059,3 @@ class UKRForWeightedKDE():
         segs2 = segs1.transpose(1, 0, 2)
         ax.add_collection(LineCollection(segs1, **kwargs))
         ax.add_collection(LineCollection(segs2, **kwargs))
-
