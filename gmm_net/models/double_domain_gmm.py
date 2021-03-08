@@ -5,7 +5,6 @@ from scipy.spatial.distance import cdist
 import plotly.graph_objects as go
 
 
-
 class DoubleDomainGMM(object):
     def __init__(self, data):
         self.mesh_grid_mapping = None
@@ -24,12 +23,12 @@ class DoubleDomainGMM(object):
         self.dic_ls = {'own': own_ls, 'opp': opp_ls}
         self.os.label_feature = label_feature
         self.os.set_graph_indiv(id_graph=id_fb,
-                                id_store=id_fb+'_fig_store',
+                                id_store=id_fb + '_fig_store',
                                 params_figure_layout=params_figure_layout,
                                 config=config)
         for key, ls in self.dic_ls.items():
             ls.dropdown = dcc.Dropdown(
-                id=key+'_team_dropdown',
+                id=key + '_team_dropdown',
                 options=[{"value": i, "label": x}
                          for i, x in enumerate(self.os.label_feature)],
                 placeholder="Select own team performance shown as contour",
@@ -53,12 +52,13 @@ class DoubleDomainGMM(object):
                 if self.dic_ls['opp'].index_clicked_grid is not None:
                     # opp team map is clicked
                     self.os.graph_indiv.figure.update_traces(
-                        y=self.mesh_grid_mapping[self.dic_ls['own'].index_clicked_grid, self.dic_ls['opp'].index_clicked_grid, :]
+                        y=self.mesh_grid_mapping[self.dic_ls['own'].index_clicked_grid,
+                          self.dic_ls['opp'].index_clicked_grid, :]
                     )
                 else:
                     # opp team map is not clicked
                     self.os.graph_indiv.figure.update_traces(
-                        y=np.mean(self.mesh_grid_mapping[self.dic_ls['own'].index_clicked_grid, : , :], axis=0)
+                        y=np.mean(self.mesh_grid_mapping[self.dic_ls['own'].index_clicked_grid, :, :], axis=0)
                     )
             else:
                 if self.dic_ls['opp'].index_clicked_grid is not None:
@@ -71,7 +71,6 @@ class DoubleDomainGMM(object):
                     )
 
             return self.os.graph_indiv.figure
-
 
     def update_ls(self, index_selected_feature, clickData,
                   prev_own_ls_fig_json, prev_opp_ls_fig_json,
@@ -118,9 +117,15 @@ class DoubleDomainGMM(object):
                 else:
                     # If clicked point does not exist, set value to marginal component plance
                     if which_update == 'own':
-                        grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=1)
+                        grid_value = np.mean(
+                            self.mesh_grid_mapping[:, :, index_selected_feature],
+                            axis=1
+                        )
                     else:
-                        grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=0)
+                        grid_value = np.mean(
+                            self.mesh_grid_mapping[:, :, index_selected_feature],
+                            axis=0
+                        )
                 # update
                 fig_ls_updated.update_traces(
                     selector=dict(type='contour'),
@@ -143,6 +148,3 @@ class DoubleDomainGMM(object):
         distance = cdist(grids, coordinate, metric='sqeuclidean')
         index_nearest = np.argmin(distance.ravel())
         return index_nearest
-
-
-
