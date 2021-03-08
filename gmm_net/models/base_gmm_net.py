@@ -404,22 +404,27 @@ class BaseGMMNetworkOwnOppPerformance():
                 ),
                 Input(
                     component_id=self.own_lower_ukr.ls.store_fig_whole.id,
-                    component_property='data',
+                    component_property='data'
                 ),
                 Input(
                     component_id=self.own_ukr_kde.ls.store_fig_whole.id,
-                    component_property='data',
+                    component_property='data'
                 ),
                 Input(
-                    component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
+                    component_id=self.opp_lower_ukr.ls.store_fig_whole.id,
                     component_property='data'
+                )
+                Input(
+                    component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
+                    component_property='data
                 )
             ]
         )
         def update_maps(index_feature_own_member, clickData_mm,
                         index_own_performance_own_tm, clickData_own_tm,
                         index_own_performance_opp_tm, clickData_opp_tm,
-                        prev_own_mm_json, prev_own_tm_json, prev_opp_tm_json):
+                        prev_own_mm_json, prev_own_tm_json,
+                        prev_opp_mm_json, prev_opp_tm_json):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
                 # no update
@@ -503,31 +508,27 @@ class BaseGMMNetworkOwnOppPerformance():
                     }
                     return self.get_return_list(**dict_update)
                 elif clicked_id_text == self.own_opp_gplvm.dic_ls['opp'].graph_whole.id:
-                    _ = self.opp_ukr_kde.update_ls(
-                        clickData=clickData_opp_tm
+                    ret_opp_ukr_kde_fig_ls = self.opp_ukr_kde.update_ls(
+                        clickData=clickData_opp_tm,
+                        prev_ls_fig_json=prev_opp_tm_json
                     )
-                    ret_opplu_graph, temp = self.opp_ukr_kde.update_fs_dropdown_from_ls(
-                        clickData=clickData_opp_tm
+                    ret_opp_lower_ukr_fig_ls, temp = self.opp_ukr_kde.update_fs_dropdown_from_ls(
+                        clickData=clickData_opp_tm,
+                        prev_fs_fig_json=prev_opp_mm_json
                     )
                     dict_update = {
-                        self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
-                            index_selected_feature=index_own_performance_own_tm,
-                            clickData=clickData_opp_tm,
-                            which_update='own'
-                        ),
-                        self.own_opp_gplvm.dic_ls['opp'].graph_whole.id: self.own_opp_gplvm.update_ls(
+                        self.opp_ukr_kde.ls.store_fig_whole.id: ret_opp_ukr_kde_fig_ls,
+                        self.opp_lower_ukr.ls.store_fig_whole.id: ret_opp_lower_ukr_fig_ls,
+                        self.own_ukr_kde.ls.store_fig_whole.id: self.own_opp_gplvm.update_ls(
                             index_selected_feature=index_own_performance_opp_tm,
-                            clickData=clickData_own_tm,
-                            which_update='opp'
-                        ),
-                        self.opp_ukr_kde.ls.graph_whole.id: self.opp_ukr_kde.update_ls(
-                            clickData=clickData_opp_tm
-                        ),
-                        self.own_opp_gplvm.os.graph_indiv.id: self.own_opp_gplvm.update_bar(
-                            own_clickData=clickData_own_tm,
-                            opp_clickData=clickData_opp_tm
-                        ),
-                        self.opp_lower_ukr.ls.graph_whole.id: ret_opplu_graph
+                            fig_own_ls=go.Figure(**prev_own_tm_json),
+                            fig_opp_ls=ret_opp_ukr_kde_fig_ls,
+                            which_update='own'
+                        )
+                        # self.own_opp_gplvm.os.graph_indiv.id: self.own_opp_gplvm.update_bar(
+                        #     own_clickData=clickData_own_tm,
+                        #     opp_clickData=clickData_opp_tm
+                        # ),
                     }
                     return self.get_return_list(**dict_update)
                 else:
@@ -566,6 +567,28 @@ class BaseGMMNetworkOwnOppPerformance():
             Output(component_id=self.own_ukr_kde.ls.graph_whole.id,
                    component_property='figure'),
             Input(component_id=self.own_ukr_kde.ls.store_fig_whole.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.opp_lower_ukr.ls.graph_whole.id,
+                   component_property='figure'),
+            Input(component_id=self.opp_lower_ukr.ls.store_fig_whole.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_lower_ukr.os.graph_indiv.id,
+                   component_property='figure'),
+            Input(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
                   component_property='data')
         )
         app.clientside_callback(
