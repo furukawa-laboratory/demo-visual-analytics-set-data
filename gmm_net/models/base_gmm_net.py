@@ -413,10 +413,10 @@ class BaseGMMNetworkOwnOppPerformance():
                 Input(
                     component_id=self.opp_lower_ukr.ls.store_fig_whole.id,
                     component_property='data'
-                )
+                ),
                 Input(
                     component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
-                    component_property='data
+                    component_property='data'
                 )
             ]
         )
