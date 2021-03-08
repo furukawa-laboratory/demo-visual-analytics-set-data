@@ -372,8 +372,8 @@ class BaseGMMNetworkOwnOppPerformance():
                    component_property='data'),
             Output(component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
                    component_property='value'),
-            Output(component_id=self.own_opp_gplvm.os.graph_indiv.id,
-                   component_property='figure')
+            Output(component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
+                   component_property='data')
         ]
         @app.callback(
             self.output_lists,
@@ -417,6 +417,10 @@ class BaseGMMNetworkOwnOppPerformance():
                 Input(
                     component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
                     component_property='data'
+                ),
+                Input(
+                    component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
+                    component_property='data'
                 )
             ]
         )
@@ -424,7 +428,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         index_own_performance_own_tm, clickData_own_tm,
                         index_own_performance_opp_tm, clickData_opp_tm,
                         prev_own_mm_json, prev_own_tm_json,
-                        prev_opp_mm_json, prev_opp_tm_json):
+                        prev_opp_mm_json, prev_opp_tm_json,
+                        prev_own_tpb_json):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
                 # no update
@@ -589,6 +594,17 @@ class BaseGMMNetworkOwnOppPerformance():
             Output(component_id=self.opp_ukr_kde.ls.graph_whole.id,
                    component_property='figure'),
             Input(component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_opp_gplvm.os.graph_indiv.id,
+                   component_property='figure'),
+            Input(component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
                   component_property='data')
         )
 
