@@ -2,6 +2,8 @@ from gmm_net.models.core import ObservedSpace
 import numpy as np
 import dash
 from scipy.spatial.distance import cdist
+import plotly.graph_objects as go
+
 
 
 class DoubleDomainGMM(object):
@@ -71,20 +73,21 @@ class DoubleDomainGMM(object):
             return self.os.graph_indiv.figure
 
 
-    def update_ls(self, index_selected_feature, clickData, which_update: str):
-        import dash
+    def update_ls(self, index_selected_feature, clickData,
+                  prev_own_ls_fig_json, prev_opp_ls_fig_json,
+                  which_update: str):
         ctx = dash.callback_context
         if not ctx.triggered or ctx.triggered[0]['value'] is None:
             return dash.no_update
         else:
             if which_update == 'own':
-                ls_updated = self.dic_ls['own']
-                ls_triggered = self.dic_ls['opp']
-                # which_triggerd = 'opp'
+                fig_ls_updated = go.Figure(**prev_own_ls_fig_json)
+                fig_ls_triggered = go.Figure(**prev_opp_ls_fig_json)
+                which_triggered = 'opp'
             elif which_update == 'opp':
-                ls_updated = self.dic_ls['opp']
-                ls_triggered = self.dic_ls['own']
-                # which_triggerd = 'own'
+                fig_ls_updated = go.Figure(**prev_opp_ls_fig_json)
+                fig_ls_triggered = go.Figure(**prev_own_ls_fig_json)
+                which_triggered = 'own'
             else:
                 raise ValueError('invalid which_update={}'.format(which_update))
             print('in own_opp_gplvm.update_ls')
@@ -93,32 +96,46 @@ class DoubleDomainGMM(object):
             print('which={}'.format(which_update))
 
             if index_selected_feature is not None:
-                ls_triggered.update_trace_clicked_point(clickData=clickData)
-                if ls_triggered.index_clicked_grid is not None:
-                    # set value to conditional component plane
-                    index_nearest_grid = ls_triggered.index_clicked_grid
+                index_trace_clicked_point = self.dic_ls[which_triggered].dic_index_traces['clicked_point']
+                if fig_ls_triggered.data[index_trace_clicked_point].visible:
+                    # if clicked point exists, set value to conditional component plane
+                    index_nearest_grid = self.dic_ls[which_triggered]._get_index_nearest_grid(
+                        x=fig_ls_triggered.data[index_trace_clicked_point].x[0],
+                        y=fig_ls_triggered.data[index_trace_clicked_point].y[0]
+                    )
                     if which_update == 'own':
-                        grid_value = self.mesh_grid_mapping[:, ls_triggered.index_clicked_grid, index_selected_feature]
+                        grid_value = self.mesh_grid_mapping[
+                                     :,
+                                     index_nearest_grid,
+                                     index_selected_feature
+                                     ]
                     else:
-                        grid_value = self.mesh_grid_mapping[index_nearest_grid, :, index_selected_feature]
+                        grid_value = self.mesh_grid_mapping[
+                                     index_nearest_grid,
+                                     :,
+                                     index_selected_feature
+                                     ]
                 else:
-                    # set value to marginal
+                    # If clicked point does not exist, set value to marginal component plance
                     if which_update == 'own':
                         grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=1)
                     else:
                         grid_value = np.mean(self.mesh_grid_mapping[:, :, index_selected_feature], axis=0)
-                ls_updated.graph_whole.figure.update_traces(
+                # update
+                fig_ls_updated.update_traces(
                     selector=dict(type='contour'),
                     z=grid_value,
                     **self.params_contour
                 )
-                return ls_updated.graph_whole.figure
+                return fig_ls_updated
+
             else:
-                ls_updated.graph_whole.figure.update_traces(
+                fig_ls_updated.update_traces(
                     z=None,
                     selector=dict(type='contour')
                 )
-                return ls_updated.graph_whole.figure
+                return fig_ls_updated
+
     def _get_index_nearest_grid(self, x, y, which: str):
         coordinate = np.array([x, y])[None, :]
         grids = self.dic_ls[which].grid_points
