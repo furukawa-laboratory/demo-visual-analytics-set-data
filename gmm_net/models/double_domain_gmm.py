@@ -72,26 +72,25 @@ class DoubleDomainGMM(object):
 
             return self.os.graph_indiv.figure
 
-    def update_ls(self, index_selected_feature, clickData,
-                  prev_own_ls_fig_json, prev_opp_ls_fig_json,
+    def update_ls(self, index_selected_feature,
+                  fig_own_ls, fig_opp_ls,
                   which_update: str):
         ctx = dash.callback_context
         if not ctx.triggered or ctx.triggered[0]['value'] is None:
             return dash.no_update
         else:
             if which_update == 'own':
-                fig_ls_updated = go.Figure(**prev_own_ls_fig_json)
-                fig_ls_triggered = go.Figure(**prev_opp_ls_fig_json)
+                fig_ls_updated = fig_own_ls
+                fig_ls_triggered = fig_opp_ls
                 which_triggered = 'opp'
             elif which_update == 'opp':
-                fig_ls_updated = go.Figure(**prev_opp_ls_fig_json)
-                fig_ls_triggered = go.Figure(**prev_own_ls_fig_json)
+                fig_ls_updated = fig_opp_ls
+                fig_ls_triggered = fig_own_ls
                 which_triggered = 'own'
             else:
                 raise ValueError('invalid which_update={}'.format(which_update))
             print('in own_opp_gplvm.update_ls')
             print('index_selected_feature={}'.format(index_selected_feature))
-            print('clickData={}'.format(clickData))
             print('which={}'.format(which_update))
 
             if index_selected_feature is not None:
