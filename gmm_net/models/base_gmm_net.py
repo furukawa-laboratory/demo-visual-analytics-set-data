@@ -586,17 +586,6 @@ class BaseGMMNetworkOwnOppPerformance():
                 return data
             }
             """,
-            Output(component_id=self.own_lower_ukr.os.graph_indiv.id,
-                   component_property='figure'),
-            Input(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
-                  component_property='data')
-        )
-        app.clientside_callback(
-            """
-            function(data){
-                return data
-            }
-            """,
             Output(component_id=self.opp_ukr_kde.ls.graph_whole.id,
                    component_property='figure'),
             Input(component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
