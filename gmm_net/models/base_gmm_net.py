@@ -339,8 +339,8 @@ class BaseGMMNetworkOwnOppPerformance():
 
         )
 
-        # Define callback function when data is clicked
-        # Callback function related own member feature bars
+        # Define callback functions
+        # Callback function to show own member feature bars
         @app.callback(
             Output(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
                    component_property='data'),
@@ -354,11 +354,109 @@ class BaseGMMNetworkOwnOppPerformance():
         def update_bar(clickData, prev_fb_fig_json):
             return self.own_lower_ukr.update_fb_from_ls(clickData, prev_fb_fig_json)
 
+        # Callback function to show own member map
+        @app.callback(
+            [
+                Output(
+                    component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                    component_property='data'
+                ),
+                Output(
+                    component_id=self.own_lower_ukr.ls.dropdown.id,
+                    component_property='value'
+                )
+            ],
+            [
+                Input(
+                    component_id=self.own_lower_ukr.ls.dropdown.id,
+                    component_property='value'
+                ),
+                Input(
+                    component_id=self.own_lower_ukr.ls.graph_whole.id,
+                    component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_ukr_kde.ls.graph_whole.id,
+                    component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                    component_property='data'
+                )
+            ]
+        )
+        def update_own_member_map(index_feature_own_member,
+                                  clickData_own_mm,
+                                  clickData_own_tm,
+                                  prev_own_mm_json):
+            ctx = dash.callback_context
+            if not ctx.triggered or ctx.triggered[0]['value'] is None:
+                # no update
+                return dash.no_update, dash.no_update
+            else:
+                clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+                # print(clicked_id_text)
+                if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
+                    return self.own_lower_ukr.update_ls(
+                        index_selected_feature=index_feature_own_member,
+                        clickData=clickData_own_mm,
+                        prev_ls_fig_json=prev_own_mm_json
+                    ), dash.no_update
+                elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
+                    return self.own_lower_ukr.update_ls(
+                        index_selected_feature=index_feature_own_member,
+                        clickData=clickData_own_mm,
+                        prev_ls_fig_json=prev_own_mm_json
+                    ), dash.no_update
+                elif clicked_id_text == self.own_ukr_kde.ls.graph_whole.id:
+                    ret_own_lower_ukr_fig_ls, ret_own_lower_ukr_dropdown = self.own_ukr_kde.update_fs_dropdown_from_ls(
+                        clickData=clickData_own_tm,
+                        prev_fs_fig_json=prev_own_mm_json
+                    )
+                    return ret_own_lower_ukr_fig_ls, ret_own_lower_ukr_dropdown
+
+        # Callback function to show own team performance bars
+        # @app.callback(
+        #     [
+        #         Output(
+        #             component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+        #             component_property='data'
+        #         ),
+        #         Output(
+        #             component_id=self.own_lower_ukr.ls.dropdown.id,
+        #             component_property='value'
+        #         )
+        #     ],
+        #     [
+        #         Input(
+        #             component_id=self.own_ukr_kde.ls.graph_whole.id,
+        #             component_property='clickData'
+        #         ),
+        #         Input(
+        #             component_id=self.opp_ukr_kde.ls.graph_whole.id,
+        #             component_property='clickData'
+        #         ),
+        #         Input(
+        #             component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
+        #             component_property='data'
+        #         )
+        #     ]
+        # )
+        # def update_own_team_performance_bars(clickData_own_tm, clickData_opp_tm,
+        #                                      prev_fig_tpb_json):
+        #     ctx = dash.callback_context
+        #     if not ctx.triggered or ctx.triggered[0]['value'] is None:
+        #         # no update
+        #         return self.get_return_list(**{})
+        #     else:
+        #         clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+
+
         self.output_lists = [
-            Output(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
-                   component_property='data'),
-            Output(component_id=self.own_lower_ukr.ls.dropdown.id,
-                   component_property='value'),
+            # Output(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+            #        component_property='data'),
+            # Output(component_id=self.own_lower_ukr.ls.dropdown.id,
+            #        component_property='value'),
             Output(component_id=self.own_ukr_kde.ls.store_fig_whole.id,
                    component_property='data'),
             Output(component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
@@ -376,14 +474,14 @@ class BaseGMMNetworkOwnOppPerformance():
         @app.callback(
             self.output_lists,
             [
-                Input(
-                    component_id=self.own_lower_ukr.ls.dropdown.id,
-                    component_property='value'
-                ),
-                Input(
-                    component_id=self.own_lower_ukr.ls.graph_whole.id,
-                    component_property='clickData'
-                ),
+                # Input(
+                #     component_id=self.own_lower_ukr.ls.dropdown.id,
+                #     component_property='value'
+                # ),
+                # Input(
+                #     component_id=self.own_lower_ukr.ls.graph_whole.id,
+                #     component_property='clickData'
+                # ),
                 Input(
                     component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
                     component_property='value'
@@ -400,10 +498,10 @@ class BaseGMMNetworkOwnOppPerformance():
                     component_id=self.opp_ukr_kde.ls.graph_whole.id,
                     component_property='clickData'
                 ),
-                Input(
-                    component_id=self.own_lower_ukr.ls.store_fig_whole.id,
-                    component_property='data'
-                ),
+                # Input(
+                #     component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                #     component_property='data'
+                # ),
                 Input(
                     component_id=self.own_ukr_kde.ls.store_fig_whole.id,
                     component_property='data'
@@ -422,38 +520,42 @@ class BaseGMMNetworkOwnOppPerformance():
                 )
             ]
         )
-        def update_maps(index_feature_own_member, clickData_mm,
-                        index_own_performance_own_tm, clickData_own_tm,
-                        index_own_performance_opp_tm, clickData_opp_tm,
-                        prev_own_mm_json, prev_own_tm_json,
-                        prev_opp_mm_json, prev_opp_tm_json,
-                        prev_own_tpb_json):
+        def update_maps(
+                # index_feature_own_member, clickData_mm,
+                index_own_performance_own_tm, clickData_own_tm,
+                index_own_performance_opp_tm, clickData_opp_tm,
+                # prev_own_mm_json,
+                prev_own_tm_json,
+                prev_opp_mm_json,
+                prev_opp_tm_json,
+                prev_own_tpb_json
+        ):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
                 # no update
                 return self.get_return_list(**{})
             else:
                 clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
-                print(clicked_id_text)
-                if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
-                    dict_update = {
-                        self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
-                            index_selected_feature=index_feature_own_member,
-                            clickData=clickData_mm,
-                            prev_ls_fig_json=prev_own_mm_json
-                        )
-                    }
-                    return self.get_return_list(**dict_update)
-                elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
-                    dict_update = {
-                        self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
-                            index_selected_feature=index_feature_own_member,
-                            clickData=clickData_mm,
-                            prev_ls_fig_json=prev_own_mm_json
-                        )
-                    }
-                    return self.get_return_list(**dict_update)
-                elif clicked_id_text == self.own_opp_gplvm.dic_ls['own'].dropdown.id:
+                # print(clicked_id_text)
+                # if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
+                #     dict_update = {
+                #         self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
+                #             index_selected_feature=index_feature_own_member,
+                #             clickData=clickData_mm,
+                #             prev_ls_fig_json=prev_own_mm_json
+                #         )
+                #     }
+                #     return self.get_return_list(**dict_update)
+                # elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
+                #     dict_update = {
+                #         self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
+                #             index_selected_feature=index_feature_own_member,
+                #             clickData=clickData_mm,
+                #             prev_ls_fig_json=prev_own_mm_json
+                #         )
+                #     }
+                #     return self.get_return_list(**dict_update)
+                if clicked_id_text == self.own_opp_gplvm.dic_ls['own'].dropdown.id:
                     dict_update = {
                         self.own_opp_gplvm.dic_ls['own'].store_fig_whole.id: self.own_opp_gplvm.update_ls(
                             index_selected_feature=index_own_performance_own_tm,
@@ -471,10 +573,10 @@ class BaseGMMNetworkOwnOppPerformance():
                     )
                     fig_ls_opp_ukr_kde = go.Figure(**prev_opp_tm_json)
                     # Update own member map and dropdown to show density map
-                    ret_own_lower_ukr_fig_ls, ret_own_lower_ukr_dropdown = self.own_ukr_kde.update_fs_dropdown_from_ls(
-                        clickData=clickData_own_tm,
-                        prev_fs_fig_json=prev_own_mm_json
-                    )
+                    # ret_own_lower_ukr_fig_ls, ret_own_lower_ukr_dropdown = self.own_ukr_kde.update_fs_dropdown_from_ls(
+                    #     clickData=clickData_own_tm,
+                    #     prev_fs_fig_json=prev_own_mm_json
+                    # )
                     # Update opp team map to show conditional or marginal component plane
                     fig_ls_opp_ukr_kde = self.own_opp_gplvm.update_ls(
                         index_selected_feature=index_own_performance_opp_tm,
@@ -483,8 +585,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         which_update='opp'
                     )
                     dict_update = {
-                        self.own_lower_ukr.ls.store_fig_whole.id: ret_own_lower_ukr_fig_ls,
-                        self.own_lower_ukr.ls.dropdown.id: ret_own_lower_ukr_dropdown,
+                        # self.own_lower_ukr.ls.store_fig_whole.id: ret_own_lower_ukr_fig_ls,
+                        # self.own_lower_ukr.ls.dropdown.id: ret_own_lower_ukr_dropdown,
                         self.own_ukr_kde.ls.store_fig_whole.id: fig_ls_own_ukr_kde,
                         self.opp_ukr_kde.ls.store_fig_whole.id: fig_ls_opp_ukr_kde,
                         # Why is this updated??? I can't understand my self
