@@ -226,18 +226,20 @@ dict_position_marker = {
     'PG': 'triangle-up',
     'SF': 'star'
 }
-import matplotlib.pyplot as plt
-import matplotlib
-cmap_member_scat = plt.get_cmap('tab10')
+# import matplotlib.pyplot as plt
+# import matplotlib
+# cmap_member_scat = plt.get_cmap('tab10')
+import plotly.express as px
+cmap_member_scat = px.colors.qualitative.D3
 dict_position_color = {
-    'C': cmap_member_scat(0),
-    'PF': cmap_member_scat(4),
-    'SG': cmap_member_scat(3),
-    'PG': cmap_member_scat(2),
-    'SF': cmap_member_scat(1)
+    'C': cmap_member_scat[0],
+    'PF': cmap_member_scat[4],
+    'SG': cmap_member_scat[3],
+    'PG': cmap_member_scat[2],
+    'SF': cmap_member_scat[1]
 }
-for key in dict_position_color.keys():
-    dict_position_color[key] = matplotlib.colors.to_hex(dict_position_color[key])
+# for key in dict_position_color.keys():
+#     dict_position_color[key] = matplotlib.colors.to_hex(dict_position_color[key])
 
 dict_position_correct_name = {
     'C': 'Center',
