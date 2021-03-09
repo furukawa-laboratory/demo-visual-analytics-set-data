@@ -347,12 +347,24 @@ class BaseGMMNetworkOwnOppPerformance():
             [
                 Input(component_id=self.own_lower_ukr.ls.graph_whole.id,
                       component_property='clickData'),
+                Input(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                      component_property='data'),
                 Input(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
                       component_property='data')
             ]
         )
-        def update_bar(clickData, prev_fb_fig_json):
-            return self.own_lower_ukr.update_fb_from_ls(clickData, prev_fb_fig_json)
+        def update_bar(clickData, present_mm_fig_json, prev_fb_fig_json):
+            ctx = dash.callback_context
+            if not ctx.triggered or ctx.triggered[0]['value'] is None:
+                # no update
+                return dash.no_update
+            else:
+                clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+                print(clicked_id_text)
+                if clicked_id_text == self.own_lower_ukr.ls.store_fig_whole.id:
+                    return self.own_lower_ukr.update_fb_from_ls(clickData, prev_fb_fig_json)
+                else:
+                    return dash.no_update
 
         # Callback function to show own member map
         @app.callback(
