@@ -556,44 +556,11 @@ class BaseGMMNetworkOwnOppPerformance():
                     return dash.no_update
 
 
-        self.output_lists = [
-            # Output(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
-            #        component_property='data'),
-            # Output(component_id=self.own_lower_ukr.ls.dropdown.id,
-            #        component_property='value'),
-            # Output(component_id=self.own_ukr_kde.ls.store_fig_whole.id,
-            #        component_property='data'),
-            # Output(component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
-            #        component_property='value'),
-            # Output(component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
-            #        component_property='data'),
-            Output(component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
-                   component_property='value'),
-            # Output(component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
-            #        component_property='data')
-        ]
-
         @app.callback(
             Output(component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
                    component_property='data'),
             # self.output_lists,
             [
-                # Input(
-                #     component_id=self.own_lower_ukr.ls.dropdown.id,
-                #     component_property='value'
-                # ),
-                # Input(
-                #     component_id=self.own_lower_ukr.ls.graph_whole.id,
-                #     component_property='clickData'
-                # ),
-                # Input(
-                #     component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
-                #     component_property='value'
-                # ),
-                # Input(
-                #     component_id=self.own_ukr_kde.ls.graph_whole.id,
-                #     component_property='clickData'
-                # ),
                 Input(
                     component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
                     component_property='value'
@@ -602,10 +569,6 @@ class BaseGMMNetworkOwnOppPerformance():
                     component_id=self.opp_ukr_kde.ls.graph_whole.id,
                     component_property='clickData'
                 ),
-                # Input(
-                #     component_id=self.own_lower_ukr.ls.store_fig_whole.id,
-                #     component_property='data'
-                # ),
                 Input(
                     component_id=self.own_ukr_kde.ls.store_fig_whole.id,
                     component_property='data'
@@ -614,95 +577,26 @@ class BaseGMMNetworkOwnOppPerformance():
                     component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
                     component_property='data'
                 ),
-                # Input(
-                #     component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
-                #     component_property='data'
-                # )
             ]
         )
         def update_opp_team_map(
-                # index_feature_own_member, clickData_mm,
-                # index_own_performance_own_tm, clickData_own_tm,
                 index_own_performance_opp_tm, clickData_opp_tm,
-                # prev_own_mm_json,
                 present_own_tm_json,
-                # prev_opp_mm_json,
                 prev_opp_tm_json,
-                # prev_own_tpb_json
         ):
             ctx = dash.callback_context
             if not ctx.triggered or ctx.triggered[0]['value'] is None:
                 # no update
-                return self.get_return_list(**{})
+                return dash.no_update
             else:
                 clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
-                # print(clicked_id_text)
-                # if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
-                #     dict_update = {
-                #         self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
-                #             index_selected_feature=index_feature_own_member,
-                #             clickData=clickData_mm,
-                #             prev_ls_fig_json=prev_own_mm_json
-                #         )
-                #     }
-                #     return self.get_return_list(**dict_update)
-                # elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
-                #     dict_update = {
-                #         self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
-                #             index_selected_feature=index_feature_own_member,
-                #             clickData=clickData_mm,
-                #             prev_ls_fig_json=prev_own_mm_json
-                #         )
-                #     }
-                #     return self.get_return_list(**dict_update)
-                # if clicked_id_text == self.own_opp_gplvm.dic_ls['own'].dropdown.id:
-                #     dict_update = {
-                #         self.own_opp_gplvm.dic_ls['own'].store_fig_whole.id: self.own_opp_gplvm.update_ls(
-                #             index_selected_feature=index_own_performance_own_tm,
-                #             fig_own_ls=go.Figure(**prev_own_tm_json),
-                #             fig_opp_ls=go.Figure(**prev_opp_tm_json),
-                #             which_update='own'
-                #         )
-                #     }
-                #     return self.get_return_list(**dict_update)
                 if clicked_id_text == self.own_ukr_kde.ls.store_fig_whole.id:
-                    # Update own team map to show clicked point
-                    # fig_ls_own_ukr_kde = self.own_ukr_kde.update_ls(
-                    #     clickData=clickData_own_tm,
-                    #     prev_ls_fig_json=prev_own_tm_json
-                    # )
-                    # fig_ls_opp_ukr_kde = go.Figure(**prev_opp_tm_json)
-                    # Update own member map and dropdown to show density map
-                    # ret_own_lower_ukr_fig_ls, ret_own_lower_ukr_dropdown = self.own_ukr_kde.update_fs_dropdown_from_ls(
-                    #     clickData=clickData_own_tm,
-                    #     prev_fs_fig_json=prev_own_mm_json
-                    # )
-                    # Update opp team map to show conditional or marginal component plane
                     return self.own_opp_gplvm.update_ls(
                         index_selected_feature=index_own_performance_opp_tm,
                         fig_own_ls=go.Figure(**present_own_tm_json),
                         fig_opp_ls=go.Figure(**prev_opp_tm_json),
                         which_update='opp'
                     )
-                    # dict_update = {
-                    #     # self.own_lower_ukr.ls.store_fig_whole.id: ret_own_lower_ukr_fig_ls,
-                    #     # self.own_lower_ukr.ls.dropdown.id: ret_own_lower_ukr_dropdown,
-                    #     # self.own_ukr_kde.ls.store_fig_whole.id: fig_ls_own_ukr_kde,
-                    #     # self.opp_ukr_kde.ls.store_fig_whole.id: fig_ls_opp_ukr_kde
-                    #     # Why is this updated??? I can't understand my self
-                    #     # self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
-                    #     #     index_selected_feature=index_own_performance_own_tm,
-                    #     #     clickData=clickData_opp_tm,
-                    #     #     which_update='own'
-                    #     # ),
-                    #     # Update own team performance bars
-                    #     # self.own_opp_gplvm.os.store_fig_indiv.id: self.own_opp_gplvm.update_bar(
-                    #     #     fig_own_ls=fig_ls_own_ukr_kde,
-                    #     #     fig_opp_ls=fig_ls_opp_ukr_kde,
-                    #     #     prev_fig_bar_json=prev_own_tpb_json
-                    #     # )
-                    # }
-                    # return self.get_return_list(**dict_update)
                 elif clicked_id_text == self.own_opp_gplvm.dic_ls['opp'].dropdown.id:
                     return self.own_opp_gplvm.update_ls(
                         index_selected_feature=index_own_performance_opp_tm,
