@@ -2,6 +2,7 @@ import numpy as np
 import scipy.spatial.distance as dist
 from tqdm import tqdm
 from ..tools.create_zeta import create_zeta
+from gmm_net.models.core import LatentSpace, ObservedSpace
 
 
 class UnsupervisedKernelRegression(object):
@@ -189,6 +190,199 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
+    def define_graphs(self, n_grid_points, label_data, label_feature,
+                      is_show_all_label_data, is_middle_color_zero,
+                      is_show_ticks_latent_space,
+                      params_contour, params_scat_z, params_fig_layout_ls,
+                      params_fig_layout_fb,
+                      id_ls, id_dropdown, id_fb):
+
+        self._initialize_to_vis_least(n_grid_points=n_grid_points,
+                                      label_data=label_data,
+                                      label_feature=label_feature,
+                                      is_show_all_label_data=is_show_all_label_data,
+                                      is_middle_color_zero=is_middle_color_zero,
+                                      is_show_ticks_latent_space=is_show_ticks_latent_space)
+        self._initialize_to_vis_dash(
+            label_data=label_data,
+            label_feature=label_feature,
+            is_middle_color_zero=is_middle_color_zero,
+            params_contour=params_contour,
+            params_scat_z=params_scat_z,
+            params_fig_layout_ls=params_fig_layout_ls,
+            params_fig_layout_fb=params_fig_layout_fb,
+            id_ls=id_ls,
+            id_dropdown=id_dropdown,
+            id_fb=id_fb
+        )
+
+    def _initialize_to_vis_least(self, n_grid_points, label_data, label_feature,
+                                 is_show_all_label_data, is_middle_color_zero,
+                                 is_show_ticks_latent_space):
+
+        # invalid check
+        if self.n_components != 2:
+            raise ValueError('Now support only n_components = 2')
+
+        if isinstance(n_grid_points, int):
+            # Store number of grid points for each dimension
+            self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
+            if self.is_compact:
+                self._set_grid(create_zeta(-1.0, 1.0, self.n_components, n_grid_points), self.n_grid_points)
+            else:
+                raise ValueError('Not support is_compact=False')
+        else:
+            raise ValueError('Only support n_grid_points is int')
+
+        if label_data is None:
+            self.label_data = label_data
+        elif isinstance(label_data, list):
+            self.label_data = label_data
+        elif isinstance(label_data, np.ndarray):
+            if np.squeeze(label_data).ndim == 1:
+                self.label_data = np.squeeze(label_data)
+            else:
+                raise ValueError('label_data must be 1d array')
+        else:
+            raise ValueError('label_data must be 1d array or list')
+
+        if label_feature is None:
+            self.label_feature = np.arange(self.n_dimensions)
+        elif isinstance(label_feature, list):
+            self.label_feature = label_feature
+        elif isinstance(label_feature, np.ndarray):
+            if np.squeeze(label_feature).ndim == 1:
+                self.label_feature = np.squeeze(label_feature)
+            else:
+                raise ValueError('label_feature must be 1d array')
+        else:
+            raise ValueError('label_feature must be 1d array or list')
+
+        self.is_middle_color_zero = is_middle_color_zero
+        self.is_show_ticks_latent_space = is_show_ticks_latent_space
+        self.is_show_all_label_data = is_show_all_label_data
+
+    def _initialize_to_vis_dash(self,
+                                label_data,
+                                label_feature,
+                                is_middle_color_zero,
+                                params_contour: dict,
+                                params_scat_z: dict,
+                                params_fig_layout_ls: dict,
+                                params_fig_layout_fb: dict,
+                                id_ls: str,
+                                id_dropdown: str,
+                                id_fb: str
+                                ):
+        import plotly.graph_objects as go
+        import dash_core_components as dcc
+
+        config = {'displayModeBar': False}
+
+        self.os = ObservedSpace(
+            data=self.X,
+            label_feature=label_feature
+        )
+        self.ls = LatentSpace(data=self.Z,
+                              grid_points=self.grid_points,
+                              grid_mapping=self.grid_mapping,
+                              is_middle_color_zero=is_middle_color_zero,
+                              params_figure_layout=params_fig_layout_ls)
+        if label_data is None:
+            self.ls.label_data = label_data
+        elif isinstance(label_data, list):
+            self.ls.label_data = label_data
+        elif isinstance(label_data, np.ndarray):
+            if np.squeeze(label_data).ndim == 1:
+                self.ls.label_data = np.squeeze(label_data)
+            else:
+                raise ValueError('label_data must be 1d array')
+        else:
+            raise ValueError('label_data must be 1d array or list')
+        if params_contour is None:
+            self.ls.params_contour = {}
+            self.params_contour = {}
+        elif isinstance(params_contour, dict):
+            self.ls.params_contour = params_contour
+            self.params_contour = params_contour
+        else:
+            raise ValueError('invalid params_contour={}'.format(params_contour))
+
+        if params_scat_z is None:
+            self.ls.params_scat_data = {}
+        elif isinstance(params_scat_z, dict):
+            self.ls.params_scat_data = params_scat_z
+        else:
+            raise ValueError('invalid params_scat_z={}'.format(params_scat_z))
+
+        # set graph of latent space
+        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls + '_fig_store', config=config)
+
+        self.ls.dropdown = dcc.Dropdown(
+            id=id_dropdown,
+            options=[{"value": i, "label": x}
+                     for i, x in enumerate(self.label_feature)],
+            placeholder="Select feature shown as contour",
+            style={'width': '95%', 'margin': '0 auto'},
+            clearable=True
+        )
+
+        self.os.set_graph_indiv(id_graph=id_fb, id_store=id_fb + '_fig_store', config=config,
+                                params_figure_layout=params_fig_layout_fb)
+
+    def update_fb_from_ls(self, clickData, prev_fb_fig_json):
+        import dash
+        import plotly.graph_objects as go
+        if clickData is not None:
+            fig_bar = go.Figure(**prev_fb_fig_json)
+            index = clickData['points'][0]['pointIndex']
+            # print('index={}'.format(index))
+            if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
+                # print('clicked latent variable')
+                # if latent variable is clicked
+                fig_bar.update_traces(y=self.X[index])
+                # fig_ls.update_traces(visible=False, selector=dict(name='clicked_point'))
+                return fig_bar
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
+                # print('clicked map')
+                # if contour is clicked
+                fig_bar.update_traces(y=self.ls.grid_mapping[index])
+                return fig_bar
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
+                fig_bar.update_traces(y=np.zeros(self.X.shape[1]))
+                return fig_bar
+            else:
+                return dash.no_update
+        else:
+            return dash.no_update
+
+    def update_ls(self, index_selected_feature, clickData, prev_ls_fig_json):
+        import dash
+        import plotly.graph_objects as go
+        # print(clickData)
+        # print(index_selected_feature, clickData)
+        ctx = dash.callback_context
+        if not ctx.triggered or ctx.triggered[0]['value'] is None:
+            return dash.no_update
+        else:
+            clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+            fig_ls = go.Figure(**prev_ls_fig_json)
+            # print(clicked_id_text)
+            if clicked_id_text == self.ls.dropdown.id:
+                if index_selected_feature is not None:
+                    fig_ls.update_traces(
+                        selector=dict(type='contour'),
+                        z=self.ls.grid_mapping[:, index_selected_feature],
+                        name='cp',
+                        **self.params_contour
+                    )
+                return fig_ls
+            elif clicked_id_text == self.ls.graph_whole.id:
+                # self.ls.update_trace_clicked_point(clickData=clickData)
+                return self.ls.update_trace_clicked_point(clickData=clickData, fig=fig_ls)
+            else:
+                return dash.no_update
+
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
                   marker='.', dict_marker_label=None,
                   is_show_all_label_data=False, is_middle_color_zero=False,
@@ -255,22 +449,22 @@ class UnsupervisedKernelRegression(object):
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
-        self._initialize_to_visualize(n_grid_points=n_grid_points,
-                                      params_imshow=params_imshow,
-                                      params_scatter=params_scatter,
-                                      label_data=label_data,
-                                      label_feature=label_feature,
-                                      title_latent_space=title_latent_space,
-                                      title_feature_bars=title_feature_bars,
-                                      is_show_all_label_data=is_show_all_label_data,
-                                      is_middle_color_zero=is_middle_color_zero,
-                                      is_show_ticks_latent_space=is_show_ticks_latent_space,
-                                      fig=fig,
-                                      fig_size=fig_size,
-                                      ax_latent_space=ax_latent_space,
-                                      ax_feature_bars=ax_feature_bars,
-                                      marker=marker,
-                                      dict_marker_label=dict_marker_label)
+        self._initialize_to_vis_mpl(n_grid_points=n_grid_points,
+                                    params_imshow=params_imshow,
+                                    params_scatter=params_scatter,
+                                    label_data=label_data,
+                                    label_feature=label_feature,
+                                    title_latent_space=title_latent_space,
+                                    title_feature_bars=title_feature_bars,
+                                    is_show_all_label_data=is_show_all_label_data,
+                                    is_middle_color_zero=is_middle_color_zero,
+                                    is_show_ticks_latent_space=is_show_ticks_latent_space,
+                                    fig=fig,
+                                    fig_size=fig_size,
+                                    ax_latent_space=ax_latent_space,
+                                    ax_feature_bars=ax_feature_bars,
+                                    marker=marker,
+                                    dict_marker_label=dict_marker_label)
 
         self._draw_latent_space()
         self._draw_feature_bars()
@@ -308,52 +502,20 @@ class UnsupervisedKernelRegression(object):
             elif event.inaxes == self.ax_feature_bars:
                 pass
 
-    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
-                                 is_show_all_label_data, is_middle_color_zero,
-                                 is_show_ticks_latent_space,
-                                 params_imshow, params_scatter,
-                                 title_latent_space, title_feature_bars,
-                                 fig, fig_size, ax_latent_space, ax_feature_bars,
-                                 marker=None, dict_marker_label=None):
+    def _initialize_to_vis_mpl(self, n_grid_points, label_data, label_feature,
+                               is_show_all_label_data, is_middle_color_zero,
+                               is_show_ticks_latent_space,
+                               params_imshow, params_scatter,
+                               title_latent_space, title_feature_bars,
+                               fig, fig_size, ax_latent_space, ax_feature_bars,
+                               marker=None, dict_marker_label=None):
 
-        # invalid check
-        if self.n_components != 2:
-            raise ValueError('Now support only n_components = 2')
-
-        if isinstance(n_grid_points, int):
-            # Store number of grid points for each dimension
-            self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
-            if self.is_compact:
-                self._set_grid(create_zeta(-1.0, 1.0, self.n_components, n_grid_points), self.n_grid_points)
-            else:
-                raise ValueError('Not support is_compact=False')
-        else:
-            raise ValueError('Only support n_grid_points is int')
-
-        if label_data is None:
-            self.label_data = label_data
-        elif isinstance(label_data, list):
-            self.label_data = label_data
-        elif isinstance(label_data, np.ndarray):
-            if np.squeeze(label_data).ndim == 1:
-                self.label_data = np.squeeze(label_data)
-            else:
-                raise ValueError('label_data must be 1d array')
-        else:
-            raise ValueError('label_data must be 1d array or list')
-
-        if label_feature is None:
-            self.label_feature = np.arange(self.n_dimensions)
-        elif isinstance(label_feature, list):
-            self.label_feature = label_feature
-        elif isinstance(label_feature, np.ndarray):
-            if np.squeeze(label_feature).ndim == 1:
-                self.label_feature = np.squeeze(label_feature)
-            else:
-                raise ValueError('label_feature must be 1d array')
-        else:
-            raise ValueError('label_feature must be 1d array or list')
-
+        self._initialize_to_vis_least(n_grid_points=n_grid_points,
+                                      label_data=label_data,
+                                      label_feature=label_feature,
+                                      is_show_all_label_data=is_show_all_label_data,
+                                      is_middle_color_zero=is_middle_color_zero,
+                                      is_show_ticks_latent_space=is_show_ticks_latent_space)
 
         if params_imshow is None:
             self.params_imshow = {}
@@ -388,8 +550,6 @@ class UnsupervisedKernelRegression(object):
         else:
             self.title_feature_bars = title_feature_bars
 
-        self.is_show_all_label_data = is_show_all_label_data
-
         # set variables
         if fig is None:
             import matplotlib.pyplot as plt
@@ -407,8 +567,6 @@ class UnsupervisedKernelRegression(object):
             self.ax_latent_space = ax_latent_space
             self.ax_feature_bars = ax_feature_bars
 
-        self.is_middle_color_zero = is_middle_color_zero
-        self.is_show_ticks_latent_space = is_show_ticks_latent_space
         self.click_point_latent_space = None  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
@@ -501,7 +659,6 @@ class UnsupervisedKernelRegression(object):
 
     def set_scatter_cross(self, coordinates):
         self.cross_points = coordinates
-
 
     def set_comment_in_latent_space(self, comment: str):
         self.comment_latent_space = comment

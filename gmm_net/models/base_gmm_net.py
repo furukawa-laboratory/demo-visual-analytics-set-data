@@ -1,9 +1,11 @@
 from gmm_net.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 from gmm_net.models.ukr_for_kde import UKRForWeightedKDE as UKRKDE
+from gmm_net.models.double_domain_gmm import DoubleDomainGMM as DDGMM
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
+from collections import OrderedDict
 
 
 class BaseGMMNetworkOwnOppPerformance():
@@ -144,6 +146,483 @@ class BaseGMMNetworkOwnOppPerformance():
                                                   opp_Zeta.reshape(-1, n_dim_latent_space)], axis=1),
                                 return_std=return_std, return_cov=return_cov)
 
+    def define_dash_app(self, n_grid_points=30, cmap_feature=None, cmap_density=None, cmap_ccp=None,
+                        label_member=None, label_feature=None, label_team=None, label_performance=None,
+                        fig_size=None, is_member_cp_middle_color_zero=False, is_ccp_middle_color_zero=False,
+                        params_init_lower_ukr=None, params_init_upper_ukr=None, is_available_simulation_mode=False,
+                        n_epoch_to_change_member=1500, learning_rate_to_change_member=0.001):
+
+        import dash
+        import dash_core_components as dcc
+        import dash_html_components as html
+        from dash.dependencies import Input, Output
+        import plotly.graph_objects as go
+        # invalid check
+        if self.lower_ukr.n_components != 2 or self.upper_ukr_kde.n_embedding != 2:
+            raise ValueError('Now support only n_components = 2')
+
+        external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+        app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+        # Prepare variables to color
+        self.cmap_density = cmap_density
+        self.cmap_feature = cmap_feature
+        self.cmap_ccp = cmap_ccp
+        self.is_ccp_middle_color_zero = is_ccp_middle_color_zero
+        self.is_member_cp_middle_color_zero = is_member_cp_middle_color_zero
+
+        # Variables to simulate new member
+        self.n_epoch_to_change_member = n_epoch_to_change_member
+        self.learning_rate_to_change_member = learning_rate_to_change_member
+        self.is_simulate_changing_member = False
+        self.is_available_simulation_mode = is_available_simulation_mode
+        self.deleted_member_coordinates = None
+        self.grid_simulated_latent_variables = None
+
+        # Create instance of ukr for kde to put together variables and methods
+        self.own_ukr_kde = self.upper_ukr_kde
+        self.opp_ukr_kde = UKRKDE(**self.params_upper_ukr_kde)
+        self.opp_ukr_kde.Z = self.upper_ukr_kde.Z.copy()
+
+        # Create instance to draw opp member map
+        import copy
+        self.opp_lower_ukr = copy.deepcopy(self.lower_ukr)
+        self.own_lower_ukr = self.lower_ukr
+
+        # define graphs
+        for lower_ukr, ukr_kde, which in zip([self.own_lower_ukr, self.opp_lower_ukr],
+                                             [self.own_ukr_kde, self.opp_ukr_kde],
+                                             ['own', 'opp']):
+            lower_ukr.define_graphs(
+                n_grid_points=n_grid_points,
+                label_data=label_member,
+                label_feature=label_feature,
+                is_show_all_label_data=False,
+                params_contour={'colorscale': cmap_feature,
+                                'contours_coloring': 'heatmap',
+                                'line_smoothing': 0.85,
+                                'zmid': 0.0,
+                                'zmin': None},
+                params_scat_z=params_init_lower_ukr['params_scat_z'],
+                params_fig_layout_ls={
+                    'plot_bgcolor': '#ffffff',
+                    # 'title': which+' member map',
+                    # 'grid': dict(rows=2, columns=2)
+                    # 'grid': dict(domain=dict(x=[0.5,1],y=[0.5,1]))
+                    'margin': dict(l=10, r=10, t=10, b=10)
+                },
+                params_fig_layout_fb={
+                    ##'title': which+' member feature',
+                    'margin': dict(l=10, r=10, t=10, b=10)
+                },
+                is_middle_color_zero=is_member_cp_middle_color_zero,
+                is_show_ticks_latent_space=False,
+                id_ls=which + '_member_map',
+                id_dropdown=which + '_cp_db',
+                id_fb=which + 'fb'
+            )
+            ukr_kde.define_graphs(
+                n_grid_points=n_grid_points,
+                label_groups=label_team,
+                is_show_all_label_data=None,
+                is_middle_color_zero=is_ccp_middle_color_zero,
+                is_show_ticks_latent_space=False,
+                params_contour={'contours_coloring': 'heatmap',
+                                'colorscale': cmap_density,
+                                'line_smoothing': 0.85,
+                                'zmid': None,
+                                'zmin': 0.0},
+                params_scat_z=params_init_upper_ukr['params_scat_z'],
+                params_figure_layout={
+                    # 'title': which+' team map',
+                    'plot_bgcolor': '#ffffff',
+                    'margin': dict(l=10, r=10, t=10, b=10)
+                },
+                id_ls=which + '_team_map',
+                fs=lower_ukr.ls
+            )
+
+        # Create tensor to draw ccp
+        if 'mesh_grid_mapping' in vars(self) and 'mesh_grid_precision':
+            if self.mesh_grid_mapping.shape[0] == self.upper_ukr_kde.ls.grid_points.shape[0]:
+                pass
+            else:
+                raise ValueError('invalid previous mesh_grid_mapping or mesh_grid_precision')
+        else:
+            self.mesh_grid_mapping, mesh_grid_uncertainty = self._create_tensor_mapping_for_ccp(return_std=True)
+            self.mesh_grid_precision = np.reciprocal(mesh_grid_uncertainty)
+        self.own_opp_gplvm = DDGMM(data=self.training_performance)
+        self.own_opp_gplvm.mesh_grid_mapping = self.mesh_grid_mapping
+        self.own_opp_gplvm.mesh_grid_precision = self.mesh_grid_precision
+        self.own_opp_gplvm.define_graphs(own_ls=self.own_ukr_kde.ls,
+                                         opp_ls=self.opp_ukr_kde.ls,
+                                         label_feature=label_performance,
+                                         id_fb='performance_bar',
+                                         params_contour={'colorscale': cmap_ccp,
+                                                         'contours_coloring': 'heatmap',
+                                                         'line_smoothing': 0.85,
+                                                         'zmid': 0.0},
+                                         params_figure_layout={
+                                             # 'title': 'own team performance',
+                                             'margin': dict(l=10, r=10, t=10, b=10)
+                                         }
+                                         )
+
+        # Define whole layout
+
+        title_style = {'whiteSpace': 'pre-line'}
+        app.layout = html.Div(
+            children=[
+                # `dash_html_components`が提供するクラスは`childlen`属性を有している。
+                # `childlen`属性を慣例的に最初の属性にしている。
+                html.H1(children='Visual Analyticis of NBA dataset'),
+                html.Div(
+                    [
+                        html.H3(id='title_own_member_map',
+                                style=title_style,
+                                children='Own athlete map'),
+                        self.own_lower_ukr.ls.graph_whole,
+                        self.own_lower_ukr.ls.store_fig_whole,
+                        # html.Div(id='text_under_member_map',
+                        #          style={'whiteSpace': 'pre-line'},
+                        #          children='test under member map'),
+                        self.own_lower_ukr.ls.dropdown,
+                        html.H3(id='title_member_feature_bar',
+                                style=title_style,
+                                children='Own athlete feature'),
+                        self.own_lower_ukr.os.graph_indiv,
+                        self.own_lower_ukr.os.store_fig_indiv
+                    ],
+                    style={'display': 'inline-block', 'width': '33%'}
+                ),
+                html.Div(
+                    [
+                        html.H3(id='title_own_team_map',
+                                # style=title_style,
+                                children='Own team map'),
+                        self.own_ukr_kde.ls.graph_whole,
+                        self.own_ukr_kde.ls.store_fig_whole,
+                        # html.Div(id='text_under_own_team_map',
+                        #          style={'whiteSpace': 'pre-line'},
+                        #          children='test under own team map'),
+                        self.own_opp_gplvm.dic_ls['own'].dropdown,
+                        html.H3(id='title_own_team_performance',
+                                style=title_style,
+                                children='Own team performance'),
+                        self.own_opp_gplvm.os.graph_indiv,
+                        self.own_opp_gplvm.os.store_fig_indiv
+                    ],
+                    style={'display': 'inline-block', 'width': '33%'}
+                ),
+                html.Div(
+                    [
+                        html.H3(id='title_opp_team_map',
+                                style=title_style,
+                                children='Opposing team map'),
+                        self.opp_ukr_kde.ls.graph_whole,
+                        self.opp_ukr_kde.ls.store_fig_whole,
+                        # html.Div(id='text_under_opp_team_map',
+                        #          style={'whiteSpace': 'pre-line'},
+                        #          children='test under opp team map'),
+                        self.own_opp_gplvm.dic_ls['opp'].dropdown,
+                        html.H3(id='title_opp_member_map',
+                                style=title_style,
+                                children='Opposing athlete map'),
+                        self.opp_lower_ukr.ls.graph_whole,
+                        self.opp_lower_ukr.ls.store_fig_whole
+                    ],
+                    style={'display': 'inline-block', 'width': '33%'}
+                ),
+            ],
+            style={'margin': '50px'}
+
+        )
+
+        # Define callback function when data is clicked
+        # Callback function related own member feature bars
+        @app.callback(
+            Output(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
+                   component_property='data'),
+            [
+                Input(component_id=self.own_lower_ukr.ls.graph_whole.id,
+                      component_property='clickData'),
+                Input(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
+                      component_property='data')
+            ]
+        )
+        def update_bar(clickData, prev_fb_fig_json):
+            return self.own_lower_ukr.update_fb_from_ls(clickData, prev_fb_fig_json)
+
+        self.output_lists = [
+            Output(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                   component_property='data'),
+            Output(component_id=self.own_lower_ukr.ls.dropdown.id,
+                   component_property='value'),
+            Output(component_id=self.own_ukr_kde.ls.store_fig_whole.id,
+                   component_property='data'),
+            Output(component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
+                   component_property='value'),
+            Output(component_id=self.opp_lower_ukr.ls.store_fig_whole.id,
+                   component_property='data'),
+            Output(component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
+                   component_property='data'),
+            Output(component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
+                   component_property='value'),
+            Output(component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
+                   component_property='data')
+        ]
+
+        @app.callback(
+            self.output_lists,
+            [
+                Input(
+                    component_id=self.own_lower_ukr.ls.dropdown.id,
+                    component_property='value'
+                ),
+                Input(
+                    component_id=self.own_lower_ukr.ls.graph_whole.id,
+                    component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_opp_gplvm.dic_ls['own'].dropdown.id,
+                    component_property='value'
+                ),
+                Input(
+                    component_id=self.own_ukr_kde.ls.graph_whole.id,
+                    component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_opp_gplvm.dic_ls['opp'].dropdown.id,
+                    component_property='value'
+                ),
+                Input(
+                    component_id=self.opp_ukr_kde.ls.graph_whole.id,
+                    component_property='clickData'
+                ),
+                Input(
+                    component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                    component_property='data'
+                ),
+                Input(
+                    component_id=self.own_ukr_kde.ls.store_fig_whole.id,
+                    component_property='data'
+                ),
+                Input(
+                    component_id=self.opp_lower_ukr.ls.store_fig_whole.id,
+                    component_property='data'
+                ),
+                Input(
+                    component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
+                    component_property='data'
+                ),
+                Input(
+                    component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
+                    component_property='data'
+                )
+            ]
+        )
+        def update_maps(index_feature_own_member, clickData_mm,
+                        index_own_performance_own_tm, clickData_own_tm,
+                        index_own_performance_opp_tm, clickData_opp_tm,
+                        prev_own_mm_json, prev_own_tm_json,
+                        prev_opp_mm_json, prev_opp_tm_json,
+                        prev_own_tpb_json):
+            ctx = dash.callback_context
+            if not ctx.triggered or ctx.triggered[0]['value'] is None:
+                # no update
+                return self.get_return_list(**{})
+            else:
+                clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+                print(clicked_id_text)
+                if clicked_id_text == self.own_lower_ukr.ls.dropdown.id:
+                    dict_update = {
+                        self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
+                            index_selected_feature=index_feature_own_member,
+                            clickData=clickData_mm,
+                            prev_ls_fig_json=prev_own_mm_json
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
+                elif clicked_id_text == self.own_lower_ukr.ls.graph_whole.id:
+                    dict_update = {
+                        self.own_lower_ukr.ls.store_fig_whole.id: self.own_lower_ukr.update_ls(
+                            index_selected_feature=index_feature_own_member,
+                            clickData=clickData_mm,
+                            prev_ls_fig_json=prev_own_mm_json
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
+                elif clicked_id_text == self.own_opp_gplvm.dic_ls['own'].dropdown.id:
+                    dict_update = {
+                        self.own_opp_gplvm.dic_ls['own'].store_fig_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_own_tm,
+                            fig_own_ls=go.Figure(**prev_own_tm_json),
+                            fig_opp_ls=go.Figure(**prev_opp_tm_json),
+                            which_update='own'
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
+                elif clicked_id_text == self.own_ukr_kde.ls.graph_whole.id:
+                    # Update own team map to show clicked point
+                    fig_ls_own_ukr_kde = self.own_ukr_kde.update_ls(
+                        clickData=clickData_own_tm,
+                        prev_ls_fig_json=prev_own_tm_json
+                    )
+                    fig_ls_opp_ukr_kde = go.Figure(**prev_opp_tm_json)
+                    # Update own member map and dropdown to show density map
+                    ret_own_lower_ukr_fig_ls, ret_own_lower_ukr_dropdown = self.own_ukr_kde.update_fs_dropdown_from_ls(
+                        clickData=clickData_own_tm,
+                        prev_fs_fig_json=prev_own_mm_json
+                    )
+                    # Update opp team map to show conditional or marginal component plane
+                    fig_ls_opp_ukr_kde = self.own_opp_gplvm.update_ls(
+                        index_selected_feature=index_own_performance_opp_tm,
+                        fig_own_ls=fig_ls_own_ukr_kde,
+                        fig_opp_ls=fig_ls_opp_ukr_kde,
+                        which_update='opp'
+                    )
+                    dict_update = {
+                        self.own_lower_ukr.ls.store_fig_whole.id: ret_own_lower_ukr_fig_ls,
+                        self.own_lower_ukr.ls.dropdown.id: ret_own_lower_ukr_dropdown,
+                        self.own_ukr_kde.ls.store_fig_whole.id: fig_ls_own_ukr_kde,
+                        self.opp_ukr_kde.ls.store_fig_whole.id: fig_ls_opp_ukr_kde,
+                        # Why is this updated??? I can't understand my self
+                        # self.own_opp_gplvm.dic_ls['own'].graph_whole.id: self.own_opp_gplvm.update_ls(
+                        #     index_selected_feature=index_own_performance_own_tm,
+                        #     clickData=clickData_opp_tm,
+                        #     which_update='own'
+                        # ),
+                        # Update own team performance bars
+                        self.own_opp_gplvm.os.store_fig_indiv.id: self.own_opp_gplvm.update_bar(
+                            fig_own_ls=fig_ls_own_ukr_kde,
+                            fig_opp_ls=fig_ls_opp_ukr_kde,
+                            prev_fig_bar_json=prev_own_tpb_json
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
+                elif clicked_id_text == self.own_opp_gplvm.dic_ls['opp'].dropdown.id:
+                    dict_update = {
+                        self.opp_ukr_kde.ls.store_fig_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_opp_tm,
+                            fig_own_ls=go.Figure(**prev_own_tm_json),
+                            fig_opp_ls=go.Figure(**prev_opp_tm_json),
+                            which_update='opp'
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
+                elif clicked_id_text == self.own_opp_gplvm.dic_ls['opp'].graph_whole.id:
+                    # Update opp team map to show clicked point
+                    fig_ls_opp_ukr_kde = self.opp_ukr_kde.update_ls(
+                        clickData=clickData_opp_tm,
+                        prev_ls_fig_json=prev_opp_tm_json
+                    )
+                    fig_ls_own_ukr_kde = go.Figure(**prev_own_tm_json)
+                    # Update opp member map to show density
+                    ret_opp_lower_ukr_fig_ls, temp = self.opp_ukr_kde.update_fs_dropdown_from_ls(
+                        clickData=clickData_opp_tm,
+                        prev_fs_fig_json=prev_opp_mm_json
+                    )
+                    dict_update = {
+                        self.opp_ukr_kde.ls.store_fig_whole.id: fig_ls_opp_ukr_kde,
+                        self.opp_lower_ukr.ls.store_fig_whole.id: ret_opp_lower_ukr_fig_ls,
+                        # Update own team map to show component plane
+                        self.own_ukr_kde.ls.store_fig_whole.id: self.own_opp_gplvm.update_ls(
+                            index_selected_feature=index_own_performance_opp_tm,
+                            fig_own_ls=fig_ls_own_ukr_kde,
+                            fig_opp_ls=fig_ls_opp_ukr_kde,
+                            which_update='own'
+                        ),
+                        # Update own team performance bars
+                        self.own_opp_gplvm.os.store_fig_indiv.id: self.own_opp_gplvm.update_bar(
+                            fig_own_ls=fig_ls_own_ukr_kde,
+                            fig_opp_ls=fig_ls_opp_ukr_kde,
+                            prev_fig_bar_json=prev_own_tpb_json
+                        )
+                    }
+                    return self.get_return_list(**dict_update)
+                else:
+                    # no update
+                    return self.get_return_list(**{})
+
+        # Define clientside callback to connect store in the browser and figure in graph
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_lower_ukr.ls.graph_whole.id,
+                   component_property='figure'),
+            Input(component_id=self.own_lower_ukr.ls.store_fig_whole.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_lower_ukr.os.graph_indiv.id,
+                   component_property='figure'),
+            Input(component_id=self.own_lower_ukr.os.store_fig_indiv.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_ukr_kde.ls.graph_whole.id,
+                   component_property='figure'),
+            Input(component_id=self.own_ukr_kde.ls.store_fig_whole.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.opp_lower_ukr.ls.graph_whole.id,
+                   component_property='figure'),
+            Input(component_id=self.opp_lower_ukr.ls.store_fig_whole.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.opp_ukr_kde.ls.graph_whole.id,
+                   component_property='figure'),
+            Input(component_id=self.opp_ukr_kde.ls.store_fig_whole.id,
+                  component_property='data')
+        )
+        app.clientside_callback(
+            """
+            function(data){
+                return data
+            }
+            """,
+            Output(component_id=self.own_opp_gplvm.os.graph_indiv.id,
+                   component_property='figure'),
+            Input(component_id=self.own_opp_gplvm.os.store_fig_indiv.id,
+                  component_property='data')
+        )
+
+        return app
+
+    def get_return_list(self, **kwargs):
+        import dash
+        od = OrderedDict()
+        for output in self.output_lists:
+            od[output.component_id] = dash.no_update
+        od.update(kwargs)
+        return list(od.values())
+
     def visualize(self, n_grid_points=30, cmap_feature=None, cmap_density=None, cmap_ccp=None,
                   label_member=None, label_feature=None, label_team=None, label_performance=None,
                   fig_size=None, is_member_cp_middle_color_zero=False, is_ccp_middle_color_zero=False,
@@ -175,7 +654,7 @@ class BaseGMMNetworkOwnOppPerformance():
         self.is_member_cp_middle_color_zero = is_member_cp_middle_color_zero
 
         # Variables to simulate new member
-        self.n_epoch_to_change_member =n_epoch_to_change_member
+        self.n_epoch_to_change_member = n_epoch_to_change_member
         self.learning_rate_to_change_member = learning_rate_to_change_member
         self.is_simulate_changing_member = False
         self.is_available_simulation_mode = is_available_simulation_mode
@@ -200,38 +679,38 @@ class BaseGMMNetworkOwnOppPerformance():
             pass
         else:
             params_init_lower_ukr['params_scatter'] = None
-        self.lower_ukr._initialize_to_visualize(n_grid_points,
-                                                label_data=label_member,
-                                                label_feature=label_feature,
-                                                title_latent_space='Own member map',
-                                                title_feature_bars='Member feature',
-                                                is_show_all_label_data=False,
-                                                params_imshow={'cmap': cmap_feature,
-                                                               'interpolation': 'spline16'},
-                                                is_middle_color_zero=is_member_cp_middle_color_zero,
-                                                is_show_ticks_latent_space=False,
-                                                fig=self.fig,
-                                                fig_size=None,
-                                                ax_latent_space=ax_lower_ukr_latent_space,
-                                                ax_feature_bars=ax_lower_ukr_feature_bars,
-                                                **params_init_lower_ukr)
+        self.lower_ukr._initialize_to_vis_mpl(n_grid_points,
+                                              label_data=label_member,
+                                              label_feature=label_feature,
+                                              title_latent_space='Own member map',
+                                              title_feature_bars='Member feature',
+                                              is_show_all_label_data=False,
+                                              params_imshow={'cmap': cmap_feature,
+                                                             'interpolation': 'spline16'},
+                                              is_middle_color_zero=is_member_cp_middle_color_zero,
+                                              is_show_ticks_latent_space=False,
+                                              fig=self.fig,
+                                              fig_size=None,
+                                              ax_latent_space=ax_lower_ukr_latent_space,
+                                              ax_feature_bars=ax_lower_ukr_feature_bars,
+                                              **params_init_lower_ukr)
         temp_dict = params_init_lower_ukr.copy()
         temp_dict.update({'dict_marker_label': None})
-        self.opp_lower_ukr._initialize_to_visualize(n_grid_points,
-                                                label_data=label_member,
-                                                label_feature=label_feature,
-                                                title_latent_space='Opposing member map',
-                                                title_feature_bars='Member feature',
-                                                is_show_all_label_data=False,
-                                                is_show_ticks_latent_space=False,
-                                                params_imshow={'cmap': cmap_feature,
-                                                               'interpolation': 'spline16'},
-                                                is_middle_color_zero=is_member_cp_middle_color_zero,
-                                                fig=self.fig,
-                                                fig_size=None,
-                                                ax_latent_space=ax_opp_member_latent_space,
-                                                ax_feature_bars=None,
-                                                **temp_dict)
+        self.opp_lower_ukr._initialize_to_vis_mpl(n_grid_points,
+                                                  label_data=label_member,
+                                                  label_feature=label_feature,
+                                                  title_latent_space='Opposing member map',
+                                                  title_feature_bars='Member feature',
+                                                  is_show_all_label_data=False,
+                                                  is_show_ticks_latent_space=False,
+                                                  params_imshow={'cmap': cmap_feature,
+                                                                 'interpolation': 'spline16'},
+                                                  is_middle_color_zero=is_member_cp_middle_color_zero,
+                                                  fig=self.fig,
+                                                  fig_size=None,
+                                                  ax_latent_space=ax_opp_member_latent_space,
+                                                  ax_feature_bars=None,
+                                                  **temp_dict)
         params_init_upper_ukr['params_scatter_data_space'] = None
         self.own_ukr_kde._initialize_to_visualize(n_grid_points,
                                                   params_imshow_latent_space={'cmap': self.cmap_ccp,
@@ -315,7 +794,6 @@ class BaseGMMNetworkOwnOppPerformance():
                 else:
                     self.is_simulate_changing_member = False
                 self.lower_ukr._set_feature_bar_from_latent_space(click_coordinates)
-
 
                 # set the value to draw in own team map
                 self.own_ukr_kde._set_latent_space_from_data_space(click_coordinates)
@@ -429,7 +907,7 @@ class BaseGMMNetworkOwnOppPerformance():
 
                 # draw
                 self.opp_lower_ukr._draw_latent_space()
-                #self.opp_lower_ukr._draw_feature_bars()
+                # self.opp_lower_ukr._draw_feature_bars()
                 self.opp_ukr_kde._draw_latent_space()
             elif event.inaxes == self.ax_performance_bars.axes:
                 self._set_two_team_latent_spaces_from_target_bars(click_coordinates)
@@ -442,9 +920,6 @@ class BaseGMMNetworkOwnOppPerformance():
                 self.opp_ukr_kde._draw_latent_space()
                 self._draw_target_bars()
                 self.lower_ukr._draw_latent_space()
-
-
-
 
     def __mouse_over_fig(self, event):
         if event.xdata is not None:
@@ -545,7 +1020,7 @@ class BaseGMMNetworkOwnOppPerformance():
             else:
                 # marginal component plane
                 grid_values = np.mean(self.mesh_grid_mapping[:, :, self.selected_performance], axis=1)[:, None]
-                grid_precision = np.mean(self.mesh_grid_precision[:, :], axis=1)[:,None]
+                grid_precision = np.mean(self.mesh_grid_precision[:, :], axis=1)[:, None]
                 annotation_text = 'Heat map of {} (marginal)'.format(
                     self.label_performance[self.selected_performance]
                 )
@@ -652,13 +1127,13 @@ class BaseGMMNetworkOwnOppPerformance():
         else:
             raise ValueError('arg shape {} is not consistent'.format(grid_array.shape))
 
-
     def _set_to_simulate_changing_member(self, click_coordinates):
         member_features = self.own_ukr_kde.member_features[self.own_ukr_kde.mask_shown_member]
         index_nearest, distance = self.__calc_nearest_candidate(click_coordinates=click_coordinates,
                                                                 candidates=member_features,
                                                                 retdist=True)
-        epsilon = 0.02 * np.abs(self.own_ukr_kde.grid_points_data_space.max() - self.own_ukr_kde.grid_points_data_space.min())
+        epsilon = 0.02 * np.abs(
+            self.own_ukr_kde.grid_points_data_space.max() - self.own_ukr_kde.grid_points_data_space.min())
         if distance < epsilon and self.selected_performance is not None:
             self.is_simulate_changing_member = True
             self.deleted_member_coordinates = member_features[index_nearest]
@@ -752,4 +1227,3 @@ class BaseGMMNetworkOwnOppPerformance():
         self.grid_simulated_latent_variables = None
         self.lower_ukr.set_scatter_cross(None)
         self.own_ukr_kde.set_mesh_in_latent_space(None)
-

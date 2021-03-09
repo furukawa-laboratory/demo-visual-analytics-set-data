@@ -3,6 +3,9 @@ from scipy.spatial.distance import cdist
 from tqdm import tqdm
 from gmm_net.models.kde import KDE
 from gmm_net.tools.create_zeta import create_zeta
+from gmm_net.models.core import LatentSpace, FeatureSpace
+import dash
+import plotly.graph_objects as go
 
 
 class UKRForWeightedKDE():
@@ -264,7 +267,6 @@ class UKRForWeightedKDE():
                                              learning_rate=learning_rate,
                                              verbose=verbose)
 
-
     def transform_from_densities(self, target_densities, n_epoch, learning_rate, verbose=True):
         # calcualte nearest data density to initialize
         if target_densities.shape[1] != self.data_densities.shape[1]:
@@ -356,6 +358,135 @@ class UKRForWeightedKDE():
                 bandwidth=self.bandwidth_kde,
                 weights=smoothed_weight)
         return kde.pdf(x)  # MxK
+
+    def define_graphs(self, n_grid_points, label_groups,
+                      is_show_all_label_data, is_middle_color_zero,
+                      is_show_ticks_latent_space,
+                      params_contour, params_scat_z, params_figure_layout,
+                      id_ls, fs=None):
+        import plotly.graph_objects as go
+        import dash_core_components as dcc
+
+        # invalid check
+        if self.n_embedding != 2 or self.n_features != 2:
+            raise ValueError('Now support only n_embedding = 2 and n_features = 2')
+
+        # if isinstance(n_grid_points, int):
+        #     # Keep resolution per one dimension
+        #     self.n_grid_points_latent_space = np.ones(self.n_embedding, dtype='int8') * n_grid_points
+        #     self.n_grid_points_data_space = np.ones(self.n_features, dtype='int8') * n_grid_points
+        # else:
+        #     raise ValueError('Only support n_grid_points is int')
+        if self.is_compact:
+            grid_points = create_zeta(-1.0, 1.0, self.n_embedding, n_grid_points)
+        else:
+            raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
+        # shape=(grid_points**self.n_embedding, self.resolution_quadrature**self.n_feature)
+        # In short, number of discretizing latent space x number of discretizing data space
+        self.ls = LatentSpace(data=self.Z,
+                              grid_points=grid_points,
+                              params_scat_data=params_scat_z,
+                              label_data=label_groups,
+                              params_figure_layout=params_figure_layout
+                              )
+
+        if fs is not None:
+            self.fs = fs
+        else:
+            grid_points = create_zeta(self.member_features.min(), self.member_features.max(),
+                                      self.n_features, n_grid_points)
+            self.fs = FeatureSpace(data=self.member_features, grid_points=grid_points)
+            self.fs.set_graph_whole(id_graph='feature_space', id_store='feature_space_fig_store')
+
+        self.params_contour_density = params_contour
+
+        self.ls.grid_mapping = self.inverse_transformed_pdf(
+            x=self.fs.grid_points,
+            latent_variables=self.ls.grid_points
+        )
+
+        config = {'displayModeBar': False}
+        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls + '_fig_store', config=config)
+
+    def update_fs_dropdown_from_ls(self, clickData, prev_fs_fig_json):
+        if clickData is not None:
+            fig_fs = go.Figure(**prev_fs_fig_json)
+            index = clickData['points'][0]['pointIndex']
+            if clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['data']:
+                # if latent variable is clicked
+                bag_of_members = self.normalized_weight_of_group[index]
+                # self.mask_shown_member = bag_of_members != 0.0
+                # self.bag_of_shown_member = bag_of_members[self.mask_shown_member]
+                kde = KDE()
+                kde.fit(dataset=self.member_features,
+                        bandwidth=self.bandwidth_kde,
+                        weights=bag_of_members)
+                grid_values = kde.pdf(self.fs.grid_points)
+                # self.click_coordinates_latent_space = self.Z[index_nearest_latent_variable]
+                # self.is_select_latent_variable = True
+                # self.index_team_selected = index_nearest_latent_variable
+                fig_fs.update_traces(
+                    selector=dict(type='contour'),
+                    z=grid_values,
+                    name='density',
+                    **self.params_contour_density
+                )
+                return fig_fs, None
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
+                # if contour is clicked
+                grid_values = self.ls.grid_mapping[index, :]
+                fig_fs.update_traces(
+                    selector=dict(type='contour'),
+                    z=grid_values,
+                    name='density',
+                    **self.params_contour_density
+                )
+                return fig_fs, None
+            elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
+                if fig_fs.data[self.fs.dic_index_traces['contour']].name == 'density':
+                    fig_fs.update_traces(
+                        selector=dict(type='contour'),
+                        z=None,
+                        name='no value',
+                        **self.params_contour_density
+                    )
+                    return fig_fs, dash.no_update
+                else:
+                    return dash.no_update, dash.no_update
+            else:
+                return dash.no_update, dash.no_update
+        else:
+            return dash.no_update, dash.no_update
+
+    def update_ls(self, clickData, prev_ls_fig_json):
+        ctx = dash.callback_context
+        if not ctx.triggered or ctx.triggered[0]['value'] is None:
+            return dash.no_update
+        else:
+            clicked_id_text = ctx.triggered[0]['prop_id'].split('.')[0]
+            # print(clicked_id_text)
+            if clicked_id_text == self.ls.graph_whole.id:
+                fig_ls = go.Figure(**prev_ls_fig_json)
+                return self.ls.update_trace_clicked_point(clickData=clickData,
+                                                          fig=fig_ls)
+            else:
+                return dash.no_update
+
+    # def _initialize_to_vis_dash(self,
+    #                             params_contour: dict,
+    #                             params_scat_z: dict,
+    #                             params_fig_ls: dict,
+    #                             id_ls: str,
+    #                             id_dropdown: str,
+    #                             id_fb: str
+    #                             ):
+    #     self.is_middle_color_zero = self.is_latent_space_middle_color_zero
+    #     super()._initialize_to_vis_dash(params_contour=params_contour,
+    #                                     params_scat_z=params_scat_z,
+    #                                     params_fig_ls=params_fig_ls,
+    #                                     id_ls=id_ls,
+    #                                     id_dropdown=id_dropdown,
+    #                                     id_fb=id_fb)
 
     def visualize(self, n_grid_points=30, label_groups=None,
                   is_latent_space_middle_color_zero=False,
@@ -541,7 +672,8 @@ class UKRForWeightedKDE():
         if self.click_coordinates_latent_space is not None:
             # If a coordinates are clicked previously
             _, dist_previous_click_coordinates = self.__calc_nearest_candidate(click_coordinates,
-                                                                               self.click_coordinates_latent_space.reshape(1, -1),
+                                                                               self.click_coordinates_latent_space.reshape(
+                                                                                   1, -1),
                                                                                retdist=True)
             epsilon = 0.02 * np.abs(self.grid_points_latent_space.max() - self.grid_points_latent_space.min())
             if dist_previous_click_coordinates < epsilon:
@@ -586,7 +718,8 @@ class UKRForWeightedKDE():
         if self.click_coordinates_data_space is not None:
             # If a coodinates are clicked previously
             _, dist_previous_click_coordinates = self.__calc_nearest_candidate(click_coordinates,
-                                                                               self.click_coordinates_data_space.reshape(1, -1),
+                                                                               self.click_coordinates_data_space.reshape(
+                                                                                   1, -1),
                                                                                retdist=True)
             epsilon = 0.02 * np.abs(self.grid_points_data_space.max() - self.grid_points_data_space.min())
             if dist_previous_click_coordinates < epsilon:
@@ -602,8 +735,8 @@ class UKRForWeightedKDE():
             pass
         else:
             index_nearest_grid_point, dist_min_grid = self.__calc_nearest_candidate(click_coordinates,
-                                                                                          self.grid_points_data_space,
-                                                                                          retdist=True)
+                                                                                    self.grid_points_data_space,
+                                                                                    retdist=True)
             self.grid_values_to_draw_latent_space = self.grid_mapping[:, index_nearest_grid_point]
             self.click_coordinates_data_space = self.grid_points_data_space[index_nearest_grid_point]
 
@@ -775,7 +908,8 @@ class UKRForWeightedKDE():
                                              marker='o', s=50, c='r',
                                              edgecolors='w', linewidths=2.0)
             else:
-                self.ax_latent_space.scatter(self.click_coordinates_latent_space[0], self.click_coordinates_latent_space[1],
+                self.ax_latent_space.scatter(self.click_coordinates_latent_space[0],
+                                             self.click_coordinates_latent_space[1],
                                              marker="o", color="k", s=40, edgecolors='w', linewidths=2.0)
 
         if self.mesh_in_latent_space is not None:
@@ -895,13 +1029,13 @@ class UKRForWeightedKDE():
         #                                   ha='center', va='bottom', color='black')
         if not self.is_show_ticks:
             self.ax_data_space.tick_params(labelbottom=False,
-                                             labelleft=False,
-                                             labelright=False,
-                                             labeltop=False)
+                                           labelleft=False,
+                                           labelright=False,
+                                           labeltop=False)
             self.ax_data_space.tick_params(bottom=False,
-                                             left=False,
-                                             right=False,
-                                             top=False)
+                                           left=False,
+                                           right=False,
+                                           top=False)
         self.fig.show()
 
     def __calc_nearest_candidate(self, click_coordinates, candidates, retdist=False):
@@ -925,4 +1059,3 @@ class UKRForWeightedKDE():
         segs2 = segs1.transpose(1, 0, 2)
         ax.add_collection(LineCollection(segs1, **kwargs))
         ax.add_collection(LineCollection(segs2, **kwargs))
-
