@@ -265,7 +265,6 @@ for lp in label_position:
 params_init_lower_ukr=dict(
     params_scat_z=dict(
         name='member',
-        visible=False,
         marker=dict(
             size=13,
             color=position_color,
