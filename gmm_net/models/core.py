@@ -162,7 +162,7 @@ class Space():
                            y=self.data[:, 1].min()-0.1,
                            text=annotation_text,
                            showarrow=False,
-                           font=dict(size=15),
+                           font=dict(size=12),
                            xanchor='right')
 
         self.graph_whole = dcc.Graph(

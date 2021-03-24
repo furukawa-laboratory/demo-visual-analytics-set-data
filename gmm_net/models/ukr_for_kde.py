@@ -433,6 +433,7 @@ class UKRForWeightedKDE():
                     name='density',
                     **self.params_contour_density
                 )
+                fig_fs.update_annotations(text='Contour: athletes composition of clicked team')
                 return fig_fs, None
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # if contour is clicked
@@ -443,6 +444,7 @@ class UKRForWeightedKDE():
                     name='density',
                     **self.params_contour_density
                 )
+                fig_fs.update_annotations(text='Contour: athletes composition of clicked team')
                 return fig_fs, None
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
                 if fig_fs.data[self.fs.dic_index_traces['contour']].name == 'density':
@@ -452,6 +454,7 @@ class UKRForWeightedKDE():
                         name='no value',
                         **self.params_contour_density
                     )
+                    fig_fs.update_annotations(text='Contour: invisible')
                     return fig_fs, dash.no_update
                 else:
                     return dash.no_update, dash.no_update
