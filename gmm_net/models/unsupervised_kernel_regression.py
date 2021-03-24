@@ -195,7 +195,8 @@ class UnsupervisedKernelRegression(object):
                       is_show_ticks_latent_space,
                       params_contour, params_scat_z, params_fig_layout_ls,
                       params_fig_layout_fb,
-                      id_ls, id_dropdown, id_fb):
+                      id_ls, id_dropdown, id_fb,
+                      init_anno_text_ls):
 
         self._initialize_to_vis_least(n_grid_points=n_grid_points,
                                       label_data=label_data,
@@ -213,7 +214,8 @@ class UnsupervisedKernelRegression(object):
             params_fig_layout_fb=params_fig_layout_fb,
             id_ls=id_ls,
             id_dropdown=id_dropdown,
-            id_fb=id_fb
+            id_fb=id_fb,
+            init_anno_text_ls=init_anno_text_ls
         )
 
     def _initialize_to_vis_least(self, n_grid_points, label_data, label_feature,
@@ -272,7 +274,8 @@ class UnsupervisedKernelRegression(object):
                                 params_fig_layout_fb: dict,
                                 id_ls: str,
                                 id_dropdown: str,
-                                id_fb: str
+                                id_fb: str,
+                                init_anno_text_ls: str,
                                 ):
         import plotly.graph_objects as go
         import dash_core_components as dcc
@@ -316,7 +319,10 @@ class UnsupervisedKernelRegression(object):
             raise ValueError('invalid params_scat_z={}'.format(params_scat_z))
 
         # set graph of latent space
-        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls + '_fig_store', config=config)
+        self.ls.set_graph_whole(id_graph=id_ls,
+                                id_store=id_ls + '_fig_store',
+                                annnotation_text=init_anno_text_ls,
+                                config=config)
 
         self.ls.dropdown = dcc.Dropdown(
             id=id_dropdown,

@@ -194,6 +194,10 @@ class BaseGMMNetworkOwnOppPerformance():
         for lower_ukr, ukr_kde, which in zip([self.own_lower_ukr, self.opp_lower_ukr],
                                              [self.own_ukr_kde, self.opp_ukr_kde],
                                              ['own', 'opp']):
+            if which == 'own':
+                init_anno_text_ls = 'Click to show athlete feature in below bars'
+            else:
+                init_anno_text_ls = ''
             lower_ukr.define_graphs(
                 n_grid_points=n_grid_points,
                 label_data=label_member,
@@ -210,7 +214,7 @@ class BaseGMMNetworkOwnOppPerformance():
                     # 'title': which+' member map',
                     # 'grid': dict(rows=2, columns=2)
                     # 'grid': dict(domain=dict(x=[0.5,1],y=[0.5,1]))
-                    'margin': dict(l=10, r=10, t=10, b=10)
+                    'margin': dict(l=10, r=10, t=10, b=20)
                 },
                 params_fig_layout_fb={
                     ##'title': which+' member feature',
@@ -220,7 +224,8 @@ class BaseGMMNetworkOwnOppPerformance():
                 is_show_ticks_latent_space=False,
                 id_ls=which + '_member_map',
                 id_dropdown=which + '_cp_db',
-                id_fb=which + 'fb'
+                id_fb=which + 'fb',
+                init_anno_text_ls=init_anno_text_ls
             )
             ukr_kde.define_graphs(
                 n_grid_points=n_grid_points,
@@ -237,7 +242,7 @@ class BaseGMMNetworkOwnOppPerformance():
                 params_figure_layout={
                     # 'title': which+' team map',
                     'plot_bgcolor': '#ffffff',
-                    'margin': dict(l=10, r=10, t=10, b=10)
+                    'margin': dict(l=10, r=10, t=10, b=20)
                 },
                 id_ls=which + '_team_map',
                 fs=lower_ukr.ls

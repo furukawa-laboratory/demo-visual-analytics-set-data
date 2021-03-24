@@ -40,7 +40,7 @@ class Space():
         self.params_figure_layout = params_figure_layout
         self.index_clicked_grid = None
 
-    def set_graph_whole(self, id_graph, id_store, config=None):
+    def set_graph_whole(self, id_graph, id_store, annnotation_text='', config=None):
         if config is None:
             config = {'displayModeBar': False}
         x_range = [
@@ -145,18 +145,25 @@ class Space():
                 y=np.array(0.0),
                 visible=False,
                 marker=dict(
-                    size=12,
+                    size=18,
                     symbol='x',
                     color='#e377c2',
                     line=dict(
-                        width=1.5,
-                        color="white"
+                        width=3.0,
+                        color="dimgray"
                     )
                 ),
                 name='clicked_point'
             )
         )
         self.dic_index_traces['clicked_point'] = 7
+
+        fig.add_annotation(x=self.data[:, 0].max(),
+                           y=self.data[:, 1].min()-0.1,
+                           text=annnotation_text,
+                           showarrow=False,
+                           font=dict(size=15),
+                           xanchor='right')
 
         self.graph_whole = dcc.Graph(
             id=id_graph,
