@@ -285,7 +285,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_own_member_map',
                                 style=title_style,
                                 children='Own athlete map'),
-                        html.Div(children='Available to click to show athlete feature'),
+                        html.Div(children="Available to click to show athlete's stats"),
                         self.own_lower_ukr.ls.graph_whole,
                         self.own_lower_ukr.ls.store_fig_whole,
                         # html.Div(id='text_under_member_map',
@@ -294,7 +294,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_lower_ukr.ls.dropdown,
                         html.H3(id='title_member_feature_bar',
                                 style=title_style,
-                                children='Own athlete feature'),
+                                children="Own athlete's stats"),
                         self.own_lower_ukr.os.graph_indiv,
                         self.own_lower_ukr.os.store_fig_indiv
                     ],
@@ -304,7 +304,7 @@ class BaseGMMNetworkOwnOppPerformance():
                     [
                         html.H3(id='title_own_team_map',
                                 # style=title_style,
-                                children='Own team map'),
+                                children="Own teams' map"),
                         html.Div(children="Available to click to show own team's performance"),
                         self.own_ukr_kde.ls.graph_whole,
                         self.own_ukr_kde.ls.store_fig_whole,
@@ -324,7 +324,7 @@ class BaseGMMNetworkOwnOppPerformance():
                     [
                         html.H3(id='title_opp_team_map',
                                 style=title_style,
-                                children='Opposing team map'),
+                                children="Opposing teams' map"),
                         html.Div(children="Available to click to show own team's performance"),
                         self.opp_ukr_kde.ls.graph_whole,
                         self.opp_ukr_kde.ls.store_fig_whole,
@@ -334,7 +334,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_opp_gplvm.dic_ls['opp'].dropdown,
                         html.H3(id='title_opp_member_map',
                                 style=title_style,
-                                children='Opposing athlete map'),
+                                children="Opposing athletes' map"),
                         self.opp_lower_ukr.ls.graph_whole,
                         self.opp_lower_ukr.ls.store_fig_whole
                     ],

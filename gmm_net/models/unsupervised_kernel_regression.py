@@ -383,7 +383,7 @@ class UnsupervisedKernelRegression(object):
                         **self.params_contour
                     )
                     fig_ls.update_annotations(
-                        text="Contour: {}".format(self.label_feature[index_selected_feature])
+                        text="Contour: {} (athletes' stat)".format(self.label_feature[index_selected_feature])
                     )
                 return fig_ls
             elif clicked_id_text == self.ls.graph_whole.id:
