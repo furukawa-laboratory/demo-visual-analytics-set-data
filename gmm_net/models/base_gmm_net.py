@@ -194,10 +194,7 @@ class BaseGMMNetworkOwnOppPerformance():
         for lower_ukr, ukr_kde, which in zip([self.own_lower_ukr, self.opp_lower_ukr],
                                              [self.own_ukr_kde, self.opp_ukr_kde],
                                              ['own', 'opp']):
-            if which == 'own':
-                init_anno_text_ls = 'Click to show athlete feature in below bars'
-            else:
-                init_anno_text_ls = ''
+            init_anno_text_ls = 'Contour: invisible'
             lower_ukr.define_graphs(
                 n_grid_points=n_grid_points,
                 label_data=label_member,
@@ -245,7 +242,8 @@ class BaseGMMNetworkOwnOppPerformance():
                     'margin': dict(l=10, r=10, t=10, b=20)
                 },
                 id_ls=which + '_team_map',
-                fs=lower_ukr.ls
+                fs=lower_ukr.ls,
+                init_anno_text_ls=init_anno_text_ls
             )
 
         # Create tensor to draw ccp
@@ -287,6 +285,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_own_member_map',
                                 style=title_style,
                                 children='Own athlete map'),
+                        html.Div(children='Available to click to show athlete feature'),
                         self.own_lower_ukr.ls.graph_whole,
                         self.own_lower_ukr.ls.store_fig_whole,
                         # html.Div(id='text_under_member_map',
@@ -306,6 +305,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_own_team_map',
                                 # style=title_style,
                                 children='Own team map'),
+                        html.Div(children="Available to click to show own team's performance"),
                         self.own_ukr_kde.ls.graph_whole,
                         self.own_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_own_team_map',
@@ -325,6 +325,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_opp_team_map',
                                 style=title_style,
                                 children='Opposing team map'),
+                        html.Div(children="Available to click to show own team's performance"),
                         self.opp_ukr_kde.ls.graph_whole,
                         self.opp_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_opp_team_map',

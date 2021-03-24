@@ -321,7 +321,7 @@ class UnsupervisedKernelRegression(object):
         # set graph of latent space
         self.ls.set_graph_whole(id_graph=id_ls,
                                 id_store=id_ls + '_fig_store',
-                                annnotation_text=init_anno_text_ls,
+                                annotation_text=init_anno_text_ls,
                                 config=config)
 
         self.ls.dropdown = dcc.Dropdown(
@@ -381,6 +381,9 @@ class UnsupervisedKernelRegression(object):
                         z=self.ls.grid_mapping[:, index_selected_feature],
                         name='cp',
                         **self.params_contour
+                    )
+                    fig_ls.update_annotations(
+                        text="Contour: {}.".format(self.label_feature[index_selected_feature])
                     )
                 return fig_ls
             elif clicked_id_text == self.ls.graph_whole.id:

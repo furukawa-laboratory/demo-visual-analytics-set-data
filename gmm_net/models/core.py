@@ -40,7 +40,7 @@ class Space():
         self.params_figure_layout = params_figure_layout
         self.index_clicked_grid = None
 
-    def set_graph_whole(self, id_graph, id_store, annnotation_text='', config=None):
+    def set_graph_whole(self, id_graph, id_store, annotation_text='', config=None):
         if config is None:
             config = {'displayModeBar': False}
         x_range = [
@@ -160,7 +160,7 @@ class Space():
 
         fig.add_annotation(x=self.data[:, 0].max(),
                            y=self.data[:, 1].min()-0.1,
-                           text=annnotation_text,
+                           text=annotation_text,
                            showarrow=False,
                            font=dict(size=15),
                            xanchor='right')

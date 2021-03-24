@@ -363,7 +363,8 @@ class UKRForWeightedKDE():
                       is_show_all_label_data, is_middle_color_zero,
                       is_show_ticks_latent_space,
                       params_contour, params_scat_z, params_figure_layout,
-                      id_ls, fs=None):
+                      id_ls, fs=None,
+                      init_anno_text_ls=''):
         import plotly.graph_objects as go
         import dash_core_components as dcc
 
@@ -406,7 +407,8 @@ class UKRForWeightedKDE():
         )
 
         config = {'displayModeBar': False}
-        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls + '_fig_store', config=config)
+        self.ls.set_graph_whole(id_graph=id_ls, id_store=id_ls + '_fig_store',
+                                annotation_text=init_anno_text_ls, config=config)
 
     def update_fs_dropdown_from_ls(self, clickData, prev_fs_fig_json):
         if clickData is not None:
