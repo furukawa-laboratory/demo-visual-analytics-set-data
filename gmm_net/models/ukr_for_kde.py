@@ -433,7 +433,7 @@ class UKRForWeightedKDE():
                     name='density',
                     **self.params_contour_density
                 )
-                fig_fs.update_annotations(text='Contour: athletes composition of clicked team')
+                fig_fs.update_annotations(text='Contour: composition of clicked team')
                 return fig_fs, None
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['grids']:
                 # if contour is clicked
@@ -444,7 +444,7 @@ class UKRForWeightedKDE():
                     name='density',
                     **self.params_contour_density
                 )
-                fig_fs.update_annotations(text='Contour: athletes composition of clicked team')
+                fig_fs.update_annotations(text='Contour: composition of clicked team')
                 return fig_fs, None
             elif clickData['points'][0]['curveNumber'] == self.ls.dic_index_traces['clicked_point']:
                 if fig_fs.data[self.fs.dic_index_traces['contour']].name == 'density':
