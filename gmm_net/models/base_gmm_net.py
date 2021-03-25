@@ -275,6 +275,7 @@ class BaseGMMNetworkOwnOppPerformance():
         # Define whole layout
 
         title_style = {'whiteSpace': 'pre-line'}
+        description_style = {'fontSize': 'large'}
         app.layout = html.Div(
             children=[
                 # `dash_html_components`が提供するクラスは`childlen`属性を有している。
@@ -285,7 +286,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_own_member_map',
                                 style=title_style,
                                 children="Own athletes' map"),
-                        html.Div(children="Available to click to show athlete's stats"),
+                        html.Div(children="Available to click to show athlete's stats",
+                                 style=description_style),
                         self.own_lower_ukr.ls.graph_whole,
                         self.own_lower_ukr.ls.store_fig_whole,
                         # html.Div(id='text_under_member_map',
@@ -305,7 +307,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_own_team_map',
                                 # style=title_style,
                                 children="Own teams' map"),
-                        html.Div(children="Available to click to show own team's performance"),
+                        html.Div(children="Available to click to show own team's performance",
+                                 style=description_style),
                         self.own_ukr_kde.ls.graph_whole,
                         self.own_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_own_team_map',
@@ -325,7 +328,8 @@ class BaseGMMNetworkOwnOppPerformance():
                         html.H3(id='title_opp_team_map',
                                 style=title_style,
                                 children="Opposing teams' map"),
-                        html.Div(children="Available to click to show own team's performance"),
+                        html.Div(children="Available to click to show own team's performance",
+                                 style=description_style),
                         self.opp_ukr_kde.ls.graph_whole,
                         self.opp_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_opp_team_map',
