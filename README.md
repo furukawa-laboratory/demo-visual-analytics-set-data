@@ -1,7 +1,7 @@
 # GenerativeManifoldModelingNetwork
 ![image](https://user-images.githubusercontent.com/19607449/122664638-8ab49480-d1dd-11eb-95ab-43c9d11099ea.png)
 
-In the paper, *Visual analytics of set data for knowledge discovery and member selection support*, we introduce the visualization method to support forming the team.
+In the paper, *Visual analytics of set data for knowledge discovery and member selection support*([arXiv:2104.09231](https://arxiv.org/abs/2104.09231)), we introduce the visualization method to support forming the team.
 It's the network consisting of *generative manifold modelings*.
 Proposed method can visualize the relationship among own team's composition, opposing team's one and own team's performance.
 The purpose of this repository is sharing our implementation of proposed method and providing the demonstration of interactive visualization.
@@ -19,8 +19,8 @@ By running `learn_and_visualize.py`, you can try a prototype of the proposed met
 `learn_and_visualize.py` both trains and visualizes the model, but since the trained model is saved in `dumped`, the visualization is done immediately.
 If you want to apply the model to the desired other dataset, code a script to learn model by referring to `learn_and_visualize.py`.
 
-## How to use?
-In preparation...
+### What functions are available in this demo?
+All the features shown in the paper are available. See [the paper](https://arxiv.org/abs/2104.09231) for details.
 
 ## Contact us
 If you have any questions or requests, please give us an Issue!
