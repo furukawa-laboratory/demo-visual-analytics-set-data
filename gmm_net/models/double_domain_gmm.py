@@ -130,12 +130,22 @@ class DoubleDomainGMM(object):
                                      index_nearest_grid,
                                      index_selected_feature
                                      ]
+                        fig_ls_updated.update_annotations(
+                            text="Contour: {} vs clicked opposing team".format(
+                                self.os.label_feature[index_selected_feature]
+                            )
+                        )
                     else:
                         grid_value = self.mesh_grid_mapping[
                                      index_nearest_grid,
                                      :,
                                      index_selected_feature
                                      ]
+                        fig_ls_updated.update_annotations(
+                            text="Contour: clicked own team's {}".format(
+                                self.os.label_feature[index_selected_feature]
+                            )
+                        )
                 else:
                     # If clicked point does not exist, set value to marginal component plance
                     if which_update == 'own':
@@ -143,10 +153,20 @@ class DoubleDomainGMM(object):
                             self.mesh_grid_mapping[:, :, index_selected_feature],
                             axis=1
                         )
+                        fig_ls_updated.update_annotations(
+                            text="Contour: {} (average)".format(
+                                self.os.label_feature[index_selected_feature]
+                            )
+                        )
                     else:
                         grid_value = np.mean(
                             self.mesh_grid_mapping[:, :, index_selected_feature],
                             axis=0
+                        )
+                        fig_ls_updated.update_annotations(
+                            text="Contour: own team's {} (average)".format(
+                                self.os.label_feature[index_selected_feature]
+                            )
                         )
                 # update
                 fig_ls_updated.update_traces(
@@ -160,6 +180,9 @@ class DoubleDomainGMM(object):
                 fig_ls_updated.update_traces(
                     z=None,
                     selector=dict(type='contour')
+                )
+                fig_ls_updated.update_annotations(
+                    text='Contour: invisible'
                 )
                 return fig_ls_updated
 

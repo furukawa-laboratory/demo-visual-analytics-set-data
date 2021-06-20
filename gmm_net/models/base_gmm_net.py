@@ -194,6 +194,7 @@ class BaseGMMNetworkOwnOppPerformance():
         for lower_ukr, ukr_kde, which in zip([self.own_lower_ukr, self.opp_lower_ukr],
                                              [self.own_ukr_kde, self.opp_ukr_kde],
                                              ['own', 'opp']):
+            init_anno_text_ls = 'Contour: invisible'
             lower_ukr.define_graphs(
                 n_grid_points=n_grid_points,
                 label_data=label_member,
@@ -210,7 +211,7 @@ class BaseGMMNetworkOwnOppPerformance():
                     # 'title': which+' member map',
                     # 'grid': dict(rows=2, columns=2)
                     # 'grid': dict(domain=dict(x=[0.5,1],y=[0.5,1]))
-                    'margin': dict(l=10, r=10, t=10, b=10)
+                    'margin': dict(l=10, r=10, t=10, b=20)
                 },
                 params_fig_layout_fb={
                     ##'title': which+' member feature',
@@ -220,7 +221,8 @@ class BaseGMMNetworkOwnOppPerformance():
                 is_show_ticks_latent_space=False,
                 id_ls=which + '_member_map',
                 id_dropdown=which + '_cp_db',
-                id_fb=which + 'fb'
+                id_fb=which + 'fb',
+                init_anno_text_ls=init_anno_text_ls
             )
             ukr_kde.define_graphs(
                 n_grid_points=n_grid_points,
@@ -237,10 +239,11 @@ class BaseGMMNetworkOwnOppPerformance():
                 params_figure_layout={
                     # 'title': which+' team map',
                     'plot_bgcolor': '#ffffff',
-                    'margin': dict(l=10, r=10, t=10, b=10)
+                    'margin': dict(l=10, r=10, t=10, b=20)
                 },
                 id_ls=which + '_team_map',
-                fs=lower_ukr.ls
+                fs=lower_ukr.ls,
+                init_anno_text_ls=init_anno_text_ls
             )
 
         # Create tensor to draw ccp
@@ -272,6 +275,7 @@ class BaseGMMNetworkOwnOppPerformance():
         # Define whole layout
 
         title_style = {'whiteSpace': 'pre-line'}
+        description_style = {'fontSize': 'large'}
         app.layout = html.Div(
             children=[
                 # `dash_html_components`が提供するクラスは`childlen`属性を有している。
@@ -281,7 +285,9 @@ class BaseGMMNetworkOwnOppPerformance():
                     [
                         html.H3(id='title_own_member_map',
                                 style=title_style,
-                                children='Own athlete map'),
+                                children="Own athletes' map"),
+                        html.Div(children="Available to click to show athlete's stats",
+                                 style=description_style),
                         self.own_lower_ukr.ls.graph_whole,
                         self.own_lower_ukr.ls.store_fig_whole,
                         # html.Div(id='text_under_member_map',
@@ -290,7 +296,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_lower_ukr.ls.dropdown,
                         html.H3(id='title_member_feature_bar',
                                 style=title_style,
-                                children='Own athlete feature'),
+                                children="Own athlete's stats"),
                         self.own_lower_ukr.os.graph_indiv,
                         self.own_lower_ukr.os.store_fig_indiv
                     ],
@@ -300,7 +306,9 @@ class BaseGMMNetworkOwnOppPerformance():
                     [
                         html.H3(id='title_own_team_map',
                                 # style=title_style,
-                                children='Own team map'),
+                                children="Own teams' map"),
+                        html.Div(children="Available to click to show own team's performance",
+                                 style=description_style),
                         self.own_ukr_kde.ls.graph_whole,
                         self.own_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_own_team_map',
@@ -309,7 +317,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_opp_gplvm.dic_ls['own'].dropdown,
                         html.H3(id='title_own_team_performance',
                                 style=title_style,
-                                children='Own team performance'),
+                                children="Own team's performance"),
                         self.own_opp_gplvm.os.graph_indiv,
                         self.own_opp_gplvm.os.store_fig_indiv
                     ],
@@ -319,7 +327,9 @@ class BaseGMMNetworkOwnOppPerformance():
                     [
                         html.H3(id='title_opp_team_map',
                                 style=title_style,
-                                children='Opposing team map'),
+                                children="Opposing teams' map"),
+                        html.Div(children="Available to click to show own team's performance",
+                                 style=description_style),
                         self.opp_ukr_kde.ls.graph_whole,
                         self.opp_ukr_kde.ls.store_fig_whole,
                         # html.Div(id='text_under_opp_team_map',
@@ -328,7 +338,7 @@ class BaseGMMNetworkOwnOppPerformance():
                         self.own_opp_gplvm.dic_ls['opp'].dropdown,
                         html.H3(id='title_opp_member_map',
                                 style=title_style,
-                                children='Opposing athlete map'),
+                                children="Opposing athletes' map"),
                         self.opp_lower_ukr.ls.graph_whole,
                         self.opp_lower_ukr.ls.store_fig_whole
                     ],
