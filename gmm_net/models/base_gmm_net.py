@@ -280,7 +280,7 @@ class BaseGMMNetworkOwnOppPerformance():
             children=[
                 # `dash_html_components`が提供するクラスは`childlen`属性を有している。
                 # `childlen`属性を慣例的に最初の属性にしている。
-                html.H1(children='Visual Analyticis of NBA dataset'),
+                html.H1(children='Visual Analytics of NBA dataset'),
                 html.Div(
                     [
                         html.H3(id='title_own_member_map',
